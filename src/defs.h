@@ -1,13 +1,14 @@
 #ifndef DEFS_H
 
-#define FR2SQ(f,r) ( (21 + (f) ) + ( (r) * 10 ) )
+#define FR2SQ120(f,r) ( (21 + (f) ) + ( (r) * 10 ) )
+#define FR2SQ64(f,r) ( (f) + ( (r) * 8 ) )
 #define MAX_LEGAL_MOVES 256
 
 enum { EMPTY, wP, wN, wB, wR, wQ, wK, bP, bN, bB, bR, bQ, bK, MAX_PIECE };
 enum { FILE_A, FILE_B, FILE_C, FILE_D, FILE_E, FILE_F, FILE_G, FILE_H, FILE_NONE };
 enum { RANK_1, RANK_2, RANK_3, RANK_4, RANK_5, RANK_6, RANK_7, RANK_8, RANK_NONE };
 
-enum { WHITE, BLACK };
+enum { WHITE, BLACK, BOTH};
 enum {
   A1 = 21, B1, C1, D1, E1, F1, G1, H1,
   A2 = 31, B2, C2, D2, E2, F2, G2, H2,
@@ -21,6 +22,9 @@ enum {
 
 typedef struct {
   int board[120];
+
+  unsigned long pieces[3];
+
   int turn;
   int fiftyMove;
   int castle;
@@ -42,5 +46,8 @@ extern void setPiece(char piece,int file,int rank,BOARD_STATE *board);
 
 // moves.c
 extern void generateMoves(BOARD_STATE *board, MOVE *move);
+
+// utils.c
+extern void printBits(unsigned long num);
 
 #endif
