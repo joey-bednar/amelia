@@ -21,3 +21,14 @@ int countBits(unsigned long b) {
         ;
     return r;
 }
+
+// return color of piece
+char getColor(char piece) {
+    if (piece >= wP && piece <= wK) {
+        return WHITE;
+    } else if (piece >= bP && piece <= bK) {
+        return BLACK;
+    }
+    return BOTH;
+}
+

@@ -44,10 +44,16 @@ extern void clearBoard(BOARD_STATE* board);
 extern void printBoard(BOARD_STATE* board);
 extern void setPiece(char piece,int file,int rank,BOARD_STATE *board);
 
+// bitboard.c
+extern void clearBitboard(unsigned long *bitboard);
+extern void addBitboard(int file, int rank, unsigned long* bitboard);
+extern void removeBitboard(int file, int rank, unsigned long* bitboard);
+
 // moves.c
 extern void generateMoves(BOARD_STATE *board, MOVE *move);
 
 // utils.c
 extern void printBits(unsigned long num);
+extern char getColor(char piece);
 
 #endif

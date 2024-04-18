@@ -16,19 +16,11 @@ void clearBoard(BOARD_STATE *board) {
         }
     }
 
+    // reset bit boards
     board->pieces[WHITE] = 0;
     board->pieces[BLACK] = 0;
     board->pieces[BOTH] = 0;
 
-}
-
-char getColor(char piece) {
-    if (piece >= wP && piece <= wK) {
-        return WHITE;
-    } else if (piece >= bP && piece <= bK) {
-        return BLACK;
-    }
-    return BOTH;
 }
 
 void setPiece(char piece,int file,int rank,BOARD_STATE *board) {
@@ -44,13 +36,22 @@ void setPiece(char piece,int file,int rank,BOARD_STATE *board) {
     unsigned long sq = FR2SQ120(file,rank);
     board->board[sq] = piece;
 
-    int coord = file+8*rank;
+    // remove empty piece from bitboards
+    if (piece == EMPTY) {
+        removeBitboard(file,rank,&board->pieces[WHITE]);
+        removeBitboard(file,rank,&board->pieces[BLACK]);
+        removeBitboard(file,rank,&board->pieces[BOTH]);
+        return;
+    }
 
-    // add/remove piece from shared bitboard
-    unsigned long bit = (piece != EMPTY) & 0x01;
-    board->pieces[BOTH] |= (bit << coord);
-    printf("%d\n",coord);
-    printBits(board->pieces[BOTH]);
+    // add any other piece bitboards
+    if (piece >= wP && piece <= wK) {
+        addBitboard(file,rank,&board->pieces[WHITE]);
+    } else {
+        addBitboard(file,rank,&board->pieces[BLACK]);
+    }
+
+    addBitboard(file,rank,&board->pieces[BOTH]);
 
 }
 
