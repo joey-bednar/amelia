@@ -2,37 +2,6 @@
 #include <assert.h>
 #include <stdio.h>
 
-void generatePseudoPawnMoves(BOARD_STATE *board, MOVE *moves, int file,
-                             int rank, int index) {
-
-    // two/one forward, capture left/right, en passant left,right
-    char offsets[6] = {20, 10, 9, 11, 19, 21};
-
-    char piece = getPieceFR(file, rank, board);
-
-    char color = getColor(piece);
-
-    // color must be valid
-    assert(color == WHITE || color == BLACK);
-
-    if (color == WHITE) {
-        // on second rank
-        if (rank == RANK_2) {
-            // TODO: check for two moves forward
-        }
-        // TODO: check for one move forward
-        // TODO: check for captures
-        // TODO: check for en passant
-    } else {
-        if (rank == RANK_7) {
-            // TODO: check for two moves forward
-        }
-        // TODO: check for one move forward
-        // TODO: check for captures
-        // TODO: check for en passant
-    }
-}
-
 void generatePseudoKingMoves(BOARD_STATE *board, MOVE *moves, int sq,
                              int index) {
     char piece = getPieceSq120(sq, board);
@@ -42,8 +11,15 @@ void generatePseudoKingMoves(BOARD_STATE *board, MOVE *moves, int sq,
 
     for (int i = 0; i < sizeof(offsets); i++) {
         char squareContains = getPieceSq120(sq + offsets[i], board);
-        if (squareContains == EMPTY || squareContains > wK) {
-            printf("movable");
+        // if square is empty or can capture enemy piece, it is a pseudolegal
+        // move
+
+        if (color == WHITE) {
+            assert(piece == wK);
+            printf("%d\n", squareContains);
+        } else {
+            assert(piece == bK);
+            printf("%d\n", squareContains);
         }
     }
 }
@@ -58,7 +34,7 @@ void generateMoves(BOARD_STATE *board, MOVE *moves) {
             if (piece == EMPTY) {
                 continue;
             } else if (piece == wP || piece == bP) {
-                generatePseudoPawnMoves(board, moves, file, rank, index);
+                /*generatePseudoPawnMoves(board, moves, sq, index);*/
             } else if (piece == wK || piece == bK) {
                 generatePseudoKingMoves(board, moves, sq, index);
             }

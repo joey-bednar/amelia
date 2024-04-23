@@ -18,3 +18,8 @@ void removeBitboard(int file, int rank, unsigned long *bitboard) {
     int coord = FR2SQ64(file, rank);
     *bitboard &= ~(0x01UL << coord);
 }
+
+char checkBitboard(int file, int rank, unsigned long *bitboard) {
+    int coord = FR2SQ64(file, rank);
+    return (char)(*bitboard & (0x01UL << coord));
+}

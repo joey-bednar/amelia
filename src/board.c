@@ -41,7 +41,7 @@ void setPiece(char piece, int file, int rank, BOARD_STATE *board) {
     assert(rank >= RANK_1 && rank <= RANK_8);
 
     // check for valid piece
-    assert(piece >= 0 && piece < MAX_PIECE);
+    assert(piece >= 0 && piece <= bK);
 
     // set piece on board
     unsigned long sq = FR2SQ120(file, rank);

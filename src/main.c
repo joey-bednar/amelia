@@ -20,8 +20,8 @@ int main() {
     clearBoard(&board);
 
     initBoard(&board);
-    printBoard(&board);
-    printBits(board.pieces[BOTH]);
+    /*printBoard(&board);*/
+    /*printBits(board.pieces[BOTH]);*/
 
     generateMoves(&board, moves);
 
