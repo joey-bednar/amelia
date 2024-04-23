@@ -1,13 +1,13 @@
 #ifndef DEFS_H
 
-#define FR2SQ120(f,r) ( (21 + (f) ) + ( (r) * 10 ) )
-#define FR2SQ64(f,r) ( (f) + ( (r) * 8 ) )
+#define FR2SQ120(f, r) ((21 + (f)) + ((r) * 10))
+#define FR2SQ64(f, r) ((f) + ((r) * 8))
 #define MAX_LEGAL_MOVES 256
 
+// clang-format off
 enum { EMPTY, wP, wN, wB, wR, wQ, wK, bP, bN, bB, bR, bQ, bK, MAX_PIECE };
 enum { FILE_A, FILE_B, FILE_C, FILE_D, FILE_E, FILE_F, FILE_G, FILE_H, FILE_NONE };
 enum { RANK_1, RANK_2, RANK_3, RANK_4, RANK_5, RANK_6, RANK_7, RANK_8, RANK_NONE };
-
 enum { WHITE, BLACK, BOTH};
 enum {
   A1 = 21, B1, C1, D1, E1, F1, G1, H1,
@@ -19,35 +19,38 @@ enum {
   A7 = 81, B7, C7, D7, E7, F7, G7, H7,
   A8 = 91, B8, C8, D8, E8, F8, G8, H8, OFFBOARD
 };
+// clang-format on
 
 typedef struct {
-  int board[120];
+    int board[120];
 
-  unsigned long pieces[3];
+    unsigned long pieces[3];
 
-  int turn;
-  int fiftyMove;
-  int castle;
-  int enpassant;
+    int turn;
+    int fiftyMove;
+    int castle;
+    int enpassant;
 } BOARD_STATE;
 
 typedef struct {
-  char startSquare;
-  char endSquare;
+    char startSquare;
+    char endSquare;
 } MOVE;
 
 enum { FALSE, TRUE };
 
 // board.c
-extern void initBoard(BOARD_STATE* board);
-extern void clearBoard(BOARD_STATE* board);
-extern void printBoard(BOARD_STATE* board);
-extern void setPiece(char piece,int file,int rank,BOARD_STATE *board);
+extern void initBoard(BOARD_STATE *board);
+extern void clearBoard(BOARD_STATE *board);
+extern void printBoard(BOARD_STATE *board);
+extern void setPiece(char piece, int file, int rank, BOARD_STATE *board);
+extern char getPieceFR(int file, int rank, BOARD_STATE *board);
+extern char getPieceSq120(char sq, BOARD_STATE *board);
 
 // bitboard.c
 extern void clearBitboard(unsigned long *bitboard);
-extern void addBitboard(int file, int rank, unsigned long* bitboard);
-extern void removeBitboard(int file, int rank, unsigned long* bitboard);
+extern void addBitboard(int file, int rank, unsigned long *bitboard);
+extern void removeBitboard(int file, int rank, unsigned long *bitboard);
 
 // moves.c
 extern void generateMoves(BOARD_STATE *board, MOVE *move);

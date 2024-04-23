@@ -31,4 +31,3 @@ char getColor(char piece) {
     }
     return BOTH;
 }
-

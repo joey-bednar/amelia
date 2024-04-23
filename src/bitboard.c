@@ -3,16 +3,18 @@
 #include <stdio.h>
 
 // clears the bitboard of any pieces
-void clearBitboard(unsigned long* bitboard) { *bitboard = 0; }
+void clearBitboard(unsigned long *bitboard) {
+    *bitboard = 0;
+}
 
 // adds piece to bitboard on the given square
-void addBitboard(int file, int rank, unsigned long* bitboard) { 
-    int coord = FR2SQ64(file,rank);
-    *bitboard |= (0x01UL << coord); 
+void addBitboard(int file, int rank, unsigned long *bitboard) {
+    int coord = FR2SQ64(file, rank);
+    *bitboard |= (0x01UL << coord);
 }
 
 // removes piece from bitboard on the given square
-void removeBitboard(int file, int rank, unsigned long* bitboard) { 
-    int coord = FR2SQ64(file,rank);
-    *bitboard &= ~(0x01UL << coord); 
+void removeBitboard(int file, int rank, unsigned long *bitboard) {
+    int coord = FR2SQ64(file, rank);
+    *bitboard &= ~(0x01UL << coord);
 }

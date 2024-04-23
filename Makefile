@@ -4,6 +4,11 @@ TARGET_EXEC := main
 BUILD_DIR := build
 SRC_DIRS := src
 
+
+
+# Find all C and header files to run clang-format on
+FORMAT_SRCS := $(shell find $(SRC_DIRS) -name '*.c' -or -name '*.h')
+
 # Find all the C and C++ files we want to compile
 # Note the single quotes around the * expressions. The shell will incorrectly expand these otherwise, but we want to send the * directly to the find command.
 SRCS := $(shell find $(SRC_DIRS) -name '*.cpp' -or -name '*.c' -or -name '*.s')
@@ -40,6 +45,9 @@ $(BUILD_DIR)/%.cpp.o: %.cpp
 	mkdir -p $(dir $@)
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $< -o $@
 
+.PHONY: format
+format:
+	clang-format -i --style=file $(FORMAT_SRCS)
 
 .PHONY: clean
 clean:
