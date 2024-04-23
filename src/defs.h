@@ -21,10 +21,12 @@ enum {
 };
 // clang-format on
 
+typedef unsigned long long ULL;
+
 typedef struct {
     int board[120];
 
-    unsigned long pieces[3];
+    unsigned long long pieces[3];
 
     int turn;
     int fiftyMove;
@@ -33,8 +35,9 @@ typedef struct {
 } BOARD_STATE;
 
 typedef struct {
-    char startSquare;
-    char endSquare;
+    int startSquare;
+    int endSquare;
+    int captured;
 } MOVE;
 
 enum { FALSE, TRUE };
@@ -48,16 +51,20 @@ extern char getPieceFR(int file, int rank, BOARD_STATE *board);
 extern char getPieceSq120(char sq, BOARD_STATE *board);
 
 // bitboard.c
-extern void clearBitboard(unsigned long *bitboard);
-extern void addBitboard(int file, int rank, unsigned long *bitboard);
-extern void removeBitboard(int file, int rank, unsigned long *bitboard);
-extern char checkBitboard(int file, int rank, unsigned long *bitboard);
+extern void clearBitboard(unsigned long long *bitboard);
+extern void addBitboard(int file, int rank, unsigned long long *bitboard);
+extern void removeBitboard(int file, int rank, unsigned long long *bitboard);
+extern char checkBitboard(int file, int rank, unsigned long long *bitboard);
 
 // moves.c
 extern void generateMoves(BOARD_STATE *board, MOVE *move);
 
 // utils.c
-extern void printBits(unsigned long num);
+extern void printBits(unsigned long long num);
+extern int countBits(unsigned long long b);
 extern char getColor(char piece);
+
+// test.c
+extern void test();
 
 #endif

@@ -2,7 +2,7 @@
 #include <assert.h>
 #include <stdio.h>
 
-void printBits(unsigned long num) {
+void printBits(unsigned long long num) {
     int bits = sizeof(num) * 8;
     unsigned long mask = 1UL << (bits - 1);
 
@@ -15,7 +15,7 @@ void printBits(unsigned long num) {
     }
 }
 
-int countBits(unsigned long b) {
+int countBits(unsigned long long b) {
     int r;
     for (r = 0; b; r++, b &= b - 1)
         ;

@@ -44,7 +44,7 @@ void setPiece(char piece, int file, int rank, BOARD_STATE *board) {
     assert(piece >= 0 && piece <= bK);
 
     // set piece on board
-    unsigned long sq = FR2SQ120(file, rank);
+    unsigned long long sq = FR2SQ120(file, rank);
     board->board[sq] = piece;
 
     // remove empty piece from bitboards
@@ -55,11 +55,13 @@ void setPiece(char piece, int file, int rank, BOARD_STATE *board) {
         return;
     }
 
-    // add any other piece bitboards
+    // add any other piece bitboards/replace existing pieces
     if (piece >= wP && piece <= wK) {
         addBitboard(file, rank, &board->pieces[WHITE]);
+        removeBitboard(file, rank, &board->pieces[BLACK]);
     } else {
         addBitboard(file, rank, &board->pieces[BLACK]);
+        removeBitboard(file, rank, &board->pieces[WHITE]);
     }
 
     addBitboard(file, rank, &board->pieces[BOTH]);

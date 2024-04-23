@@ -12,16 +12,14 @@ int main() {
         moves[i].endSquare = OFFBOARD;
     }
 
-    // init pawns
-    board.pieces[WHITE] = 0;
-    board.pieces[BLACK] = 0;
-    board.pieces[BOTH] = 0;
-
     clearBoard(&board);
+    /*initBoard(&board);*/
 
-    initBoard(&board);
-    /*printBoard(&board);*/
-    /*printBits(board.pieces[BOTH]);*/
+    /*test();*/
+
+    setPiece(wK, FILE_E, RANK_1, &board);
+    setPiece(wN, FILE_B, RANK_1, &board);
+    printBoard(&board);
 
     generateMoves(&board, moves);
 
