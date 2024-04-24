@@ -1,0 +1,23 @@
+name: CI
+
+on: [push,pull_request]
+
+jobs:
+  formatting-check:
+    name: Format
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - name: Run clang-format style check
+      uses: jidicula/clang-format-action@v4.11.0
+      with:
+        clang-format-version: '18'
+        check-path: 'src'
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - name: Run make
+      run: make
+
