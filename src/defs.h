@@ -1,7 +1,7 @@
 #ifndef DEFS_H
 
-#define FR2SQ120(f, r) ((21 + (f)) + ((r) * 10))
-#define FR2SQ64(f, r) ((f) + ((r) * 8))
+#define FR2SQ120(f, r) ((21 + (r)) + ((f) * 10))
+#define FR2SQ64(f, r) ((r) + ((f) * 8))
 #define MAX_LEGAL_MOVES 256
 
 // clang-format off
@@ -26,7 +26,7 @@ typedef unsigned long long ULL;
 typedef struct {
     int board[120];
 
-    unsigned long long pieces[3];
+    unsigned long long pieces[13];
 
     int turn;
     int fiftyMove;
@@ -61,6 +61,7 @@ extern void generateMoves(BOARD_STATE *board, MOVE *move);
 
 // utils.c
 extern void printBits(unsigned long long num);
+extern void printBitboard(unsigned long long num);
 extern int countBits(unsigned long long b);
 extern char getColor(char piece);
 

@@ -13,15 +13,9 @@ int main() {
     }
 
     clearBoard(&board);
-    /*initBoard(&board);*/
+    initBoard(&board);
 
-    /*test();*/
-
-    setPiece(wK, FILE_E, RANK_1, &board);
-    setPiece(wN, FILE_B, RANK_1, &board);
-    printBoard(&board);
-
-    generateMoves(&board, moves);
+    test();
 
     return 0;
 }

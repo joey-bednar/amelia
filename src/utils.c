@@ -9,9 +9,18 @@ void printBits(unsigned long long num) {
     for (int i = 0; i < bits; i++) {
         putchar((num & mask) ? '1' : '0');
         num <<= 1;
-        if ((i + 1) % 8 == 0) {
-            putchar('\n');
+    }
+}
+
+void printBitboard(unsigned long long bitboard) {
+    for (int rank = RANK_8; rank >= RANK_1; rank--) {
+        for (int file = FILE_A; file <= FILE_H; file++) {
+            char sq = FR2SQ64(file, rank);
+
+            char val = (checkBitboard(file, rank, &bitboard));
+            printf("%d ", val);
         }
+        printf("\n");
     }
 }
 

@@ -17,9 +17,9 @@ void clearBoard(BOARD_STATE *board) {
     }
 
     // reset bit boards
-    board->pieces[WHITE] = 0;
-    board->pieces[BLACK] = 0;
-    board->pieces[BOTH] = 0;
+    for (int i = 0; i <= bK; i++) {
+        board->pieces[i] = 0;
+    }
 }
 
 // return piece on square given by 120 index
@@ -47,24 +47,13 @@ void setPiece(char piece, int file, int rank, BOARD_STATE *board) {
     unsigned long long sq = FR2SQ120(file, rank);
     board->board[sq] = piece;
 
-    // remove empty piece from bitboards
-    if (piece == EMPTY) {
-        removeBitboard(file, rank, &board->pieces[WHITE]);
-        removeBitboard(file, rank, &board->pieces[BLACK]);
-        removeBitboard(file, rank, &board->pieces[BOTH]);
-        return;
+    // remove piece from bitboards
+    for (int i = 0; i <= bK; i++) {
+        removeBitboard(file, rank, &board->pieces[i]);
     }
-
-    // add any other piece bitboards/replace existing pieces
-    if (piece >= wP && piece <= wK) {
-        addBitboard(file, rank, &board->pieces[WHITE]);
-        removeBitboard(file, rank, &board->pieces[BLACK]);
-    } else {
-        addBitboard(file, rank, &board->pieces[BLACK]);
-        removeBitboard(file, rank, &board->pieces[WHITE]);
-    }
-
-    addBitboard(file, rank, &board->pieces[BOTH]);
+    // add piece to bitboard
+    addBitboard(file, rank, &board->pieces[piece]);
+    addBitboard(file, rank, &board->pieces[EMPTY]);
 }
 
 // sets up the pieces for a new game
