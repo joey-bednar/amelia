@@ -55,18 +55,17 @@ static void testMoves() {
     }
 
     clearBoard(&board);
-    setPiece(wK, FILE_E, RANK_1, &board);
-    setPiece(wN, FILE_B, RANK_1, &board);
+    setPiece(wQ, FILE_D, RANK_4, &board);
+    setPiece(wR, FILE_D, RANK_5, &board);
     printBoard(&board);
 
     generateMoves(&board, moves);
 
-    printBits(board.pieces[EMPTY]);
-    printBits(board.pieces[bK]);
+    printBoardIndex(&board);
 }
 
 void test() {
-    testBitboardIndex();
-    /*testBitboards();*/
-    /*testMoves();*/
+    // testBitboardIndex();
+    // testBitboards();
+    testMoves();
 }

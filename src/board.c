@@ -23,7 +23,7 @@ void clearBoard(BOARD_STATE *board) {
 }
 
 // return piece on square given by 120 index
-char getPieceSq120(char sq, BOARD_STATE *board) {
+char getPieceSq120(int sq, BOARD_STATE *board) {
     return board->board[sq];
 }
 
@@ -95,9 +95,21 @@ void printBoard(BOARD_STATE *board) {
                               'p', 'n', 'b', 'r', 'q', 'k'};
     for (int rank = RANK_8; rank >= RANK_1; rank--) {
         for (int file = FILE_A; file <= FILE_H; file++) {
-            char sq = FR2SQ120(file, rank);
+            int sq = FR2SQ120(file, rank);
             char display = piece2char[board->board[sq]];
             printf("%c ", display);
+        }
+        printf("\n");
+    }
+}
+
+// prints the pieces on the board
+void printBoardIndex(BOARD_STATE *board) {
+    // char to represent a piece in FEN notation
+    for (int rank = RANK_8; rank >= RANK_1; rank--) {
+        for (int file = FILE_A; file <= FILE_H; file++) {
+            char sq = FR2SQ120(file, rank);
+            printf("%d ", sq);
         }
         printf("\n");
     }

@@ -46,9 +46,10 @@ enum { FALSE, TRUE };
 extern void initBoard(BOARD_STATE *board);
 extern void clearBoard(BOARD_STATE *board);
 extern void printBoard(BOARD_STATE *board);
+extern void printBoardIndex(BOARD_STATE *board);
 extern void setPiece(char piece, int file, int rank, BOARD_STATE *board);
 extern char getPieceFR(int file, int rank, BOARD_STATE *board);
-extern char getPieceSq120(char sq, BOARD_STATE *board);
+extern char getPieceSq120(int sq, BOARD_STATE *board);
 
 // bitboard.c
 extern void clearBitboard(unsigned long long *bitboard);
