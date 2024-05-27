@@ -2,6 +2,7 @@
 #include <assert.h>
 #include <stdio.h>
 
+// add a move to the provided moves array
 static void addMove(BOARD_STATE *board, MOVE *moves, int start, int end,
                     int *index) {
     printf("Move to sq %d\n", end);
@@ -27,19 +28,13 @@ static void generateSimpleMoves(BOARD_STATE *board, MOVE *moves, int sq,
 
         if (color == WHITE) {
             if (squareContains == EMPTY || getColor(squareContains) == BLACK) {
+                printf("Move to sq %d\n", nextSq);
                 addMove(board, moves, sq, nextSq, index);
-            } else {
-                // printf("Can't capture own piece %d on sq %d\n",
-                // squareContains,
-                //        nextSq);
             }
         } else {
             if (squareContains == EMPTY || getColor(squareContains) == WHITE) {
                 printf("Move to sq %d\n", nextSq);
-            } else {
-                // printf("Can't capture own piece %d on sq %d\n",
-                // squareContains,
-                //        nextSq);
+                addMove(board, moves, sq, nextSq, index);
             }
         }
     }
@@ -114,14 +109,14 @@ static void generatePseudoQueenMoves(BOARD_STATE *board, MOVE *moves, int sq,
     generatePseudoBishopMoves(board, moves, sq, index);
 }
 
-// TODO: write makeMove
+// play a move on the board
 void makeMove(BOARD_STATE *board, MOVE move) {
     char piece = getPieceSq120(move.startSquare, board);
     setPiece(EMPTY, SQ120F(move.startSquare), SQ120R(move.startSquare), board);
     setPiece(piece, SQ120F(move.endSquare), SQ120R(move.endSquare), board);
 }
 
-// TODO: write unmakeMove
+// undo a move on the board
 void unmakeMove(BOARD_STATE *board, MOVE move) {
     char piece = getPieceSq120(move.endSquare, board);
     setPiece(move.captured, SQ120F(move.endSquare), SQ120R(move.endSquare),
@@ -129,6 +124,7 @@ void unmakeMove(BOARD_STATE *board, MOVE move) {
     setPiece(piece, SQ120F(move.startSquare), SQ120R(move.startSquare), board);
 }
 
+// generate all legal moves and insert them into the moves list
 void generateMoves(BOARD_STATE *board, MOVE *moves) {
 
     int index = 0;
