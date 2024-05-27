@@ -40,3 +40,5 @@ char getColor(char piece) {
     }
     return BOTH;
 }
+
+// TODO: add FEN->board, board->FEN

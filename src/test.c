@@ -55,7 +55,9 @@ static void testMoves() {
     }
 
     clearBoard(&board);
-    setPiece(wR, FILE_D, RANK_5, &board);
+    initBoard(&board);
+    setPiece(wN, FILE_A, RANK_3, &board);
+    setPiece(EMPTY, FILE_B, RANK_1, &board);
     printBoard(&board);
 
     generateMoves(&board, moves);
@@ -75,6 +77,8 @@ static void testMakeMoves() {
 
     clearBoard(&board);
     initBoard(&board);
+    setPiece(wN, FILE_A, RANK_3, &board);
+    setPiece(EMPTY, FILE_B, RANK_1, &board);
     generateMoves(&board, moves);
 
     printf("Root:\n");
@@ -120,6 +124,8 @@ static void testMakeMoves() {
         printf("\n");
         i++;
     }
+
+    printBoardIndex(&board);
 }
 
 static void printAllBoards() {

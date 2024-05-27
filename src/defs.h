@@ -60,7 +60,7 @@ extern void removeBitboard(int file, int rank, unsigned long long *bitboard);
 extern char checkBitboard(int file, int rank, unsigned long long *bitboard);
 
 // moves.c
-extern void generateMoves(BOARD_STATE *board, MOVE *move);
+extern int generateMoves(BOARD_STATE *board, MOVE *move);
 extern void makeMove(BOARD_STATE *board, MOVE move);
 extern void unmakeMove(BOARD_STATE *board, MOVE move);
 
