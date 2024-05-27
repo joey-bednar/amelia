@@ -2,10 +2,12 @@
 #include <assert.h>
 #include <stdio.h>
 
-static void addMove(MOVE *moves, int start, int end, int *index) {
+static void addMove(BOARD_STATE *board, MOVE *moves, int start, int end,
+                    int *index) {
     printf("Move to sq %d\n", end);
     moves[*index].startSquare = start;
     moves[*index].endSquare = end;
+    moves[*index].captured = getPieceSq120(end, board);
     (*index)++;
 }
 
@@ -25,7 +27,7 @@ static void generateSimpleMoves(BOARD_STATE *board, MOVE *moves, int sq,
 
         if (color == WHITE) {
             if (squareContains == EMPTY || getColor(squareContains) == BLACK) {
-                addMove(moves, sq, nextSq, index);
+                addMove(board, moves, sq, nextSq, index);
             } else {
                 // printf("Can't capture own piece %d on sq %d\n",
                 // squareContains,
@@ -60,23 +62,23 @@ static void generateSlidingMoves(BOARD_STATE *board, MOVE *moves, int sq,
         if (color == WHITE) {
 
             while (squareContains == EMPTY) {
-                addMove(moves, sq, nextSq, index);
+                addMove(board, moves, sq, nextSq, index);
 
                 nextSq = nextSq + offsets[i];
                 squareContains = getPieceSq120(nextSq, board);
             }
             if (getColor(squareContains) == BLACK) {
-                addMove(moves, sq, nextSq, index);
+                addMove(board, moves, sq, nextSq, index);
             }
         } else {
             while (squareContains == EMPTY) {
-                addMove(moves, sq, nextSq, index);
+                addMove(board, moves, sq, nextSq, index);
 
                 nextSq = nextSq + offsets[i];
                 squareContains = getPieceSq120(nextSq, board);
             }
             if (getColor(squareContains) == WHITE) {
-                addMove(moves, sq, nextSq, index);
+                addMove(board, moves, sq, nextSq, index);
             }
         }
     }
@@ -112,34 +114,51 @@ static void generatePseudoQueenMoves(BOARD_STATE *board, MOVE *moves, int sq,
     generatePseudoBishopMoves(board, moves, sq, index);
 }
 
-// void playMode(BOARD_STATE *board, MOVE move) {
-//     int piece = getPieceSq120(move.startSquare, board);
-// }
+// TODO: write makeMove
+void makeMove(BOARD_STATE *board, MOVE move) {
+    char piece = getPieceSq120(move.startSquare, board);
+    setPiece(EMPTY, SQ120F(move.startSquare), SQ120R(move.startSquare), board);
+    setPiece(piece, SQ120F(move.endSquare), SQ120R(move.endSquare), board);
+}
+
+// TODO: write unmakeMove
+void unmakeMove(BOARD_STATE *board, MOVE move) {
+    char piece = getPieceSq120(move.endSquare, board);
+    setPiece(move.captured, SQ120F(move.endSquare), SQ120R(move.endSquare),
+             board);
+    setPiece(piece, SQ120F(move.startSquare), SQ120R(move.startSquare), board);
+}
 
 void generateMoves(BOARD_STATE *board, MOVE *moves) {
 
     int index = 0;
     for (int file = FILE_A; file <= FILE_H; file++) {
         for (int rank = RANK_1; rank <= RANK_8; rank++) {
-            char sq = FR2SQ120(file, rank);
+            int sq = FR2SQ120(file, rank);
             char piece = board->board[sq];
 
+            if (piece >= wP && piece <= wK && board->turn == BLACK) {
+                continue;
+            } else if (piece >= bP && piece <= bK && board->turn == WHITE) {
+                continue;
+            }
+
             if (piece == EMPTY) {
-                /*printf("Empty on %c%d\n", file + 'a', rank+1);*/
+                continue;
             } else if (piece == wK || piece == bK) {
-                printf("King on %c%d\n", file + 'a', rank + 1);
+                // printf("King on %c%d\n", file + 'a', rank + 1);
                 generatePseudoKingMoves(board, moves, sq, &index);
             } else if (piece == wN || piece == bN) {
-                printf("Knight on %c%d\n", file + 'a', rank + 1);
+                // printf("Knight on %c%d\n", file + 'a', rank + 1);
                 generatePseudoKnightMoves(board, moves, sq, &index);
             } else if (piece == wB || piece == bB) {
-                printf("Bishop on %c%d\n", file + 'a', rank + 1);
+                // printf("Bishop on %c%d\n", file + 'a', rank + 1);
                 generatePseudoBishopMoves(board, moves, sq, &index);
             } else if (piece == wR || piece == bR) {
-                printf("Rook on %c%d\n", file + 'a', rank + 1);
+                // printf("Rook on %c%d\n", file + 'a', rank + 1);
                 generatePseudoRookMoves(board, moves, sq, &index);
             } else if (piece == wQ || piece == bQ) {
-                printf("Queen on %c%d\n", file + 'a', rank + 1);
+                // printf("Queen on %c%d\n", file + 'a', rank + 1);
                 generatePseudoQueenMoves(board, moves, sq, &index);
             }
         }

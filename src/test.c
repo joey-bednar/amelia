@@ -55,7 +55,6 @@ static void testMoves() {
     }
 
     clearBoard(&board);
-    setPiece(wQ, FILE_D, RANK_4, &board);
     setPiece(wR, FILE_D, RANK_5, &board);
     printBoard(&board);
 
@@ -64,8 +63,79 @@ static void testMoves() {
     printBoardIndex(&board);
 }
 
+static void testMakeMoves() {
+    BOARD_STATE board;
+
+    // init legal moves array
+    MOVE moves[MAX_LEGAL_MOVES];
+    for (int i = 0; i < MAX_LEGAL_MOVES; i++) {
+        moves[i].startSquare = OFFBOARD;
+        moves[i].endSquare = OFFBOARD;
+    }
+
+    clearBoard(&board);
+    initBoard(&board);
+    generateMoves(&board, moves);
+
+    printf("Root:\n");
+    printBoard(&board);
+    printf("\n");
+
+    int i = 0;
+    while (moves[i].startSquare != OFFBOARD) {
+        printf("End:\n");
+        makeMove(&board, moves[i]);
+        printBoard(&board);
+        printf("\n====================\n");
+        printf("Restart:\n");
+        unmakeMove(&board, moves[i]);
+        printBoard(&board);
+        printf("\n");
+        i++;
+    }
+}
+
+static void printAllBoards() {
+    BOARD_STATE board;
+
+    // empty board
+    clearBoard(&board);
+    printBoard(&board);
+    printf("\n");
+
+    // starting board
+    initBoard(&board);
+    printBoard(&board);
+    printf("\n");
+
+    // board 120 index
+    printBoardIndex(&board);
+    printf("\n");
+
+    // sq to file
+    for (int rank = RANK_8; rank >= RANK_1; rank--) {
+        for (int file = FILE_A; file <= FILE_H; file++) {
+            char sq = FR2SQ120(file, rank);
+            printf("%d%d ", SQ120F(sq), file);
+        }
+        printf("\n");
+    }
+    printf("\n");
+
+    // sq to rank
+    for (int rank = RANK_8; rank >= RANK_1; rank--) {
+        for (int file = FILE_A; file <= FILE_H; file++) {
+            char sq = FR2SQ120(file, rank);
+            printf("%d%d ", SQ120R(sq), rank);
+        }
+        printf("\n");
+    }
+}
+
 void test() {
     // testBitboardIndex();
     // testBitboards();
-    testMoves();
+    // testMoves();
+    testMakeMoves();
+    // printAllBoards();
 }

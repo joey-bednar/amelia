@@ -1,5 +1,7 @@
 #ifndef DEFS_H
 
+#define SQ120R(sq) (((sq) % 10) - 1)
+#define SQ120F(sq) (((sq) - 21) / (10))
 #define FR2SQ120(f, r) ((21 + (r)) + ((f) * 10))
 #define FR2SQ64(f, r) ((r) + ((f) * 8))
 #define MAX_LEGAL_MOVES 256
@@ -59,6 +61,8 @@ extern char checkBitboard(int file, int rank, unsigned long long *bitboard);
 
 // moves.c
 extern void generateMoves(BOARD_STATE *board, MOVE *move);
+extern void makeMove(BOARD_STATE *board, MOVE move);
+extern void unmakeMove(BOARD_STATE *board, MOVE move);
 
 // utils.c
 extern void printBits(unsigned long long num);
