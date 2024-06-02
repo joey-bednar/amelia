@@ -70,7 +70,7 @@ extern int checkBitboard(int file, int rank, unsigned long long *bitboard);
 extern int generateMoves(BOARD_STATE *board, MOVE *move);
 extern void makeMove(BOARD_STATE *board, MOVE move);
 extern void unmakeMove(BOARD_STATE *board, MOVE move);
-extern int isAttacked(BOARD_STATE *board, int sq);
+extern int isAttacked(BOARD_STATE *board, int sq, int enemycolor);
 extern int isLegalMove(BOARD_STATE *board, MOVE move);
 
 // utils.c
