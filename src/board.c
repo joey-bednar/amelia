@@ -16,6 +16,10 @@ void clearBoard(BOARD_STATE *board) {
         }
     }
 
+    // remove kings
+    board->kings[WHITE] = OFFBOARD;
+    board->kings[BLACK] = OFFBOARD;
+
     // reset bit boards
     for (int i = 0; i <= bK; i++) {
         board->pieces[i] = 0;
@@ -23,18 +27,18 @@ void clearBoard(BOARD_STATE *board) {
 }
 
 // return piece on square given by 120 index
-char getPieceSq120(int sq, BOARD_STATE *board) {
+int getPieceSq120(int sq, BOARD_STATE *board) {
     return board->board[sq];
 }
 
 // return piece on given square by file/rank
-char getPieceFR(int file, int rank, BOARD_STATE *board) {
-    char sq = FR2SQ120(file, rank);
+int getPieceFR(int file, int rank, BOARD_STATE *board) {
+    int sq = FR2SQ120(file, rank);
     return getPieceSq120(sq, board);
 }
 
 // place piece on given square by updating board/bitboards
-void setPiece(char piece, int file, int rank, BOARD_STATE *board) {
+void setPiece(int piece, int file, int rank, BOARD_STATE *board) {
 
     // check for valid square
     assert(file >= FILE_A && file <= FILE_H);
@@ -54,6 +58,15 @@ void setPiece(char piece, int file, int rank, BOARD_STATE *board) {
     // add piece to bitboard
     addBitboard(file, rank, &board->pieces[piece]);
     addBitboard(file, rank, &board->pieces[EMPTY]);
+
+    // update king placement
+    if (piece == wK) {
+        board->kings[WHITE] = sq;
+    } else if (piece == bK) {
+        board->kings[BLACK] = sq;
+    }
+
+
 }
 
 // sets up the pieces for a new game
@@ -90,13 +103,13 @@ void initBoard(BOARD_STATE *board) {
 
 // prints the pieces on the board
 void printBoard(BOARD_STATE *board) {
-    // char to represent a piece in FEN notation
+    // int to represent a piece in FEN notation
     const int piece2char[] = {'.', 'P', 'N', 'B', 'R', 'Q', 'K',
                               'p', 'n', 'b', 'r', 'q', 'k'};
     for (int rank = RANK_8; rank >= RANK_1; rank--) {
         for (int file = FILE_A; file <= FILE_H; file++) {
             int sq = FR2SQ120(file, rank);
-            char display = piece2char[board->board[sq]];
+            int display = piece2char[board->board[sq]];
             printf("%c ", display);
         }
         printf("\n");
@@ -105,10 +118,10 @@ void printBoard(BOARD_STATE *board) {
 
 // prints the pieces on the board
 void printBoardIndex(BOARD_STATE *board) {
-    // char to represent a piece in FEN notation
+    // int to represent a piece in FEN notation
     for (int rank = RANK_8; rank >= RANK_1; rank--) {
         for (int file = FILE_A; file <= FILE_H; file++) {
-            char sq = FR2SQ120(file, rank);
+            int sq = FR2SQ120(file, rank);
             printf("%d ", sq);
         }
         printf("\n");

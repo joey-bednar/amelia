@@ -23,12 +23,16 @@ enum {
 };
 // clang-format on
 
+enum { NO_CASTLE, WK_CASTLE, WQ_CASTLE, BK_CASTLE, BQ_CASTLE };
+
 typedef unsigned long long ULL;
 
 typedef struct {
     int board[120];
 
     unsigned long long pieces[13];
+
+    int kings[2];
 
     int turn;
     int fiftyMove;
@@ -40,6 +44,9 @@ typedef struct {
     int startSquare;
     int endSquare;
     int captured;
+    int enpassant;
+    int twopawnmove;
+    int castled;
 } MOVE;
 
 enum { FALSE, TRUE };
@@ -49,26 +56,29 @@ extern void initBoard(BOARD_STATE *board);
 extern void clearBoard(BOARD_STATE *board);
 extern void printBoard(BOARD_STATE *board);
 extern void printBoardIndex(BOARD_STATE *board);
-extern void setPiece(char piece, int file, int rank, BOARD_STATE *board);
-extern char getPieceFR(int file, int rank, BOARD_STATE *board);
-extern char getPieceSq120(int sq, BOARD_STATE *board);
+extern void setPiece(int piece, int file, int rank, BOARD_STATE *board);
+extern int getPieceFR(int file, int rank, BOARD_STATE *board);
+extern int getPieceSq120(int sq, BOARD_STATE *board);
 
 // bitboard.c
 extern void clearBitboard(unsigned long long *bitboard);
 extern void addBitboard(int file, int rank, unsigned long long *bitboard);
 extern void removeBitboard(int file, int rank, unsigned long long *bitboard);
-extern char checkBitboard(int file, int rank, unsigned long long *bitboard);
+extern int checkBitboard(int file, int rank, unsigned long long *bitboard);
 
 // moves.c
 extern int generateMoves(BOARD_STATE *board, MOVE *move);
 extern void makeMove(BOARD_STATE *board, MOVE move);
 extern void unmakeMove(BOARD_STATE *board, MOVE move);
+extern int isAttacked(BOARD_STATE *board, int sq);
+extern int isLegalMove(BOARD_STATE *board, MOVE move);
 
 // utils.c
 extern void printBits(unsigned long long num);
 extern void printBitboard(unsigned long long num);
 extern int countBits(unsigned long long b);
-extern char getColor(char piece);
+extern int getColor(int piece);
+extern int notColor(int color);
 
 // test.c
 extern void test();

@@ -11,11 +11,6 @@ static ULL perft(int depth, BOARD_STATE *board) {
     }
 
     MOVE moves[MAX_LEGAL_MOVES];
-    for (int i = 0; i < MAX_LEGAL_MOVES; i++) {
-        moves[i].startSquare = OFFBOARD;
-        moves[i].endSquare = OFFBOARD;
-        moves[i].captured = OFFBOARD;
-    }
 
     n_moves = generateMoves(board, moves);
 
@@ -23,18 +18,20 @@ static ULL perft(int depth, BOARD_STATE *board) {
         // printf("start:\n");
         // printBoard(board);
         // printf("\n");
+        if (isLegalMove(board, moves[i])) {
+            makeMove(board, moves[i]);
 
-        makeMove(board, moves[i]);
-        // printf("depth %d:\n",depth);
-        // printBoard(board);
-        // printf("\n");
+            // printf("depth %d:\n",depth);
+            // printBoard(board);
+            // printf("\n");
+            nodes += perft(depth - 1, board);
 
-        nodes += perft(depth - 1, board);
 
-        // printf("unmake:\n");
-        // printBoard(board);
-        // printf("\n");
-        unmakeMove(board, moves[i]);
+            // printf("unmake:\n");
+            // printBoard(board);
+            // printf("\n");
+            unmakeMove(board, moves[i]);
+        }
     }
 
     return nodes;
@@ -58,12 +55,17 @@ int main() {
     clearBoard(&board);
     initBoard(&board);
 
-    ULL num = perft(3, &board);
-
-    printBoardIndex(&board);
+    // ULL num = perft(1, &board);
+    // printf("%lld\n", num);
+    // num = perft(2, &board);
+    // printf("%lld\n", num);
+    // num = perft(3, &board);
+    // printf("%lld\n", num);
+    ULL num = perft(4, &board);
     printf("%lld\n", num);
+    printBoardIndex(&board);
 
-    // test();
+    test();
 
     return 0;
 }

@@ -15,9 +15,9 @@ void printBits(unsigned long long num) {
 void printBitboard(unsigned long long bitboard) {
     for (int rank = RANK_8; rank >= RANK_1; rank--) {
         for (int file = FILE_A; file <= FILE_H; file++) {
-            char sq = FR2SQ64(file, rank);
+            int sq = FR2SQ64(file, rank);
 
-            char val = (checkBitboard(file, rank, &bitboard));
+            int val = (checkBitboard(file, rank, &bitboard));
             printf("%d ", val);
         }
         printf("\n");
@@ -31,8 +31,15 @@ int countBits(unsigned long long b) {
     return r;
 }
 
+int notColor(int color) {
+    if (color != BOTH) {
+        return !color;
+    }
+    return BOTH;
+}
+
 // return color of piece
-char getColor(char piece) {
+int getColor(int piece) {
     if (piece >= wP && piece <= wK) {
         return WHITE;
     } else if (piece >= bP && piece <= bK) {

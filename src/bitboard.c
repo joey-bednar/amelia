@@ -20,7 +20,7 @@ void removeBitboard(int file, int rank, unsigned long long *bitboard) {
 }
 
 // return true if piece is on square
-char checkBitboard(int file, int rank, unsigned long long *bitboard) {
+int checkBitboard(int file, int rank, unsigned long long *bitboard) {
     int coord = FR2SQ64(file, rank);
-    return (char)((*bitboard & (0x01UL << coord)) >> coord);
+    return (int)((*bitboard & (0x01UL << coord)) >> coord);
 }

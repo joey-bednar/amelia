@@ -148,7 +148,7 @@ static void printAllBoards() {
     // sq to file
     for (int rank = RANK_8; rank >= RANK_1; rank--) {
         for (int file = FILE_A; file <= FILE_H; file++) {
-            char sq = FR2SQ120(file, rank);
+            int sq = FR2SQ120(file, rank);
             printf("%d%d ", SQ120F(sq), file);
         }
         printf("\n");
@@ -158,7 +158,7 @@ static void printAllBoards() {
     // sq to rank
     for (int rank = RANK_8; rank >= RANK_1; rank--) {
         for (int file = FILE_A; file <= FILE_H; file++) {
-            char sq = FR2SQ120(file, rank);
+            int sq = FR2SQ120(file, rank);
             printf("%d%d ", SQ120R(sq), rank);
         }
         printf("\n");
@@ -169,6 +169,6 @@ void test() {
     // testBitboardIndex();
     // testBitboards();
     // testMoves();
-    testMakeMoves();
+    // testMakeMoves();
     // printAllBoards();
 }
