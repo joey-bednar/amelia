@@ -44,12 +44,15 @@ typedef struct {
     int startSquare;
     int endSquare;
     int captured;
-    int enpassant;
+    int epcapture;
     int twopawnmove;
     int castled;
+    int priorep;
 } MOVE;
 
 enum { FALSE, TRUE };
+
+extern int epMap[120];
 
 // board.c
 extern void initBoard(BOARD_STATE *board);
@@ -79,6 +82,7 @@ extern void printBitboard(unsigned long long num);
 extern int countBits(unsigned long long b);
 extern int getColor(int piece);
 extern int notColor(int color);
+extern void initEnpassantMap(int *map);
 
 // test.c
 extern void test();

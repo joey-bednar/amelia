@@ -45,7 +45,7 @@ void setPiece(int piece, int file, int rank, BOARD_STATE *board) {
     assert(rank >= RANK_1 && rank <= RANK_8);
 
     // check for valid piece
-    assert(piece >= 0 && piece <= bK);
+    assert(piece >= EMPTY && piece <= bK);
 
     // set piece on board
     unsigned long long sq = FR2SQ120(file, rank);
@@ -65,8 +65,6 @@ void setPiece(int piece, int file, int rank, BOARD_STATE *board) {
     } else if (piece == bK) {
         board->kings[BLACK] = sq;
     }
-
-
 }
 
 // sets up the pieces for a new game
@@ -114,6 +112,8 @@ void printBoard(BOARD_STATE *board) {
         }
         printf("\n");
     }
+    printf("Turn: %d\n", board->turn);
+    printf("En passant: %d\n", board->enpassant);
 }
 
 // prints the pieces on the board
@@ -125,5 +125,16 @@ void printBoardIndex(BOARD_STATE *board) {
             printf("%d ", sq);
         }
         printf("\n");
+    }
+}
+
+void initEnpassantMap(int *map) {
+    for (int i = 0; i < 120; i++) {
+        map[i] = FALSE;
+    }
+
+    for (int file = FILE_A; file <= FILE_H; file++) {
+        map[FR2SQ120(file, RANK_3)] = TRUE;
+        map[FR2SQ120(file, RANK_6)] = TRUE;
     }
 }
