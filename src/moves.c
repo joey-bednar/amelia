@@ -24,22 +24,39 @@ void makeMove(BOARD_STATE *board, MOVE move) {
         board->enpassant = OFFBOARD;
     }
 
+    // TODO: test
+    if (move.epcapture) {
+        board->enpassant = OFFBOARD;
+        setPiece(EMPTY, SQ120F(move.endSquare), SQ120R(move.endSquare)-offset, board);
+    }
+
     board->turn = notColor(board->turn);
 }
 
 // undo a move on the board
 void unmakeMove(BOARD_STATE *board, MOVE move) {
 
-    // printf("unmove %d to %d\n",move.endSquare,move.startSquare);
-    int piece = getPieceSq120(move.endSquare, board);
-    setPiece(move.captured, SQ120F(move.endSquare), SQ120R(move.endSquare),
-             board);
-    setPiece(piece, SQ120F(move.startSquare), SQ120R(move.startSquare), board);
-
     int offset = 1;
     if (board->turn == WHITE) {
         offset = -1;
     }
+
+    // printf("unmove %d to %d\n",move.endSquare,move.startSquare);
+    int piece = getPieceSq120(move.endSquare, board);
+
+    // TODO: cleanup
+    if (move.epcapture) {
+        board->enpassant = move.endSquare;
+        setPiece(move.captured, SQ120F(move.endSquare), SQ120R(move.endSquare)-offset, board);
+        setPiece(EMPTY, SQ120F(move.endSquare), SQ120R(move.endSquare), board);
+        setPiece(piece, SQ120F(move.startSquare), SQ120R(move.startSquare), board);
+        board->turn = notColor(board->turn);
+        return;
+    }
+
+    setPiece(move.captured, SQ120F(move.endSquare), SQ120R(move.endSquare),
+             board);
+    setPiece(piece, SQ120F(move.startSquare), SQ120R(move.startSquare), board);
 
     if (move.twopawnmove) {
         board->enpassant = move.priorep;
@@ -152,9 +169,10 @@ static void generatePseudoPawnMoves(BOARD_STATE *board, MOVE *moves, int sq,
         addMove(board, moves, sq, left, lPiece, FALSE, FALSE, NO_CASTLE, index);
     } else if (epMap[left] && left == board->enpassant) {
         enpassant++;
+        // TODO: test further
         printf("en passant %d\n", enpassant);
-        // addMove(board, moves, sq, left, enemypawn, TRUE, FALSE, NO_CASTLE,
-        // index);
+        addMove(board, moves, sq, left, enemypawn, TRUE, FALSE, NO_CASTLE,
+        index);
     }
 
     if (getColor(rPiece) == enemycolor) {
@@ -163,8 +181,9 @@ static void generatePseudoPawnMoves(BOARD_STATE *board, MOVE *moves, int sq,
     } else if (epMap[right] && right == board->enpassant) {
         enpassant++;
         printf("en passant %d\n", enpassant);
-        // addMove(board, moves, sq, right, enemypawn, TRUE, FALSE, NO_CASTLE,
-        // index);
+        // TODO: test further
+        addMove(board, moves, sq, right, enemypawn, TRUE, FALSE, NO_CASTLE,
+        index);
     }
 
     if (SQ120R(sq) == secondrank && getPieceSq120(one, board) == EMPTY &&

@@ -87,4 +87,7 @@ extern void initEnpassantMap(int *map);
 // test.c
 extern void test();
 
+// perft.c
+extern ULL perft(int depth);
+
 #endif
