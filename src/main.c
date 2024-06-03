@@ -20,7 +20,11 @@ int main() {
     }
 
     clearBoard(&board);
-    initBoard(&board);
+    // initBoard(&board);
+    setPiece(wK, FILE_A, RANK_1, &board);
+    setPiece(bK, FILE_H, RANK_1, &board);
+    setPiece(wP, FILE_E, RANK_2, &board);
+    setPiece(bP, FILE_D, RANK_4, &board);
     printBoard(&board);
 
     initEnpassantMap(epMap);
@@ -28,7 +32,9 @@ int main() {
     // for (int i=0;i<3;i++) {
     //     perft(i);
     // }
-    perft(5);
+    perft(6);
+    // int num = perft_rec(2, &board);
+    // printf("perft: %d\n",num);
 
     // test();
     printBoardIndex(&board);

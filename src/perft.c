@@ -3,7 +3,9 @@
 #include <stdio.h>
 #include <time.h>
 
-static ULL perft_rec(int depth, BOARD_STATE *board) {
+#define VERBOSE FALSE
+
+ULL perft_rec(int depth, BOARD_STATE *board) {
     int n_moves, i;
     ULL nodes = 0;
 
@@ -21,15 +23,20 @@ static ULL perft_rec(int depth, BOARD_STATE *board) {
         // printf("\n");
         if (isLegalMove(board, moves[i])) {
 
-            // printf("depth %d:\n", depth);
-            // printBoard(board);
-            // printf("\n");
+            if (VERBOSE) {
+                printf("depth %d:\n", depth);
+                printBoard(board);
+                printf("\n");
+            }
 
             makeMove(board, moves[i]);
 
-            // printf("depth %d:\n", depth);
-            // printBoard(board);
-            // printf("\n================\n");
+            if (VERBOSE) {
+                printf("depth %d:\n", depth);
+                printBoard(board);
+                printf("\n================\n");
+            }
+
             nodes += perft_rec(depth - 1, board);
 
             // printf("unmake:\n");
@@ -41,7 +48,6 @@ static ULL perft_rec(int depth, BOARD_STATE *board) {
 
     return nodes;
 }
-
 
 ULL perft(int depth) {
     BOARD_STATE board;
@@ -70,4 +76,3 @@ ULL perft(int depth) {
 
     return num;
 }
-

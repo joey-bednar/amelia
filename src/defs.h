@@ -21,6 +21,7 @@ enum {
   A7 = 81, B7, C7, D7, E7, F7, G7, H7,
   A8 = 91, B8, C8, D8, E8, F8, G8, H8,
 };
+enum {NW=-9, N=1, NE=11, E=10, SE=9, S=-1, SW=-11, W=-10};
 // clang-format on
 
 enum { NO_CASTLE, WK_CASTLE, WQ_CASTLE, BK_CASTLE, BQ_CASTLE };
@@ -89,5 +90,6 @@ extern void test();
 
 // perft.c
 extern ULL perft(int depth);
+extern ULL perft_rec(int depth, BOARD_STATE *board);
 
 #endif
