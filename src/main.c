@@ -32,7 +32,7 @@ int main() {
     //     perft(i);
     // }
 
-    int depth = 4;
+    int depth = 7;
     perft(depth);
     printBenchmark(depth);
 
