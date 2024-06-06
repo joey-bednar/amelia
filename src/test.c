@@ -165,10 +165,27 @@ static void printAllBoards() {
     }
 }
 
+static void testBitboardRemove() {
+    BOARD_STATE board;
+
+    // init legal moves array
+    MOVE moves[MAX_LEGAL_MOVES];
+    for (int i = 0; i < MAX_LEGAL_MOVES; i++) {
+        moves[i].startSquare = OFFBOARD;
+        moves[i].endSquare = OFFBOARD;
+    }
+
+    initBoard(&board);
+    printBitboard(board.pieces[EMPTY]);
+    // removeBitboard(FILE_A, RANK_1, &board.pieces[EMPTY]);
+    printBitboard(board.pieces[EMPTY]);
+}
+
 void test() {
     // testBitboardIndex();
     // testBitboards();
     // testMoves();
     // testMakeMoves();
     // printAllBoards();
+    testBitboardRemove();
 }

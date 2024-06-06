@@ -52,12 +52,15 @@ void setPiece(int piece, int file, int rank, BOARD_STATE *board) {
     board->board[sq] = piece;
 
     // remove piece from bitboards
-    for (int i = 0; i <= bK; i++) {
+    for (int i = EMPTY; i <= bK; i++) {
         removeBitboard(file, rank, &board->pieces[i]);
     }
+
     // add piece to bitboard
-    addBitboard(file, rank, &board->pieces[piece]);
-    addBitboard(file, rank, &board->pieces[EMPTY]);
+    if (piece != EMPTY) {
+        addBitboard(file, rank, &board->pieces[piece]);
+        addBitboard(file, rank, &board->pieces[EMPTY]);
+    }
 
     // update king placement
     if (piece == wK) {
@@ -136,5 +139,22 @@ void initEnpassantMap(int *map) {
     for (int file = FILE_A; file <= FILE_H; file++) {
         map[FR2SQ120(file, RANK_3)] = TRUE;
         map[FR2SQ120(file, RANK_6)] = TRUE;
+    }
+}
+
+// return color of piece
+void initColorMap(int *map, int *notmap) {
+    for (int i=EMPTY;i<=OFFBOARD;i++) {
+        if (i >= wP && i <= wK) {
+            map[i] = WHITE;
+            notmap[i] = BLACK;
+        } else if (i >= bP && i <= bK) {
+            map[i] = BLACK;
+            notmap[i] = WHITE;
+        } else {
+            map[i] = BOTH;
+            notmap[i] = BOTH;
+        }
+
     }
 }

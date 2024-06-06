@@ -1,10 +1,17 @@
 #ifndef DEFS_H
 
+#define FALSE 0
+#define TRUE 1
+
 #define SQ120R(sq) (((sq) % 10) - 1)
 #define SQ120F(sq) (((sq) - 21) / (10))
 #define FR2SQ120(f, r) ((21 + (r)) + ((f) * 10))
 #define FR2SQ64(f, r) ((r) + ((f) * 8))
 #define MAX_LEGAL_MOVES 256
+
+
+#define COLOR(p) (colorMap[(p)])
+#define NOTCOLOR(p) (notcolorMap[(p)])
 
 // clang-format off
 enum { EMPTY, wP, wN, wB, wR, wQ, wK, bP, bN, bB, bR, bQ, bK, OFFBOARD };
@@ -51,9 +58,9 @@ typedef struct {
     int priorep;
 } MOVE;
 
-enum { FALSE, TRUE };
-
 extern int epMap[120];
+extern int colorMap[OFFBOARD+1];
+extern int notcolorMap[OFFBOARD+1];
 
 // board.c
 extern void initBoard(BOARD_STATE *board);
@@ -81,9 +88,8 @@ extern int isLegalMove(BOARD_STATE *board, MOVE move);
 extern void printBits(unsigned long long num);
 extern void printBitboard(unsigned long long num);
 extern int countBits(unsigned long long b);
-extern int getColor(int piece);
-extern int notColor(int color);
 extern void initEnpassantMap(int *map);
+extern void initColorMap(int *map,int *notmap);
 
 // test.c
 extern void test();
@@ -91,5 +97,6 @@ extern void test();
 // perft.c
 extern ULL perft(int depth);
 extern ULL perft_rec(int depth, BOARD_STATE *board);
+extern void printBenchmark(int depth);
 
 #endif

@@ -29,7 +29,7 @@ void makeMove(BOARD_STATE *board, MOVE move) {
                  SQ120R(move.endSquare + offset[board->turn]), board);
     }
 
-    board->turn = notColor(board->turn);
+    board->turn = !(board->turn);
 }
 
 // undo a move on the board
@@ -51,7 +51,7 @@ void unmakeMove(BOARD_STATE *board, MOVE move) {
         setPiece(EMPTY, SQ120F(move.endSquare), SQ120R(move.endSquare), board);
         setPiece(piece, SQ120F(move.startSquare), SQ120R(move.startSquare),
                  board);
-        board->turn = notColor(board->turn);
+        board->turn = !(board->turn);
         return;
     }
 
@@ -63,7 +63,7 @@ void unmakeMove(BOARD_STATE *board, MOVE move) {
         board->enpassant = move.priorep;
     }
 
-    board->turn = notColor(board->turn);
+    board->turn = !(board->turn);
 }
 
 // add a move to the provided moves array
@@ -85,19 +85,16 @@ static void addMove(BOARD_STATE *board, MOVE *moves, int start, int end,
 // move from sq to sq+offset[i]. If square is empty or enemy piece, add to moves
 // list. Used for kings and knights
 static void generateSimpleMoves(BOARD_STATE *board, MOVE *moves, int sq,
-                                int *index, int *offsets) {
+                                int *index, int *offsets, int offsetssize) {
     int piece = getPieceSq120(sq, board);
-    int color = getColor(piece);
 
-    int enemycolor = notColor(color);
-
-    for (int i = 0; i < (int)sizeof(offsets); i++) {
+    for (int i = 0; i < offsetssize; i++) {
         int nextSq = sq + offsets[i];
         int squareContains = getPieceSq120(nextSq, board);
         // if square is empty or can capture enemy piece, it is a pseudolegal
         // move
 
-        if (squareContains == EMPTY || getColor(squareContains) == enemycolor) {
+        if (squareContains == EMPTY || COLOR(squareContains) == NOTCOLOR(piece)) {
             // printf("Move to sq %d\n", nextSq);
             addMove(board, moves, sq, nextSq, squareContains, FALSE, FALSE,
                     NO_CASTLE, index);
@@ -108,13 +105,11 @@ static void generateSimpleMoves(BOARD_STATE *board, MOVE *moves, int sq,
 // same as generateSimpleMoves() but continues in offset direction until not
 // possible. Used for sliding pieces (bishop,rook,queen)
 static void generateSlidingMoves(BOARD_STATE *board, MOVE *moves, int sq,
-                                 int *index, int *offsets) {
+                                 int *index, int *offsets, int offsetssize) {
 
     int piece = getPieceSq120(sq, board);
-    int color = getColor(piece);
-    int enemycolor = notColor(color);
 
-    for (int i = 0; i < (int)sizeof(offsets); i++) {
+    for (int i = 0; i < offsetssize; i++) {
         int nextSq = sq + offsets[i];
         int squareContains = getPieceSq120(nextSq, board);
 
@@ -128,7 +123,7 @@ static void generateSlidingMoves(BOARD_STATE *board, MOVE *moves, int sq,
             nextSq = nextSq + offsets[i];
             squareContains = getPieceSq120(nextSq, board);
         }
-        if (getColor(squareContains) == enemycolor) {
+        if (COLOR(squareContains) == NOTCOLOR(piece)) {
             addMove(board, moves, sq, nextSq, squareContains, FALSE, FALSE,
                     NO_CASTLE, index);
         }
@@ -138,8 +133,7 @@ static void generateSlidingMoves(BOARD_STATE *board, MOVE *moves, int sq,
 static void generatePseudoPawnMoves(BOARD_STATE *board, MOVE *moves, int sq,
                                     int *index) {
     int piece = getPieceSq120(sq, board);
-    int color = getColor(piece);
-    int enemycolor = notColor(color);
+    int color = COLOR(piece);
 
     int secondrank = RANK_2;
     int offset[4] = {1, 2, -9, 11};
@@ -166,7 +160,7 @@ static void generatePseudoPawnMoves(BOARD_STATE *board, MOVE *moves, int sq,
         addMove(board, moves, sq, one, EMPTY, FALSE, FALSE, NO_CASTLE, index);
     }
 
-    if (getColor(lPiece) == enemycolor) {
+    if (COLOR(lPiece) == NOTCOLOR(piece)) {
         addMove(board, moves, sq, left, lPiece, FALSE, FALSE, NO_CASTLE, index);
     } else if (epMap[left] && left == board->enpassant) {
         enpassant++;
@@ -177,7 +171,7 @@ static void generatePseudoPawnMoves(BOARD_STATE *board, MOVE *moves, int sq,
                 index);
     }
 
-    if (getColor(rPiece) == enemycolor) {
+    if (COLOR(rPiece) == NOTCOLOR(piece)) {
         addMove(board, moves, sq, right, rPiece, FALSE, FALSE, NO_CASTLE,
                 index);
     } else if (epMap[right] && right == board->enpassant) {
@@ -197,25 +191,25 @@ static void generatePseudoPawnMoves(BOARD_STATE *board, MOVE *moves, int sq,
 static void generatePseudoKingMoves(BOARD_STATE *board, MOVE *moves, int sq,
                                     int *index) {
     int offsets[8] = {9, 10, 11, 1, -9, -10, -11, -1};
-    generateSimpleMoves(board, moves, sq, index, offsets);
+    generateSimpleMoves(board, moves, sq, index, offsets, 8);
 }
 
 static void generatePseudoKnightMoves(BOARD_STATE *board, MOVE *moves, int sq,
                                       int *index) {
     int offsets[8] = {-21, 21, 19, -19, 8, -8, -12, 12};
-    generateSimpleMoves(board, moves, sq, index, offsets);
+    generateSimpleMoves(board, moves, sq, index, offsets, 8);
 }
 
 static void generatePseudoRookMoves(BOARD_STATE *board, MOVE *moves, int sq,
                                     int *index) {
-    int offsets[8] = {-10, -1, 10, 1};
-    generateSlidingMoves(board, moves, sq, index, offsets);
+    int offsets[4] = {-10, -1, 10, 1};
+    generateSlidingMoves(board, moves, sq, index, offsets, 4);
 }
 
 static void generatePseudoBishopMoves(BOARD_STATE *board, MOVE *moves, int sq,
                                       int *index) {
-    int offsets[8] = {-11, -9, 9, 11};
-    generateSlidingMoves(board, moves, sq, index, offsets);
+    int offsets[4] = {-11, -9, 9, 11};
+    generateSlidingMoves(board, moves, sq, index, offsets, 4);
 }
 
 static void generatePseudoQueenMoves(BOARD_STATE *board, MOVE *moves, int sq,
@@ -236,7 +230,7 @@ static int isAttackedSliding(BOARD_STATE *board, int sq, int *offsets,
             nextSq = nextSq + offsets[i];
             squareContains = getPieceSq120(nextSq, board);
         }
-        if (getColor(squareContains) == enemycolor) {
+        if (COLOR(squareContains) == enemycolor) {
 
             if (squareContains == bQ || squareContains == wQ ||
                 squareContains == wRB || squareContains == bRB) {
@@ -257,7 +251,7 @@ static int isAttackedSimple(BOARD_STATE *board, int sq, int *offsets,
         int nextSq = sq + offsets[i];
         int squareContains = getPieceSq120(nextSq, board);
 
-        if (getColor(squareContains) == enemycolor) {
+        if (COLOR(squareContains) == enemycolor) {
             if (squareContains == wKNP || squareContains == bKNP) {
 
                 return TRUE;
@@ -291,7 +285,7 @@ int isAttacked(BOARD_STATE *board, int sq, int enemycolor) {
 
 static int inCheck(BOARD_STATE *board, int color) {
     return isAttacked(board, board->kings[color],
-                      notColor(board->kings[color]));
+                      !(board->kings[color]));
 }
 
 int isLegalMove(BOARD_STATE *board, MOVE move) {
@@ -309,17 +303,12 @@ int generateMoves(BOARD_STATE *board, MOVE *moves) {
     int index = 0;
     for (int file = FILE_A; file <= FILE_H; file++) {
         for (int rank = RANK_1; rank <= RANK_8; rank++) {
+
             int sq = FR2SQ120(file, rank);
             int piece = board->board[sq];
 
             // only calc white/black moves on white/black's turn
-            if (piece >= wP && piece <= wK && board->turn == BLACK) {
-                continue;
-            } else if (piece >= bP && piece <= bK && board->turn == WHITE) {
-                continue;
-            }
-
-            if (piece == EMPTY) {
+            if (piece != EMPTY && COLOR(piece) != board->turn) {
                 continue;
             } else if (piece == wK || piece == bK) {
                 generatePseudoKingMoves(board, moves, sq, &index);
@@ -341,10 +330,5 @@ int generateMoves(BOARD_STATE *board, MOVE *moves) {
             }
         }
     }
-
     return index;
-
-    // for (int i = 0; i < index; i++) {
-    //     printf("From %d to %d\n", moves[i].startSquare, moves[i].endSquare);
-    // }
 }

@@ -18,30 +18,25 @@ ULL perft_rec(int depth, BOARD_STATE *board) {
     n_moves = generateMoves(board, moves);
 
     for (i = 0; i < n_moves; i++) {
-        // printf("start:\n");
-        // printBoard(board);
-        // printf("\n");
         if (isLegalMove(board, moves[i])) {
 
-            if (VERBOSE) {
-                printf("depth %d:\n", depth);
-                printBoard(board);
-                printf("\n");
-            }
+#if VERBOSE == 1
+            printf("depth %d:\n", depth);
+            printBoard(board);
+            printf("\n");
+#endif
 
             makeMove(board, moves[i]);
 
-            if (VERBOSE) {
-                printf("depth %d:\n", depth);
-                printBoard(board);
-                printf("\n================\n");
-            }
+#if VERBOSE == 1
+            printf("depth %d:\n", depth);
+            printBoard(board);
+            printBitboard(board->pieces[EMPTY]);
+            printf("\n================\n");
+#endif
 
             nodes += perft_rec(depth - 1, board);
 
-            // printf("unmake:\n");
-            // printBoard(board);
-            // printf("\n");
             unmakeMove(board, moves[i]);
         }
     }
@@ -75,4 +70,15 @@ ULL perft(int depth) {
     printf("%lld nodes (%fs)\n", num, time_taken);
 
     return num;
+}
+
+void printBenchmark(int depth) {
+    double times[] = {0,0.000036,0.000352,0.00736,0.1616,4.06,66.97};
+
+    int length = sizeof(times)/sizeof(times[0]);
+    if (depth >= length || depth < 0) {
+        printf("Invalid depth.");
+        return;
+    }
+    printf("Laptop benchmark for depth %d: (%fs)\n",depth,times[depth]);
 }

@@ -31,21 +31,4 @@ int countBits(unsigned long long b) {
     return r;
 }
 
-int notColor(int color) {
-    if (color != BOTH) {
-        return !color;
-    }
-    return BOTH;
-}
-
-// return color of piece
-int getColor(int piece) {
-    if (piece >= wP && piece <= wK) {
-        return WHITE;
-    } else if (piece >= bP && piece <= bK) {
-        return BLACK;
-    }
-    return BOTH;
-}
-
 // TODO: add FEN->board, board->FEN
