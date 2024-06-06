@@ -329,33 +329,49 @@ int isLegalMove(BOARD_STATE *board, MOVE move) {
 int generateMoves(BOARD_STATE *board, MOVE *moves) {
 
     int index = 0;
-    for (int file = FILE_A; file <= FILE_H; file++) {
-        for (int rank = RANK_1; rank <= RANK_8; rank++) {
 
-            int piece = getPieceFR(file, rank, board);
-            int sq = FR2SQ120(file, rank);
+    ULL test = board->pieces[EMPTY];
 
-            // only calc white/black moves on white/black's turn
-            if (piece != EMPTY && COLOR(piece) != board->turn) {
-                continue;
-            } else if (piece == wK || piece == bK) {
-                generatePseudoKingMoves(board, moves, sq, &index);
-            } else if (piece == wN || piece == bN) {
-                // printf("Knight on %c%d\n", file + 'a', rank + 1);
-                generatePseudoKnightMoves(board, moves, sq, &index);
-            } else if (piece == wB || piece == bB) {
-                // printf("Bishop on %c%d\n", file + 'a', rank + 1);
-                generatePseudoBishopMoves(board, moves, sq, &index);
-            } else if (piece == wR || piece == bR) {
-                // printf("Rook on %c%d\n", file + 'a', rank + 1);
-                generatePseudoRookMoves(board, moves, sq, &index);
-            } else if (piece == wQ || piece == bQ) {
-                // printf("Queen on %c%d\n", file + 'a', rank + 1);
-                generatePseudoQueenMoves(board, moves, sq, &index);
-            } else if (piece == wP || piece == bP) {
-                // printf("Queen on %c%d\n", file + 'a', rank + 1);
-                generatePseudoPawnMoves(board, moves, sq, &index);
-            }
+    for (int i = 0; i < 64; i++) {
+
+        // assert((int)(piece != EMPTY)==checkBitboard120(sq,
+        // &board->pieces[EMPTY]));
+        // // printBitboard(test);
+        // // printf("\n");
+        // // printf("%d %d\n",(int)(piece != EMPTY),(int)(test & 1UL));
+        // // printf("\n");
+        // assert((int)(piece != EMPTY)==(test & 1UL));
+
+        int found = (test & 1UL);
+        test >>= 1;
+
+        if (!found) {
+            continue;
+        }
+
+        int sq = SQ64SQ120(i);
+        int piece = getPieceSq120(sq, board);
+
+        // only calc white/black moves on white/black's turn
+        if (COLOR(piece) != board->turn) {
+            continue;
+        } else if (piece == wK || piece == bK) {
+            generatePseudoKingMoves(board, moves, sq, &index);
+        } else if (piece == wN || piece == bN) {
+            // printf("Knight on %c%d\n", file + 'a', rank + 1);
+            generatePseudoKnightMoves(board, moves, sq, &index);
+        } else if (piece == wB || piece == bB) {
+            // printf("Bishop on %c%d\n", file + 'a', rank + 1);
+            generatePseudoBishopMoves(board, moves, sq, &index);
+        } else if (piece == wR || piece == bR) {
+            // printf("Rook on %c%d\n", file + 'a', rank + 1);
+            generatePseudoRookMoves(board, moves, sq, &index);
+        } else if (piece == wQ || piece == bQ) {
+            // printf("Queen on %c%d\n", file + 'a', rank + 1);
+            generatePseudoQueenMoves(board, moves, sq, &index);
+        } else if (piece == wP || piece == bP) {
+            // printf("Queen on %c%d\n", file + 'a', rank + 1);
+            generatePseudoPawnMoves(board, moves, sq, &index);
         }
     }
     return index;
