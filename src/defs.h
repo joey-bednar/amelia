@@ -7,10 +7,13 @@
 #define SQ120F(sq) (((sq) - 21) / (10))
 #define FR2SQ120(f, r) ((21 + (r)) + ((f) * 10))
 #define FR2SQ64(f, r) ((r) + ((f) * 8))
-#define MAX_LEGAL_MOVES 256
+#define SQ120SQ64(sq) (sq120sq64Map[(sq)])
+#define SQ64SQ120(sq) (sq64sq120Map[(sq)])
 
 #define COLOR(p) (colorMap[(p)])
 #define NOTCOLOR(p) (notcolorMap[(p)])
+
+#define MAX_LEGAL_MOVES 256
 
 // clang-format off
 enum { EMPTY, wP, wN, wB, wR, wQ, wK, bP, bN, bB, bR, bQ, bK, OFFBOARD };
@@ -59,6 +62,8 @@ typedef struct {
 } MOVE;
 
 extern int epMap[120];
+extern int sq120sq64Map[120];
+extern int sq64sq120Map[64];
 extern int colorMap[OFFBOARD + 1];
 extern int notcolorMap[OFFBOARD + 1];
 
@@ -67,15 +72,23 @@ extern void initBoard(BOARD_STATE *board);
 extern void clearBoard(BOARD_STATE *board);
 extern void printBoard(BOARD_STATE *board);
 extern void printBoardIndex(BOARD_STATE *board);
+
 extern void setPiece(int piece, int file, int rank, BOARD_STATE *board);
+extern void setPiece120(int piece, int sq, BOARD_STATE *board);
+
 extern int getPieceFR(int file, int rank, BOARD_STATE *board);
 extern int getPieceSq120(int sq, BOARD_STATE *board);
+extern void initSqMap(int *sq120sq64Map, int *sq64sq120Map);
 
 // bitboard.c
 extern void clearBitboard(unsigned long long *bitboard);
 extern void addBitboard(int file, int rank, unsigned long long *bitboard);
 extern void removeBitboard(int file, int rank, unsigned long long *bitboard);
 extern int checkBitboard(int file, int rank, unsigned long long *bitboard);
+
+extern void addBitboard120(int sq, unsigned long long *bitboard);
+extern void removeBitboard120(int sq, unsigned long long *bitboard);
+extern int checkBitboard120(int sq, unsigned long long *bitboard);
 
 // moves.c
 extern int generateMoves(BOARD_STATE *board, MOVE *move);

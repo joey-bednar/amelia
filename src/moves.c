@@ -7,8 +7,8 @@ void makeMove(BOARD_STATE *board, MOVE move) {
 
     // printf("move %d to %d\n",move.startSquare,move.endSquare);
     int piece = getPieceSq120(move.startSquare, board);
-    setPiece(EMPTY, SQ120F(move.startSquare), SQ120R(move.startSquare), board);
-    setPiece(piece, SQ120F(move.endSquare), SQ120R(move.endSquare), board);
+    setPiece120(EMPTY, move.startSquare, board);
+    setPiece120(piece, move.endSquare, board);
 
     int offset[2] = {S, N};
 
@@ -25,11 +25,9 @@ void makeMove(BOARD_STATE *board, MOVE move) {
     // TODO: test
     if (move.epcapture) {
         board->enpassant = OFFBOARD;
-        setPiece(EMPTY, SQ120F(move.endSquare + offset[board->turn]),
-                 SQ120R(move.endSquare + offset[board->turn]), board);
+        setPiece120(EMPTY, move.endSquare + offset[board->turn], board);
     } else if (move.promotion != EMPTY) {
-        setPiece(move.promotion, SQ120F(move.endSquare), SQ120R(move.endSquare),
-                 board);
+        setPiece120(move.promotion, move.endSquare, board);
     }
     board->turn = !(board->turn);
 }
@@ -37,9 +35,9 @@ void makeMove(BOARD_STATE *board, MOVE move) {
 // undo a move on the board
 void unmakeMove(BOARD_STATE *board, MOVE move) {
 
-    int offset = 1;
+    int offset = S;
     if (board->turn == WHITE) {
-        offset = -1;
+        offset = N;
     }
 
     // printf("unmove %d to %d\n",move.endSquare,move.startSquare);
@@ -48,27 +46,22 @@ void unmakeMove(BOARD_STATE *board, MOVE move) {
     // TODO: cleanup
     if (move.epcapture) {
         board->enpassant = move.endSquare;
-        setPiece(move.captured, SQ120F(move.endSquare),
-                 SQ120R(move.endSquare) - offset, board);
-        setPiece(EMPTY, SQ120F(move.endSquare), SQ120R(move.endSquare), board);
-        setPiece(piece, SQ120F(move.startSquare), SQ120R(move.startSquare),
-                 board);
+        setPiece120(move.captured, move.endSquare + offset, board);
+        setPiece120(EMPTY, move.endSquare, board);
+        setPiece120(piece, move.startSquare, board);
         board->turn = !(board->turn);
         return;
     }
 
-    setPiece(move.captured, SQ120F(move.endSquare), SQ120R(move.endSquare),
-             board);
+    setPiece120(move.captured, move.endSquare, board);
     if (move.promotion == EMPTY) {
-        setPiece(piece, SQ120F(move.startSquare), SQ120R(move.startSquare),
-                 board);
+        setPiece120(piece, move.startSquare, board);
     } else {
         int pawn = wP;
         if (COLOR(piece) == BLACK) {
             pawn = bP;
         }
-        setPiece(pawn, SQ120F(move.startSquare), SQ120R(move.startSquare),
-                 board);
+        setPiece120(pawn, move.startSquare, board);
     }
 
     if (move.twopawnmove) {

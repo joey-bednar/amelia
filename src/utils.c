@@ -12,6 +12,7 @@ void printBits(unsigned long long num) {
     }
 }
 
+// TODO: fix bug here
 void printBitboard(unsigned long long bitboard) {
     for (int rank = RANK_8; rank >= RANK_1; rank--) {
         for (int file = FILE_A; file <= FILE_H; file++) {

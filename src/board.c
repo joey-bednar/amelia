@@ -42,6 +42,37 @@ int getPieceFR(int file, int rank, BOARD_STATE *board) {
     return getPieceSq120(sq, board);
 }
 
+void setPiece120(int piece, int sq, BOARD_STATE *board) {
+
+    // // check for valid square/piece
+    // int file = SQ120F(sq);
+    // int rank = SQ120R(sq);
+    // assert(file >= FILE_A && file <= FILE_H);
+    // assert(rank >= RANK_1 && rank <= RANK_8);
+    // assert(piece >= EMPTY && piece <= bK);
+
+    // set piece on board
+    board->board[sq] = piece;
+
+    // remove piece from bitboards
+    for (int i = EMPTY; i <= bK; i++) {
+        removeBitboard120(sq, &board->pieces[i]);
+    }
+
+    // add piece to bitboard
+    if (piece != EMPTY) {
+        addBitboard120(sq, &board->pieces[piece]);
+        addBitboard120(sq, &board->pieces[EMPTY]);
+    }
+
+    // update king placement
+    if (piece == wK) {
+        board->kings[WHITE] = sq;
+    } else if (piece == bK) {
+        board->kings[BLACK] = sq;
+    }
+}
+
 // place piece on given square by updating board/bitboards
 void setPiece(int piece, int file, int rank, BOARD_STATE *board) {
 
@@ -53,7 +84,7 @@ void setPiece(int piece, int file, int rank, BOARD_STATE *board) {
     assert(piece >= EMPTY && piece <= bK);
 
     // set piece on board
-    unsigned long long sq = FR2SQ120(file, rank);
+    int sq = FR2SQ120(file, rank);
     board->board[sq] = piece;
 
     // remove piece from bitboards
@@ -136,6 +167,7 @@ void printBoardIndex(BOARD_STATE *board) {
     }
 }
 
+// array map for possible en passant squares
 void initEnpassantMap(int *map) {
     for (int i = 0; i < 120; i++) {
         map[i] = FALSE;
@@ -147,7 +179,7 @@ void initEnpassantMap(int *map) {
     }
 }
 
-// return color of piece
+// convertion arrays for piece->color, and piece->opposite color
 void initColorMap(int *map, int *notmap) {
     for (int i = EMPTY; i <= OFFBOARD; i++) {
         if (i >= wP && i <= wK) {
@@ -159,6 +191,27 @@ void initColorMap(int *map, int *notmap) {
         } else {
             map[i] = BOTH;
             notmap[i] = BOTH;
+        }
+    }
+}
+
+// conversion array from 120->64
+void initSqMap(int *sq120sq64Map, int *sq64sq120Map) {
+    // junk value for squares not on 64sq board
+    for (int i = 0; i < 120; i++) {
+        sq120sq64Map[i] = 69;
+    }
+
+    for (int i = 0; i < 64; i++) {
+        sq64sq120Map[i] = OFFBOARD;
+    }
+
+    for (int rank = RANK_8; rank >= RANK_1; rank--) {
+        for (int file = FILE_A; file <= FILE_H; file++) {
+            int sq120 = FR2SQ120(file, rank);
+            int sq64 = FR2SQ64(file, rank);
+            sq120sq64Map[sq120] = sq64;
+            sq64sq120Map[sq64] = sq120;
         }
     }
 }
