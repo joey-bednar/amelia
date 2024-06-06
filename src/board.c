@@ -24,6 +24,11 @@ void clearBoard(BOARD_STATE *board) {
     for (int i = 0; i <= bK; i++) {
         board->pieces[i] = 0;
     }
+
+    board->turn = WHITE;
+    board->fiftyMove = 0;
+    board->castle = 0b1111;
+    board->enpassant = OFFBOARD;
 }
 
 // return piece on square given by 120 index

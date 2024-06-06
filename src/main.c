@@ -8,10 +8,6 @@ int notcolorMap[OFFBOARD + 1];
 
 int main() {
     BOARD_STATE board;
-    board.turn = WHITE;
-    board.castle = 0b1111;
-    board.enpassant = OFFBOARD;
-    board.fiftyMove = 0;
 
     // init legal moves array
     MOVE moves[MAX_LEGAL_MOVES];
@@ -36,7 +32,7 @@ int main() {
     //     perft(i);
     // }
 
-    int depth = 6;
+    int depth = 4;
     perft(depth);
     printBenchmark(depth);
 

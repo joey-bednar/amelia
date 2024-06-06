@@ -4,6 +4,7 @@
 #include <time.h>
 
 #define VERBOSE FALSE
+#define POSITION 3
 
 ULL perft_rec(int depth, BOARD_STATE *board) {
     int n_moves, i;
@@ -60,20 +61,54 @@ ULL perft(int depth) {
     }
 
     clearBoard(&board);
+
+#if POSITION == 0
+
     initBoard(&board);
+
+#endif
+
+#if POSITION == 3
+
+    setPiece(wP, FILE_B, RANK_5, &board);
+    setPiece(wP, FILE_E, RANK_2, &board);
+    setPiece(wP, FILE_G, RANK_2, &board);
+    setPiece(wR, FILE_B, RANK_4, &board);
+    setPiece(wK, FILE_A, RANK_5, &board);
+
+    setPiece(bP, FILE_C, RANK_7, &board);
+    setPiece(bP, FILE_D, RANK_6, &board);
+    setPiece(bP, FILE_F, RANK_4, &board);
+    setPiece(bR, FILE_H, RANK_5, &board);
+    setPiece(bK, FILE_H, RANK_4, &board);
+
+#endif
+
+    printBoard(&board);
+
     initEnpassantMap(epMap);
 
     clock_t t = clock();
     ULL num = perft_rec(depth, &board);
     t = clock() - t;
     double time_taken = ((double)t) / CLOCKS_PER_SEC; // in seconds
-    printf("%lld nodes (%fs)\n", num, time_taken);
+    printf("%lld", num);
+
+    ULL correct[] = {1,       20,        400,        8902,       197281,
+                     4865609, 119060324, 3195901860, 84998978956};
+    if (depth < sizeof(correct) / sizeof(correct[0])) {
+        printf("/%lld nodes ", correct[depth]);
+    } else {
+        printf("nodes ");
+    }
+
+    printf(" (%fs)\n", time_taken);
 
     return num;
 }
 
 void printBenchmark(int depth) {
-    double times[] = {0, 0.000036, 0.000352, 0.00736, 0.1616, 4.06, 66.97};
+    double times[] = {0.00002, 0.00003, 0.0005, 0.00736, 0.109, 2.79, 65.34};
 
     int length = sizeof(times) / sizeof(times[0]);
     if (depth >= length || depth < 0) {

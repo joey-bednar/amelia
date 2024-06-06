@@ -69,7 +69,7 @@ void unmakeMove(BOARD_STATE *board, MOVE move) {
 // add a move to the provided moves array
 static void addMove(BOARD_STATE *board, MOVE *moves, int start, int end,
                     int captured, int epcapture, int twopawnmove, int castled,
-                    int *index) {
+                    int promotion, int *index) {
     // printf("Move to sq %d\n", end);
     moves[*index].startSquare = start;
     moves[*index].endSquare = end;
@@ -77,6 +77,7 @@ static void addMove(BOARD_STATE *board, MOVE *moves, int start, int end,
     moves[*index].epcapture = epcapture;
     moves[*index].twopawnmove = twopawnmove;
     moves[*index].castled = castled;
+    moves[*index].promotion = promotion;
     moves[*index].priorep = board->enpassant;
     (*index)++;
 }
@@ -98,7 +99,7 @@ static void generateSimpleMoves(BOARD_STATE *board, MOVE *moves, int sq,
             COLOR(squareContains) == NOTCOLOR(piece)) {
             // printf("Move to sq %d\n", nextSq);
             addMove(board, moves, sq, nextSq, squareContains, FALSE, FALSE,
-                    NO_CASTLE, index);
+                    NO_CASTLE, FALSE, index);
         }
     }
 }
@@ -119,14 +120,14 @@ static void generateSlidingMoves(BOARD_STATE *board, MOVE *moves, int sq,
 
         while (squareContains == EMPTY) {
             addMove(board, moves, sq, nextSq, squareContains, FALSE, FALSE,
-                    NO_CASTLE, index);
+                    NO_CASTLE, FALSE, index);
 
             nextSq = nextSq + offsets[i];
             squareContains = getPieceSq120(nextSq, board);
         }
         if (COLOR(squareContains) == NOTCOLOR(piece)) {
             addMove(board, moves, sq, nextSq, squareContains, FALSE, FALSE,
-                    NO_CASTLE, index);
+                    NO_CASTLE, FALSE, index);
         }
     }
 }
@@ -158,34 +159,37 @@ static void generatePseudoPawnMoves(BOARD_STATE *board, MOVE *moves, int sq,
     static int enpassant = 0;
 
     if (getPieceSq120(one, board) == EMPTY) {
-        addMove(board, moves, sq, one, EMPTY, FALSE, FALSE, NO_CASTLE, index);
+        addMove(board, moves, sq, one, EMPTY, FALSE, FALSE, NO_CASTLE, FALSE,
+                index);
     }
 
     if (COLOR(lPiece) == NOTCOLOR(piece)) {
-        addMove(board, moves, sq, left, lPiece, FALSE, FALSE, NO_CASTLE, index);
+        addMove(board, moves, sq, left, lPiece, FALSE, FALSE, NO_CASTLE, FALSE,
+                index);
     } else if (epMap[left] && left == board->enpassant) {
         enpassant++;
         // TODO: test further
 
         // printf("en passant %d\n", enpassant);
         addMove(board, moves, sq, left, enemypawn, TRUE, FALSE, NO_CASTLE,
-                index);
+                FALSE, index);
     }
 
     if (COLOR(rPiece) == NOTCOLOR(piece)) {
-        addMove(board, moves, sq, right, rPiece, FALSE, FALSE, NO_CASTLE,
+        addMove(board, moves, sq, right, rPiece, FALSE, FALSE, NO_CASTLE, FALSE,
                 index);
     } else if (epMap[right] && right == board->enpassant) {
         enpassant++;
         // printf("en passant %d\n", enpassant);
         // TODO: test further
         addMove(board, moves, sq, right, enemypawn, TRUE, FALSE, NO_CASTLE,
-                index);
+                FALSE, index);
     }
 
     if (SQ120R(sq) == secondrank && getPieceSq120(one, board) == EMPTY &&
         getPieceSq120(two, board) == EMPTY) {
-        addMove(board, moves, sq, two, EMPTY, FALSE, TRUE, NO_CASTLE, index);
+        addMove(board, moves, sq, two, EMPTY, FALSE, TRUE, NO_CASTLE, FALSE,
+                index);
     }
 }
 
@@ -304,8 +308,8 @@ int generateMoves(BOARD_STATE *board, MOVE *moves) {
     for (int file = FILE_A; file <= FILE_H; file++) {
         for (int rank = RANK_1; rank <= RANK_8; rank++) {
 
+            int piece = getPieceFR(file, rank, board);
             int sq = FR2SQ120(file, rank);
-            int piece = board->board[sq];
 
             // only calc white/black moves on white/black's turn
             if (piece != EMPTY && COLOR(piece) != board->turn) {

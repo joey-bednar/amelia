@@ -54,6 +54,7 @@ typedef struct {
     int epcapture;
     int twopawnmove;
     int castled;
+    int promotion;
     int priorep;
 } MOVE;
 
