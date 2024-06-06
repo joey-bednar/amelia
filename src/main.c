@@ -3,8 +3,8 @@
 #include <stdio.h>
 
 int epMap[120];
-int colorMap[OFFBOARD+1];
-int notcolorMap[OFFBOARD+1];
+int colorMap[OFFBOARD + 1];
+int notcolorMap[OFFBOARD + 1];
 
 int main() {
     BOARD_STATE board;
@@ -30,12 +30,12 @@ int main() {
     printBoard(&board);
 
     initEnpassantMap(epMap);
-    initColorMap(colorMap,notcolorMap);
+    initColorMap(colorMap, notcolorMap);
 
     // for (int i=0;i<3;i++) {
     //     perft(i);
     // }
-    
+
     int depth = 6;
     perft(depth);
     printBenchmark(depth);

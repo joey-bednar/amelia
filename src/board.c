@@ -144,7 +144,7 @@ void initEnpassantMap(int *map) {
 
 // return color of piece
 void initColorMap(int *map, int *notmap) {
-    for (int i=EMPTY;i<=OFFBOARD;i++) {
+    for (int i = EMPTY; i <= OFFBOARD; i++) {
         if (i >= wP && i <= wK) {
             map[i] = WHITE;
             notmap[i] = BLACK;
@@ -155,6 +155,5 @@ void initColorMap(int *map, int *notmap) {
             map[i] = BOTH;
             notmap[i] = BOTH;
         }
-
     }
 }

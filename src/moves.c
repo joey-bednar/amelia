@@ -94,7 +94,8 @@ static void generateSimpleMoves(BOARD_STATE *board, MOVE *moves, int sq,
         // if square is empty or can capture enemy piece, it is a pseudolegal
         // move
 
-        if (squareContains == EMPTY || COLOR(squareContains) == NOTCOLOR(piece)) {
+        if (squareContains == EMPTY ||
+            COLOR(squareContains) == NOTCOLOR(piece)) {
             // printf("Move to sq %d\n", nextSq);
             addMove(board, moves, sq, nextSq, squareContains, FALSE, FALSE,
                     NO_CASTLE, index);
@@ -284,8 +285,7 @@ int isAttacked(BOARD_STATE *board, int sq, int enemycolor) {
 }
 
 static int inCheck(BOARD_STATE *board, int color) {
-    return isAttacked(board, board->kings[color],
-                      !(board->kings[color]));
+    return isAttacked(board, board->kings[color], !(board->kings[color]));
 }
 
 int isLegalMove(BOARD_STATE *board, MOVE move) {

@@ -9,7 +9,6 @@
 #define FR2SQ64(f, r) ((r) + ((f) * 8))
 #define MAX_LEGAL_MOVES 256
 
-
 #define COLOR(p) (colorMap[(p)])
 #define NOTCOLOR(p) (notcolorMap[(p)])
 
@@ -59,8 +58,8 @@ typedef struct {
 } MOVE;
 
 extern int epMap[120];
-extern int colorMap[OFFBOARD+1];
-extern int notcolorMap[OFFBOARD+1];
+extern int colorMap[OFFBOARD + 1];
+extern int notcolorMap[OFFBOARD + 1];
 
 // board.c
 extern void initBoard(BOARD_STATE *board);
@@ -89,7 +88,7 @@ extern void printBits(unsigned long long num);
 extern void printBitboard(unsigned long long num);
 extern int countBits(unsigned long long b);
 extern void initEnpassantMap(int *map);
-extern void initColorMap(int *map,int *notmap);
+extern void initColorMap(int *map, int *notmap);
 
 // test.c
 extern void test();
