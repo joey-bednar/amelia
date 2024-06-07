@@ -24,13 +24,12 @@ int main() {
 
     clearBoard(&board);
     // initBoard(&board);
-    setPiece(wK, FILE_H, RANK_8, &board);
+    // setPiece(wK, FILE_H, RANK_8, &board);
     // setPiece(bK, FILE_H, RANK_1, &board);
     // setPiece(wP, FILE_E, RANK_2, &board);
     // setPiece(bP, FILE_D, RANK_4, &board);
-    printBoard(&board);
+    // printBoard(&board);
 
-    clearBoard(&board);
     initBoard(&board);
 
     // ULL bb = board.pieces[EMPTY];
@@ -43,7 +42,7 @@ int main() {
     //     bb &= mask;
     // }
 
-    int depth = 2;
+    int depth = 5;
     perft(depth);
     printBenchmark(depth);
 
