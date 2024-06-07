@@ -165,9 +165,32 @@ static void printAllBoards() {
     }
 }
 
-static void testBitboardRemove() {
+static void testScan() {
     BOARD_STATE board;
+    // init legal moves array
+    MOVE moves[MAX_LEGAL_MOVES];
+    for (int i = 0; i < MAX_LEGAL_MOVES; i++) {
+        moves[i].startSquare = OFFBOARD;
+        moves[i].endSquare = OFFBOARD;
+    }
 
+    for (int rank = RANK_8; rank >= RANK_1; rank--) {
+        for (int file = FILE_A; file <= FILE_H; file++) {
+            int sq = FR2SQ120(file, rank);
+            clearBoard(&board);
+            setPiece120(wK, sq, &board);
+            printBitboard(board.pieces[EMPTY]);
+            ULL bb = board.pieces[EMPTY];
+            int result = SQ64SQ120(bitScanForward(bb));
+            printf("result: %d\n", result);
+            assert(result == sq);
+        }
+        printf("\n");
+    }
+}
+
+static void testScanAll() {
+    BOARD_STATE board;
     // init legal moves array
     MOVE moves[MAX_LEGAL_MOVES];
     for (int i = 0; i < MAX_LEGAL_MOVES; i++) {
@@ -176,9 +199,26 @@ static void testBitboardRemove() {
     }
 
     initBoard(&board);
-    printBitboard(board.pieces[EMPTY]);
-    // removeBitboard(FILE_A, RANK_1, &board.pieces[EMPTY]);
-    printBitboard(board.pieces[EMPTY]);
+
+    ULL bb = board.pieces[EMPTY];
+
+    while (bb != 0) {
+        printf("board:\n");
+        printBitboard(bb);
+        printBits(bb);
+        printf("\n");
+
+        int index64 = bitScanForward(bb);
+        int result = SQ64SQ120(index64);
+        printf("index: %d\n", result);
+
+        printf("mask:\n");
+        ULL mask = (~1ULL << (index64));
+        printBitboard(mask);
+        printBits(mask);
+        printf("\n");
+        bb &= mask;
+    }
 }
 
 void test() {
@@ -187,5 +227,5 @@ void test() {
     // testMoves();
     // testMakeMoves();
     // printAllBoards();
-    testBitboardRemove();
+    testScanAll();
 }

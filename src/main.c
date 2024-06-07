@@ -30,23 +30,20 @@ int main() {
     // setPiece(bP, FILE_D, RANK_4, &board);
     printBoard(&board);
 
-    // ULL test = board.pieces[EMPTY];
-    // printBoard(&board);
-    //
-    // for (int i = 0; i < 64; i++) {
-    //
-    //     if (test & 1UL) {
-    //         int sq = SQ64SQ120(i);
-    //         int piece = getPieceSq120(sq, &board);
-    //         printf("piece %d on %d\n", piece,sq);
-    //
-    //     }
-    //     test >>= 1;
-    //
-    // }
-    // removeBitboard120(98, &board.pieces[EMPTY]);
+    clearBoard(&board);
+    initBoard(&board);
 
-    int depth = 5;
+    // ULL bb = board.pieces[EMPTY];
+
+    // while(bb != 0) {
+    //     int index64 = bitScanForward(bb);
+    //     int sq = SQ64SQ120(index64);
+    //
+    //     ULL mask = (~1ULL << (index64));
+    //     bb &= mask;
+    // }
+
+    int depth = 2;
     perft(depth);
     printBenchmark(depth);
 

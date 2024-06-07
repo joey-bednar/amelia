@@ -5,7 +5,7 @@
 // play a move on the board
 void makeMove(BOARD_STATE *board, MOVE move) {
 
-    // printf("move %d to %d\n",move.startSquare,move.endSquare);
+    // TODO: cleanup
     int piece = getPieceSq120(move.startSquare, board);
     setPiece120(EMPTY, move.startSquare, board);
     setPiece120(piece, move.endSquare, board);
@@ -22,7 +22,6 @@ void makeMove(BOARD_STATE *board, MOVE move) {
         board->enpassant = OFFBOARD;
     }
 
-    // TODO: test
     if (move.epcapture) {
         board->enpassant = OFFBOARD;
         setPiece120(EMPTY, move.endSquare + offset[board->turn], board);
@@ -35,6 +34,7 @@ void makeMove(BOARD_STATE *board, MOVE move) {
 // undo a move on the board
 void unmakeMove(BOARD_STATE *board, MOVE move) {
 
+    // TODO: cleanup
     int offset = S;
     if (board->turn == WHITE) {
         offset = N;
@@ -43,7 +43,6 @@ void unmakeMove(BOARD_STATE *board, MOVE move) {
     // printf("unmove %d to %d\n",move.endSquare,move.startSquare);
     int piece = getPieceSq120(move.endSquare, board);
 
-    // TODO: cleanup
     if (move.epcapture) {
         board->enpassant = move.endSquare;
         setPiece120(move.captured, move.endSquare + offset, board);

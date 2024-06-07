@@ -72,6 +72,7 @@ extern void initBoard(BOARD_STATE *board);
 extern void clearBoard(BOARD_STATE *board);
 extern void printBoard(BOARD_STATE *board);
 extern void printBoardIndex(BOARD_STATE *board);
+extern int bitScanForward(ULL bb);
 
 extern void setPiece(int piece, int file, int rank, BOARD_STATE *board);
 extern void setPiece120(int piece, int sq, BOARD_STATE *board);
