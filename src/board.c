@@ -34,6 +34,8 @@ void clearBoard(BOARD_STATE *board) {
     board->enpassant = OFFBOARD;
 }
 
+// TODO: bitboard vs board is broken
+
 // return piece on square given by 120 index
 int getPieceSq120(int sq, BOARD_STATE *board) {
     return board->board[sq];
@@ -62,10 +64,22 @@ void setPiece120(int piece, int sq, BOARD_STATE *board) {
         removeBitboard120(sq, &board->pieces[i]);
     }
 
+    const int color = COLOR(piece);
+    const int generic = GENERIC(piece);
+
+    for (int i = 0; i < bbLength; i++) {
+        removeBitboard120(sq, &board->bitboard[i]);
+    }
+
+
     // add piece to bitboard
     if (piece != EMPTY) {
         addBitboard120(sq, &board->pieces[piece]);
         addBitboard120(sq, &board->pieces[EMPTY]);
+
+        addBitboard120(sq, &board->bitboard[generic]);
+        addBitboard120(sq, &board->bitboard[color]);
+        addBitboard120(sq, &board->bitboard[bbAny]);
     }
 
     // update king placement
@@ -217,6 +231,43 @@ void initSqMap(int *sq120sq64Map, int *sq64sq120Map) {
             sq64sq120Map[sq64] = sq120;
         }
     }
+}
+
+// convertion arrays for piece->color, and piece->opposite color
+void initPieceGenericMap(int *genericMap, int *toWhite, int *toBlack) {
+    genericMap[EMPTY] = EMPTY;
+    genericMap[OFFBOARD] = OFFBOARD;
+    genericMap[wP] = bbPawn;
+    genericMap[wN] = bbKnight;
+    genericMap[wB] = bbBishop;
+    genericMap[wR] = bbRook;
+    genericMap[wQ] = bbQueen;
+    genericMap[wK] = bbKing;
+
+    genericMap[bP] = bbPawn;
+    genericMap[bN] = bbKnight;
+    genericMap[bB] = bbBishop;
+    genericMap[bR] = bbRook;
+    genericMap[bQ] = bbQueen;
+    genericMap[bK] = bbKing;
+
+    toWhite[EMPTY] = EMPTY;
+    toWhite[OFFBOARD] = OFFBOARD;
+    toWhite[bbPawn] = wP;
+    toWhite[bbKnight] = wN;
+    toWhite[bbBishop] = wB;
+    toWhite[bbRook] = wR;
+    toWhite[bbQueen] = wQ;
+    toWhite[bbKing] = wK;
+
+    toBlack[EMPTY] = EMPTY;
+    toBlack[OFFBOARD] = OFFBOARD;
+    toBlack[bbPawn] = bP;
+    toBlack[bbKnight] = bN;
+    toBlack[bbBishop] = bB;
+    toBlack[bbRook] = bR;
+    toBlack[bbQueen] = bQ;
+    toBlack[bbKing] = bK;
 }
 
 /**

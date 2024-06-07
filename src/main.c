@@ -7,6 +7,9 @@ int sq120sq64Map[120];
 int sq64sq120Map[64];
 int colorMap[OFFBOARD + 1];
 int notcolorMap[OFFBOARD + 1];
+int genericMap[bbLength];
+int toWhite[bbLength];
+int toBlack[bbLength];
 
 int main() {
     BOARD_STATE board;
@@ -21,6 +24,7 @@ int main() {
     initEnpassantMap(epMap);
     initColorMap(colorMap, notcolorMap);
     initSqMap(sq120sq64Map, sq64sq120Map);
+    initPieceGenericMap(genericMap, toWhite, toBlack);
 
     clearBoard(&board);
     // initBoard(&board);

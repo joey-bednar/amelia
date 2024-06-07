@@ -13,11 +13,15 @@
 #define COLOR(p) (colorMap[(p)])
 #define NOTCOLOR(p) (notcolorMap[(p)])
 
+#define GENERIC(p) (genericMap[(p)])
+#define TOWHITE(p) (toWhite[(p)])
+#define TOBLACK(p) (toBlack[(p)])
+
 #define MAX_LEGAL_MOVES 256
 
 // clang-format off
 enum { EMPTY, wP, wN, wB, wR, wQ, wK, bP, bN, bB, bR, bQ, bK, OFFBOARD };
-enum { bbAny, bbWhite, bbBlack, bbPawn, bbKnight, bbBishop, bbRook, bbQueen, bbKing, bbLength };
+enum { bbWhite, bbBlack, bbPawn, bbKnight, bbBishop, bbRook, bbQueen, bbKing, bbAny, bbLength };
 enum { FILE_A, FILE_B, FILE_C, FILE_D, FILE_E, FILE_F, FILE_G, FILE_H, FILE_NONE };
 enum { RANK_1, RANK_2, RANK_3, RANK_4, RANK_5, RANK_6, RANK_7, RANK_8, RANK_NONE };
 enum { WHITE, BLACK, BOTH, NONE };
@@ -69,6 +73,9 @@ extern int sq120sq64Map[120];
 extern int sq64sq120Map[64];
 extern int colorMap[OFFBOARD + 1];
 extern int notcolorMap[OFFBOARD + 1];
+extern int genericMap[bbLength];
+extern int toWhite[bbLength];
+extern int toBlack[bbLength];
 
 // board.c
 extern void initBoard(BOARD_STATE *board);
@@ -83,6 +90,7 @@ extern void setPiece120(int piece, int sq, BOARD_STATE *board);
 extern int getPieceFR(int file, int rank, BOARD_STATE *board);
 extern int getPieceSq120(int sq, BOARD_STATE *board);
 extern void initSqMap(int *sq120sq64Map, int *sq64sq120Map);
+extern void initPieceGenericMap(int *genericMap, int *toWhite, int *toBlack);
 
 // bitboard.c
 extern void clearBitboard(unsigned long long *bitboard);
