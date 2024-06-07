@@ -24,6 +24,9 @@ void clearBoard(BOARD_STATE *board) {
     for (int i = 0; i <= bK; i++) {
         board->pieces[i] = 0;
     }
+    for (int i = 0; i < bbLength; i++) {
+        board->bitboard[i] = 0;
+    }
 
     board->turn = WHITE;
     board->fiftyMove = 0;

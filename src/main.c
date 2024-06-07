@@ -42,7 +42,7 @@ int main() {
     //     bb &= mask;
     // }
 
-    int depth = 5;
+    int depth = 4;
     perft(depth);
     printBenchmark(depth);
 
