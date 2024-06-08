@@ -362,14 +362,18 @@ int generateMoves(BOARD_STATE *board, MOVE *moves) {
     // only calc white/black moves on white/black's turn
     switch (board->turn) {
     case WHITE:
-        bb = board->pieces[wK] | board->pieces[wQ] | board->pieces[wR] |
-             board->pieces[wB] | board->pieces[wN] | board->pieces[wP];
+        bb = board->bitboard[bbWhite] &
+             (board->bitboard[bbKing] | board->bitboard[bbQueen] |
+              board->bitboard[bbRook] | board->bitboard[bbBishop] |
+              board->bitboard[bbKnight] | board->bitboard[bbPawn]);
         test_c = WHITE;
         break;
 
     case BLACK:
-        bb = board->pieces[bK] | board->pieces[bQ] | board->pieces[bR] |
-             board->pieces[bB] | board->pieces[bN] | board->pieces[bP];
+        bb = board->bitboard[bbBlack] &
+             (board->bitboard[bbKing] | board->bitboard[bbQueen] |
+              board->bitboard[bbRook] | board->bitboard[bbBishop] |
+              board->bitboard[bbKnight] | board->bitboard[bbPawn]);
         test_c = BLACK;
         break;
     default:
@@ -380,26 +384,32 @@ int generateMoves(BOARD_STATE *board, MOVE *moves) {
         int index64 = bitScanForward(bb);
         int sq = SQ64SQ120(index64);
 
-        int piece = getPieceSq120(sq, board);
-
-        // TODO: remove assert
-        assert(COLOR(piece) == test_c);
+        int specpiece = getPieceSq120(sq, board);
 
         ULL mask = (~1ULL << (index64));
         bb &= mask;
 
-        if (piece == wP || piece == bP) {
+        int piece = GENERIC(specpiece);
+
+        switch (piece) {
+        case bbPawn:
             generatePseudoPawnMoves(board, moves, sq, &index);
-        } else if (piece == wR || piece == bR) {
+            break;
+        case bbRook:
             generatePseudoRookMoves(board, moves, sq, &index);
-        } else if (piece == wB || piece == bB) {
+            break;
+        case bbBishop:
             generatePseudoBishopMoves(board, moves, sq, &index);
-        } else if (piece == wN || piece == bN) {
+            break;
+        case bbKnight:
             generatePseudoKnightMoves(board, moves, sq, &index);
-        } else if (piece == wK || piece == bK) {
-            generatePseudoKingMoves(board, moves, sq, &index);
-        } else if (piece == wQ || piece == bQ) {
+            break;
+        case bbQueen:
             generatePseudoQueenMoves(board, moves, sq, &index);
+            break;
+        case bbKing:
+            generatePseudoKingMoves(board, moves, sq, &index);
+            break;
         }
     }
 

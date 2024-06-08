@@ -4,18 +4,6 @@
 
 // clears the chess board of any pieces
 void clearBoard(BOARD_STATE *board) {
-    // add offboard squares
-    for (int i = 0; i < 120; i++) {
-        board->board[i] = OFFBOARD;
-    }
-
-    // add onboard squares
-    for (int file = FILE_A; file <= FILE_H; file++) {
-        for (int rank = RANK_1; rank <= RANK_8; rank++) {
-            board->board[FR2SQ120(file, rank)] = EMPTY;
-        }
-    }
-
     // remove kings
     board->kings[WHITE] = OFFBOARD;
     board->kings[BLACK] = OFFBOARD;
@@ -40,12 +28,6 @@ int isEmptySquare(int sq, BOARD_STATE *board) {
 }
 
 // TODO: fix
-int hasPiece120(int sq, BOARD_STATE *board) {
-    ULL bb = board->bitboard[bbWhite] | board->bitboard[bbBlack];
-    return (ONBOARD(sq) && checkBitboard120(sq, &bb));
-}
-
-// TODO: fix
 int hasEmptyEnemyPiece120(int sq, BOARD_STATE *board) {
     ULL set = checkBitboard120(sq, &board->bitboard[board->turn]);
     return (ONBOARD(sq) && (!set));
@@ -65,17 +47,23 @@ int getPieceSq120(int sq, BOARD_STATE *board) {
     }
 
     // ULL set = checkBitboard120(sq, &board->pieces[EMPTY]);
-    ULL setw = checkBitboard120(sq, &board->pieces[bbWhite]);
-    ULL setb = checkBitboard120(sq, &board->pieces[bbBlack]);
+    ULL setw = checkBitboard120(sq, &board->bitboard[bbWhite]);
+    ULL setb = checkBitboard120(sq, &board->bitboard[bbBlack]);
     ULL set = setw | setb;
 
     if (!set) {
         return EMPTY;
     }
 
-    int piece = board->board[sq];
-
-    return board->board[sq];
+    for (int i = bbPawn; i < bbLength; i++) {
+        if (checkBitboard120(sq, &board->bitboard[i])) {
+            if (setw) {
+                return TOWHITE(i);
+            }
+            return TOBLACK(i);
+        }
+    }
+    assert(FALSE);
 }
 
 // return piece on given square by file/rank
@@ -92,9 +80,6 @@ void setPiece120(int piece, int sq, BOARD_STATE *board) {
     // assert(file >= FILE_A && file <= FILE_H);
     // assert(rank >= RANK_1 && rank <= RANK_8);
     // assert(piece >= EMPTY && piece <= bK);
-
-    // set piece on board
-    board->board[sq] = piece;
 
     // remove piece from bitboards
     for (int i = EMPTY; i <= bK; i++) {
@@ -182,7 +167,7 @@ void printBoard(BOARD_STATE *board) {
     for (int rank = RANK_8; rank >= RANK_1; rank--) {
         for (int file = FILE_A; file <= FILE_H; file++) {
             int sq = FR2SQ120(file, rank);
-            int display = piece2char[board->board[sq]];
+            int display = piece2char[getPieceSq120(sq, board)];
             printf("%c ", display);
         }
         printf("\n");

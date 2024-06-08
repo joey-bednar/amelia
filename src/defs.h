@@ -44,8 +44,6 @@ enum { NO_CASTLE, WK_CASTLE, WQ_CASTLE, BK_CASTLE, BQ_CASTLE };
 typedef unsigned long long ULL;
 
 typedef struct {
-    int board[120];
-
     unsigned long long pieces[13];
 
     unsigned long long bitboard[bbLength];
@@ -94,7 +92,6 @@ extern int getPieceSq120(int sq, BOARD_STATE *board);
 extern void initSqMap(int *sq120sq64Map, int *sq64sq120Map, int *onboardMap);
 extern void initPieceGenericMap(int *genericMap, int *toWhite, int *toBlack);
 
-extern int hasPiece120(int sq, BOARD_STATE *board);
 extern int hasEmptyEnemyPiece120(int sq, BOARD_STATE *board);
 extern int hasEnemyPiece120(int sq, BOARD_STATE *board);
 extern int isEmptySquare(int sq, BOARD_STATE *board);
