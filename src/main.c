@@ -1,5 +1,6 @@
 #include "defs.h"
 #include <assert.h>
+#include <inttypes.h>
 #include <stdio.h>
 
 int epMap[120];
@@ -10,6 +11,7 @@ int notcolorMap[OFFBOARD + 1];
 int genericMap[bbLength];
 int toWhite[bbLength];
 int toBlack[bbLength];
+int onboardMap[120];
 
 int main() {
     BOARD_STATE board;
@@ -23,7 +25,7 @@ int main() {
     }
     initEnpassantMap(epMap);
     initColorMap(colorMap, notcolorMap);
-    initSqMap(sq120sq64Map, sq64sq120Map);
+    initSqMap(sq120sq64Map, sq64sq120Map, onboardMap);
     initPieceGenericMap(genericMap, toWhite, toBlack);
 
     clearBoard(&board);
@@ -36,22 +38,15 @@ int main() {
 
     initBoard(&board);
 
-    // ULL bb = board.pieces[EMPTY];
-
-    // while(bb != 0) {
-    //     int index64 = bitScanForward(bb);
-    //     int sq = SQ64SQ120(index64);
-    //
-    //     ULL mask = (~1ULL << (index64));
-    //     bb &= mask;
-    // }
-
-    int depth = 4;
+    printBoardIndex(&board);
+    int depth = 5;
     perft(depth);
     printBenchmark(depth);
 
     // test();
 
+    printBitboardIndex64();
+    printBitboardIndex120();
     printBoardIndex(&board);
 
     return 0;

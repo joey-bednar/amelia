@@ -34,10 +34,47 @@ void clearBoard(BOARD_STATE *board) {
     board->enpassant = OFFBOARD;
 }
 
-// TODO: bitboard vs board is broken
+int isEmptySquare(int sq, BOARD_STATE *board) {
+    ULL bb = board->bitboard[bbWhite] | board->bitboard[bbBlack];
+    return (ONBOARD(sq) && !checkBitboard120(sq, &bb));
+}
+
+// TODO: fix
+int hasPiece120(int sq, BOARD_STATE *board) {
+    ULL bb = board->bitboard[bbWhite] | board->bitboard[bbBlack];
+    return (ONBOARD(sq) && checkBitboard120(sq, &bb));
+}
+
+// TODO: fix
+int hasEmptyEnemyPiece120(int sq, BOARD_STATE *board) {
+    ULL set = checkBitboard120(sq, &board->bitboard[board->turn]);
+    return (ONBOARD(sq) && (!set));
+}
+
+// TODO: fix
+int hasEnemyPiece120(int sq, BOARD_STATE *board) {
+    ULL set = checkBitboard120(sq, &board->bitboard[NOTCOLOR(board->turn)]);
+    return (ONBOARD(sq) && set);
+}
 
 // return piece on square given by 120 index
 int getPieceSq120(int sq, BOARD_STATE *board) {
+
+    if (!ONBOARD(sq)) {
+        return OFFBOARD;
+    }
+
+    // ULL set = checkBitboard120(sq, &board->pieces[EMPTY]);
+    ULL setw = checkBitboard120(sq, &board->pieces[bbWhite]);
+    ULL setb = checkBitboard120(sq, &board->pieces[bbBlack]);
+    ULL set = setw | setb;
+
+    if (!set) {
+        return EMPTY;
+    }
+
+    int piece = board->board[sq];
+
     return board->board[sq];
 }
 
@@ -71,7 +108,6 @@ void setPiece120(int piece, int sq, BOARD_STATE *board) {
         removeBitboard120(sq, &board->bitboard[i]);
     }
 
-
     // add piece to bitboard
     if (piece != EMPTY) {
         addBitboard120(sq, &board->pieces[piece]);
@@ -102,25 +138,8 @@ void setPiece(int piece, int file, int rank, BOARD_STATE *board) {
 
     // set piece on board
     int sq = FR2SQ120(file, rank);
-    board->board[sq] = piece;
 
-    // remove piece from bitboards
-    for (int i = EMPTY; i <= bK; i++) {
-        removeBitboard(file, rank, &board->pieces[i]);
-    }
-
-    // add piece to bitboard
-    if (piece != EMPTY) {
-        addBitboard(file, rank, &board->pieces[piece]);
-        addBitboard(file, rank, &board->pieces[EMPTY]);
-    }
-
-    // update king placement
-    if (piece == wK) {
-        board->kings[WHITE] = sq;
-    } else if (piece == bK) {
-        board->kings[BLACK] = sq;
-    }
+    setPiece120(piece, sq, board);
 }
 
 // sets up the pieces for a new game
@@ -174,6 +193,7 @@ void printBoard(BOARD_STATE *board) {
 
 // prints the pieces on the board
 void printBoardIndex(BOARD_STATE *board) {
+    printf("\n");
     // int to represent a piece in FEN notation
     for (int rank = RANK_8; rank >= RANK_1; rank--) {
         for (int file = FILE_A; file <= FILE_H; file++) {
@@ -182,6 +202,7 @@ void printBoardIndex(BOARD_STATE *board) {
         }
         printf("\n");
     }
+    printf("\n");
 }
 
 // array map for possible en passant squares
@@ -213,7 +234,7 @@ void initColorMap(int *map, int *notmap) {
 }
 
 // conversion array from 120->64
-void initSqMap(int *sq120sq64Map, int *sq64sq120Map) {
+void initSqMap(int *sq120sq64Map, int *sq64sq120Map, int *onboardMap) {
     // junk value for squares not on 64sq board
     for (int i = 0; i < 120; i++) {
         sq120sq64Map[i] = 69;
@@ -223,12 +244,17 @@ void initSqMap(int *sq120sq64Map, int *sq64sq120Map) {
         sq64sq120Map[i] = OFFBOARD;
     }
 
+    for (int i = 0; i < 120; i++) {
+        onboardMap[i] = FALSE;
+    }
+
     for (int rank = RANK_8; rank >= RANK_1; rank--) {
         for (int file = FILE_A; file <= FILE_H; file++) {
             int sq120 = FR2SQ120(file, rank);
             int sq64 = FR2SQ64(file, rank);
             sq120sq64Map[sq120] = sq64;
             sq64sq120Map[sq64] = sq120;
+            onboardMap[sq120] = TRUE;
         }
     }
 }

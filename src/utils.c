@@ -3,26 +3,59 @@
 #include <stdio.h>
 
 void printBits(unsigned long long num) {
-    int bits = sizeof(num) * 8;
-    unsigned long mask = 1UL << (bits - 1);
 
-    for (int i = 0; i < bits; i++) {
-        putchar((num & mask) ? '1' : '0');
-        num <<= 1;
+    printf("\n");
+    for (int i = 0; i < 64; ++i) {
+        if (num >> i & 1ULL)
+            putchar('1');
+        else
+            putchar('0');
     }
+    printf("\n");
 }
 
 // TODO: fix bug here
 void printBitboard(unsigned long long bitboard) {
-    for (int rank = RANK_8; rank >= RANK_1; rank--) {
-        for (int file = FILE_A; file <= FILE_H; file++) {
-            int sq = FR2SQ64(file, rank);
 
-            int val = (checkBitboard(file, rank, &bitboard));
-            printf("%d ", val);
+    printf("\n");
+    for (int i = 0; i < 64; ++i) {
+        if (i % 8 == 0) {
+            printf("\n");
         }
-        printf("\n");
+        if (bitboard >> i & 1ULL)
+            printf("1 ");
+        else
+            printf("0 ");
     }
+    printf("\n");
+}
+
+void printBitboardIndex64() {
+
+    printf("\n");
+    for (int i = 0; i < 64; ++i) {
+        if (i % 8 == 0) {
+            printf("\n");
+        }
+        if (i < 10) {
+            printf(" %d ", i);
+        } else {
+            printf("%d ", i);
+        }
+    }
+    printf("\n");
+}
+
+void printBitboardIndex120() {
+
+    printf("\n");
+    for (int i = 0; i < 64; ++i) {
+        if (i % 8 == 0) {
+            printf("\n");
+        }
+        printf("%d ", SQ64SQ120(i));
+    }
+    printf("\n");
 }
 
 int countBits(unsigned long long b) {

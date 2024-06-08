@@ -99,11 +99,37 @@ static void generateSimpleMoves(BOARD_STATE *board, MOVE *moves, int sq,
         // if square is empty or can capture enemy piece, it is a pseudolegal
         // move
 
+        // printf("%d %d\n",COLOR(squareContains),board->turn);
+        // printBoard(board);
+        // assert(COLOR(squareContains)==board->turn ||
+        // COLOR(squareContains)==BOTH);
+
+        // int enemyorblank = (squareContains == EMPTY ||
+        //     COLOR(squareContains) == NOTCOLOR(piece));
+        // int bbeob = hasEmptyEnemyPiece120(nextSq, board);
+        //
+        // printf("%d %d: sq %d, %d
+        // turn\n",enemyorblank,bbeob,nextSq,board->turn); printBoard(board);
+        // if(enemyorblank) {
+        //     assert(bbeob);
+        // } else {
+        //     assert(!bbeob);
+        // }
+
         if (squareContains == EMPTY ||
             COLOR(squareContains) == NOTCOLOR(piece)) {
-            // printf("Move to sq %d\n", nextSq);
+
+            // TODO: complete and test
+
+            // printBoard(board);
+            // printBitboard(board->bitboard[board->turn]);
+            // assert(hasEmptyEnemyPiece120(nextSq, board));
             addMove(board, moves, sq, nextSq, squareContains, FALSE, FALSE,
                     NO_CASTLE, EMPTY, index);
+        } else {
+            // printBoard(board);
+            // printBitboard(board->bitboard[board->turn]);
+            // assert(!hasEmptyEnemyPiece120(nextSq, board));
         }
     }
 }
@@ -154,7 +180,7 @@ static void addPromotions(BOARD_STATE *board, MOVE *moves, int start, int end,
 static void generatePseudoPawnMoves(BOARD_STATE *board, MOVE *moves, int sq,
                                     int *index) {
     int piece = getPieceSq120(sq, board);
-    int color = COLOR(piece);
+    int color = board->turn;
 
     int secondrank = RANK_2;
     int eighthrank = RANK_8;
@@ -176,7 +202,7 @@ static void generatePseudoPawnMoves(BOARD_STATE *board, MOVE *moves, int sq,
     static int enpassant = 0;
 
     // up one
-    if (getPieceSq120(one, board) == EMPTY) {
+    if (isEmptySquare(one, board)) {
         if (SQ120R(one) == eighthrank) {
             addPromotions(board, moves, sq, one, EMPTY, color, index);
         } else {
@@ -209,8 +235,8 @@ static void generatePseudoPawnMoves(BOARD_STATE *board, MOVE *moves, int sq,
     }
 
     // up two
-    if (SQ120R(sq) == secondrank && getPieceSq120(one, board) == EMPTY &&
-        getPieceSq120(two, board) == EMPTY) {
+    if (SQ120R(sq) == secondrank && isEmptySquare(one, board) &&
+        isEmptySquare(two, board)) {
         addMove(board, moves, sq, two, EMPTY, FALSE, TRUE, NO_CASTLE, EMPTY,
                 index);
     }
@@ -331,16 +357,20 @@ int generateMoves(BOARD_STATE *board, MOVE *moves) {
 
     ULL bb;
 
+    int test_c;
+
     // only calc white/black moves on white/black's turn
     switch (board->turn) {
     case WHITE:
         bb = board->pieces[wK] | board->pieces[wQ] | board->pieces[wR] |
              board->pieces[wB] | board->pieces[wN] | board->pieces[wP];
+        test_c = WHITE;
         break;
 
     case BLACK:
         bb = board->pieces[bK] | board->pieces[bQ] | board->pieces[bR] |
              board->pieces[bB] | board->pieces[bN] | board->pieces[bP];
+        test_c = BLACK;
         break;
     default:
         assert(FALSE);
@@ -351,6 +381,9 @@ int generateMoves(BOARD_STATE *board, MOVE *moves) {
         int sq = SQ64SQ120(index64);
 
         int piece = getPieceSq120(sq, board);
+
+        // TODO: remove assert
+        assert(COLOR(piece) == test_c);
 
         ULL mask = (~1ULL << (index64));
         bb &= mask;
