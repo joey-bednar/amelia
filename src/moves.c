@@ -14,10 +14,10 @@ void makeMove(BOARD_STATE *board, MOVE move) {
 
     if (move.twopawnmove) {
         board->enpassant = move.endSquare + offset[board->turn];
-        if (!epMap[board->enpassant]) {
-            printf("error %d", board->enpassant);
-            assert(FALSE);
-        }
+        // if (!epMap[board->enpassant]) {
+        //     printf("error %d", board->enpassant);
+        //     assert(FALSE);
+        // }
     } else {
         board->enpassant = OFFBOARD;
     }
@@ -125,10 +125,12 @@ static void generateSlidingMoves(BOARD_STATE *board, MOVE *moves, int sq,
             nextSq = nextSq + offsets[i];
         }
 
-        int squareContains = getPieceSq120(nextSq, board);
-        if (COLOR(squareContains) == NOTCOLOR(piece)) {
-            addMove(board, moves, sq, nextSq, squareContains, FALSE, FALSE,
-                    NO_CASTLE, EMPTY, index);
+        if (ONBOARD(nextSq)) {
+            if (CHECKBIT(board->bitboard[(!board->turn)], SQ120SQ64(nextSq))) {
+                int squareContains = getPieceSq120(nextSq, board);
+                addMove(board, moves, sq, nextSq, squareContains, FALSE, FALSE,
+                        NO_CASTLE, EMPTY, index);
+            }
         }
     }
 }
@@ -170,7 +172,7 @@ static void generatePseudoPawnMoves(BOARD_STATE *board, MOVE *moves, int sq,
     int one = sq + offset[0];
     int two = sq + offset[1];
 
-    static int enpassant = 0;
+    // static int enpassant = 0;
 
     // up one
     if (isEmptySquare(one, board)) {
@@ -185,8 +187,13 @@ static void generatePseudoPawnMoves(BOARD_STATE *board, MOVE *moves, int sq,
     // captures and en passant
     for (int i = 2; i <= 3; i++) {
         int enemysquare = sq + offset[i];
-        int enemypiece = getPieceSq120(enemysquare, board);
-        if (COLOR(enemypiece) == NOTCOLOR(piece)) {
+
+        if (!ONBOARD(enemysquare)) {
+            continue;
+        }
+
+        if (CHECKBIT(board->bitboard[(!board->turn)], SQ120SQ64(enemysquare))) {
+            int enemypiece = getPieceSq120(enemysquare, board);
 
             if (SQ120R(enemysquare) == eighthrank) {
                 addPromotions(board, moves, sq, enemysquare, enemypiece, color,
@@ -196,7 +203,8 @@ static void generatePseudoPawnMoves(BOARD_STATE *board, MOVE *moves, int sq,
                         NO_CASTLE, EMPTY, index);
             }
         } else if (epMap[enemysquare] && enemysquare == board->enpassant) {
-            enpassant++;
+            // enpassant++;
+
             // TODO: test further
 
             // printf("en passant %d\n", enpassant);
@@ -245,17 +253,21 @@ static void generatePseudoQueenMoves(BOARD_STATE *board, MOVE *moves, int sq,
 
 static int isAttackedSliding(BOARD_STATE *board, int sq, int *offsets,
                              int sizeoffset, int enemycolor, int wRB, int bRB) {
-    int piece = getPieceSq120(sq, board);
-
     for (int i = 0; i < sizeoffset; i++) {
         int nextSq = sq + offsets[i];
-        int squareContains = getPieceSq120(nextSq, board);
 
-        while (squareContains == EMPTY) {
+        // if (CHECKBIT(board->bitboard[(enemycolor)], SQ120SQ64(nextSq))) {
+
+        while (ONBOARD(nextSq) &&
+               !CHECKBIT(board->bitboard[(bbAny)], SQ120SQ64(nextSq))) {
             nextSq = nextSq + offsets[i];
-            squareContains = getPieceSq120(nextSq, board);
         }
-        if (COLOR(squareContains) == enemycolor) {
+
+        if (ONBOARD(nextSq) &&
+            CHECKBIT(board->bitboard[(enemycolor)], SQ120SQ64(nextSq))) {
+
+            // TODO: add generic check
+            int squareContains = getPieceSq120(nextSq, board);
 
             if (squareContains == bQ || squareContains == wQ ||
                 squareContains == wRB || squareContains == bRB) {
@@ -270,13 +282,14 @@ static int isAttackedSimple(BOARD_STATE *board, int sq, int *offsets,
                             int sizeoffset, int enemycolor, int wKNP,
                             int bKNP) {
 
-    int piece = getPieceSq120(sq, board);
-
     for (int i = 0; i < sizeoffset; i++) {
         int nextSq = sq + offsets[i];
-        int squareContains = getPieceSq120(nextSq, board);
 
-        if (COLOR(squareContains) == enemycolor) {
+        if (ONBOARD(nextSq) &&
+            CHECKBIT(board->bitboard[(enemycolor)], SQ120SQ64(nextSq))) {
+
+            // TODO: add generic check
+            int squareContains = getPieceSq120(nextSq, board);
             if (squareContains == wKNP || squareContains == bKNP) {
 
                 return TRUE;
@@ -288,7 +301,7 @@ static int isAttackedSimple(BOARD_STATE *board, int sq, int *offsets,
 }
 
 int isAttacked(BOARD_STATE *board, int sq, int enemycolor) {
-    assert(enemycolor != BOTH);
+    // assert(enemycolor != BOTH);
 
     int pawn[2] = {-9, 11};
     if (enemycolor == WHITE) {
@@ -345,12 +358,10 @@ int generateMoves(BOARD_STATE *board, MOVE *moves) {
         int index64 = bitScanForward(bb);
         int sq = SQ64SQ120(index64);
 
-        int specpiece = getPieceSq120(sq, board);
+        int piece = getGenericPieceSq120(sq, board);
 
         ULL mask = (~1ULL << (index64));
         bb &= mask;
-
-        int piece = GENERIC(specpiece);
 
         switch (piece) {
         case bbPawn:

@@ -37,6 +37,28 @@ int hasEnemyPiece120(int sq, BOARD_STATE *board) {
     return (ONBOARD(sq) && set);
 }
 
+int getGenericPieceSq120(int sq, BOARD_STATE *board) {
+    int sq64 = SQ120SQ64(sq);
+    for (int i = bbPawn; i < bbAny; i++) {
+        ULL val = CHECKBIT(board->bitboard[i], sq64);
+        if (val) {
+            return i;
+        }
+    }
+}
+
+int getColorSq120(int sq, BOARD_STATE *board) {
+    ULL any = CHECKBIT(board->bitboard[bbAny], SQ120SQ64(sq));
+    if (!any) {
+        return BOTH;
+    }
+    ULL white = CHECKBIT(board->bitboard[bbWhite], SQ120SQ64(sq));
+    if (white) {
+        return WHITE;
+    }
+    return BLACK;
+}
+
 // return piece on square given by 120 index
 int getPieceSq120(int sq, BOARD_STATE *board) {
 
@@ -108,11 +130,11 @@ void setPiece120(int piece, int sq, BOARD_STATE *board) {
 void setPiece(int piece, int file, int rank, BOARD_STATE *board) {
 
     // check for valid square
-    assert(file >= FILE_A && file <= FILE_H);
-    assert(rank >= RANK_1 && rank <= RANK_8);
-
-    // check for valid piece
-    assert(piece >= EMPTY && piece <= bK);
+    // assert(file >= FILE_A && file <= FILE_H);
+    // assert(rank >= RANK_1 && rank <= RANK_8);
+    //
+    // // check for valid piece
+    // assert(piece >= EMPTY && piece <= bK);
 
     // set piece on board
     int sq = FR2SQ120(file, rank);
@@ -290,6 +312,6 @@ int bitScanForward(ULL bb) {
                              19, 30, 9,  24, 13, 18, 8,  12, 7,  6,  5,  63};
 
     const ULL debruijn64 = 0x03f79d71b4cb0a89;
-    assert(bb != 0);
+    // assert(bb != 0);
     return index64[((bb ^ (bb - 1)) * debruijn64) >> 58];
 }

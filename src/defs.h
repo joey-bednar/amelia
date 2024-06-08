@@ -99,6 +99,10 @@ extern int hasEmptyEnemyPiece120(int sq, int color, BOARD_STATE *board);
 extern int hasEnemyPiece120(int sq, BOARD_STATE *board);
 extern int isEmptySquare(int sq, BOARD_STATE *board);
 
+extern int getGenericPieceSq120(int sq, BOARD_STATE *board);
+
+extern int getColorSq120(int sq, BOARD_STATE *board);
+
 // bitboard.c
 // extern void clearBitboard(unsigned long long *bitboard);
 // extern void addBitboard(int file, int rank, unsigned long long *bitboard);
