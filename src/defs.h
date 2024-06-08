@@ -18,6 +18,11 @@
 #define TOBLACK(p) (toBlack[(p)])
 #define ONBOARD(sq) (onboardMap[(sq)])
 
+#define CHECKBIT(bb, sq64) (((bb)) >> ((sq64)) & 1ULL)
+#define CLEARBIT(bb, sq64) ((bb) &= ~(1UL << sq64))
+#define SETBIT(bb, sq64) ((bb) |= (1UL << sq64))
+#define CLEARBITBOARD(bb) ((bb) = 0)
+
 #define MAX_LEGAL_MOVES 256
 
 // clang-format off
@@ -44,8 +49,6 @@ enum { NO_CASTLE, WK_CASTLE, WQ_CASTLE, BK_CASTLE, BQ_CASTLE };
 typedef unsigned long long ULL;
 
 typedef struct {
-    unsigned long long pieces[13];
-
     unsigned long long bitboard[bbLength];
 
     int kings[2];
@@ -92,19 +95,19 @@ extern int getPieceSq120(int sq, BOARD_STATE *board);
 extern void initSqMap(int *sq120sq64Map, int *sq64sq120Map, int *onboardMap);
 extern void initPieceGenericMap(int *genericMap, int *toWhite, int *toBlack);
 
-extern int hasEmptyEnemyPiece120(int sq, BOARD_STATE *board);
+extern int hasEmptyEnemyPiece120(int sq, int color, BOARD_STATE *board);
 extern int hasEnemyPiece120(int sq, BOARD_STATE *board);
 extern int isEmptySquare(int sq, BOARD_STATE *board);
 
 // bitboard.c
-extern void clearBitboard(unsigned long long *bitboard);
-extern void addBitboard(int file, int rank, unsigned long long *bitboard);
-extern void removeBitboard(int file, int rank, unsigned long long *bitboard);
-extern int checkBitboard(int file, int rank, unsigned long long *bitboard);
-
-extern void addBitboard120(int sq, unsigned long long *bitboard);
-extern void removeBitboard120(int sq, unsigned long long *bitboard);
-extern int checkBitboard120(int sq, unsigned long long *bitboard);
+// extern void clearBitboard(unsigned long long *bitboard);
+// extern void addBitboard(int file, int rank, unsigned long long *bitboard);
+// extern void removeBitboard(int file, int rank, unsigned long long *bitboard);
+// extern int checkBitboard(int file, int rank, unsigned long long *bitboard);
+//
+// extern void addBitboard120(int sq, unsigned long long *bitboard);
+// extern void removeBitboard120(int sq, unsigned long long *bitboard);
+// extern int checkBitboard120(int sq, unsigned long long *bitboard);
 
 // moves.c
 extern int generateMoves(BOARD_STATE *board, MOVE *move);

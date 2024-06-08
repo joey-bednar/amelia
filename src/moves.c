@@ -91,45 +91,16 @@ static void addMove(BOARD_STATE *board, MOVE *moves, int start, int end,
 // list. Used for kings and knights
 static void generateSimpleMoves(BOARD_STATE *board, MOVE *moves, int sq,
                                 int *index, int *offsets, int offsetssize) {
-    int piece = getPieceSq120(sq, board);
 
     for (int i = 0; i < offsetssize; i++) {
         int nextSq = sq + offsets[i];
-        int squareContains = getPieceSq120(nextSq, board);
+
         // if square is empty or can capture enemy piece, it is a pseudolegal
         // move
-
-        // printf("%d %d\n",COLOR(squareContains),board->turn);
-        // printBoard(board);
-        // assert(COLOR(squareContains)==board->turn ||
-        // COLOR(squareContains)==BOTH);
-
-        // int enemyorblank = (squareContains == EMPTY ||
-        //     COLOR(squareContains) == NOTCOLOR(piece));
-        // int bbeob = hasEmptyEnemyPiece120(nextSq, board);
-        //
-        // printf("%d %d: sq %d, %d
-        // turn\n",enemyorblank,bbeob,nextSq,board->turn); printBoard(board);
-        // if(enemyorblank) {
-        //     assert(bbeob);
-        // } else {
-        //     assert(!bbeob);
-        // }
-
-        if (squareContains == EMPTY ||
-            COLOR(squareContains) == NOTCOLOR(piece)) {
-
-            // TODO: complete and test
-
-            // printBoard(board);
-            // printBitboard(board->bitboard[board->turn]);
-            // assert(hasEmptyEnemyPiece120(nextSq, board));
+        if (hasEmptyEnemyPiece120(nextSq, board->turn, board)) {
+            int squareContains = getPieceSq120(nextSq, board);
             addMove(board, moves, sq, nextSq, squareContains, FALSE, FALSE,
                     NO_CASTLE, EMPTY, index);
-        } else {
-            // printBoard(board);
-            // printBitboard(board->bitboard[board->turn]);
-            // assert(!hasEmptyEnemyPiece120(nextSq, board));
         }
     }
 }
@@ -143,18 +114,18 @@ static void generateSlidingMoves(BOARD_STATE *board, MOVE *moves, int sq,
 
     for (int i = 0; i < offsetssize; i++) {
         int nextSq = sq + offsets[i];
-        int squareContains = getPieceSq120(nextSq, board);
 
         // if square is empty or can capture enemy piece, it is a pseudolegal
         // move
 
-        while (squareContains == EMPTY) {
-            addMove(board, moves, sq, nextSq, squareContains, FALSE, FALSE,
-                    NO_CASTLE, EMPTY, index);
+        while (isEmptySquare(nextSq, board)) {
+            addMove(board, moves, sq, nextSq, EMPTY, FALSE, FALSE, NO_CASTLE,
+                    EMPTY, index);
 
             nextSq = nextSq + offsets[i];
-            squareContains = getPieceSq120(nextSq, board);
         }
+
+        int squareContains = getPieceSq120(nextSq, board);
         if (COLOR(squareContains) == NOTCOLOR(piece)) {
             addMove(board, moves, sq, nextSq, squareContains, FALSE, FALSE,
                     NO_CASTLE, EMPTY, index);
@@ -357,27 +328,17 @@ int generateMoves(BOARD_STATE *board, MOVE *moves) {
 
     ULL bb;
 
-    int test_c;
-
     // only calc white/black moves on white/black's turn
     switch (board->turn) {
     case WHITE:
-        bb = board->bitboard[bbWhite] &
-             (board->bitboard[bbKing] | board->bitboard[bbQueen] |
-              board->bitboard[bbRook] | board->bitboard[bbBishop] |
-              board->bitboard[bbKnight] | board->bitboard[bbPawn]);
-        test_c = WHITE;
+        bb = board->bitboard[bbWhite];
         break;
 
     case BLACK:
-        bb = board->bitboard[bbBlack] &
-             (board->bitboard[bbKing] | board->bitboard[bbQueen] |
-              board->bitboard[bbRook] | board->bitboard[bbBishop] |
-              board->bitboard[bbKnight] | board->bitboard[bbPawn]);
-        test_c = BLACK;
+        bb = board->bitboard[bbBlack];
         break;
-    default:
-        assert(FALSE);
+        // default:
+        //     assert(FALSE);
     }
 
     while (bb != 0) {

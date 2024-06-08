@@ -8,10 +8,6 @@ void clearBoard(BOARD_STATE *board) {
     board->kings[WHITE] = OFFBOARD;
     board->kings[BLACK] = OFFBOARD;
 
-    // reset bit boards
-    for (int i = 0; i <= bK; i++) {
-        board->pieces[i] = 0;
-    }
     for (int i = 0; i < bbLength; i++) {
         board->bitboard[i] = 0;
     }
@@ -23,19 +19,21 @@ void clearBoard(BOARD_STATE *board) {
 }
 
 int isEmptySquare(int sq, BOARD_STATE *board) {
-    ULL bb = board->bitboard[bbWhite] | board->bitboard[bbBlack];
-    return (ONBOARD(sq) && !checkBitboard120(sq, &bb));
+    ULL bb = (board->bitboard[bbWhite] | board->bitboard[bbBlack]);
+    ULL val = CHECKBIT(bb, SQ120SQ64(sq));
+
+    return (ONBOARD(sq) && !val);
 }
 
 // TODO: fix
-int hasEmptyEnemyPiece120(int sq, BOARD_STATE *board) {
-    ULL set = checkBitboard120(sq, &board->bitboard[board->turn]);
+int hasEmptyEnemyPiece120(int sq, int color, BOARD_STATE *board) {
+    ULL set = CHECKBIT(board->bitboard[color], SQ120SQ64(sq));
     return (ONBOARD(sq) && (!set));
 }
 
 // TODO: fix
 int hasEnemyPiece120(int sq, BOARD_STATE *board) {
-    ULL set = checkBitboard120(sq, &board->bitboard[NOTCOLOR(board->turn)]);
+    ULL set = CHECKBIT(board->bitboard[NOTCOLOR(board->turn)], SQ120SQ64(sq));
     return (ONBOARD(sq) && set);
 }
 
@@ -46,24 +44,25 @@ int getPieceSq120(int sq, BOARD_STATE *board) {
         return OFFBOARD;
     }
 
-    // ULL set = checkBitboard120(sq, &board->pieces[EMPTY]);
-    ULL setw = checkBitboard120(sq, &board->bitboard[bbWhite]);
-    ULL setb = checkBitboard120(sq, &board->bitboard[bbBlack]);
-    ULL set = setw | setb;
+    int sq64 = SQ120SQ64(sq);
+
+    ULL set = CHECKBIT(board->bitboard[bbAny], sq64);
 
     if (!set) {
         return EMPTY;
     }
 
     for (int i = bbPawn; i < bbLength; i++) {
-        if (checkBitboard120(sq, &board->bitboard[i])) {
-            if (setw) {
+
+        ULL val = CHECKBIT(board->bitboard[i], sq64);
+        if (val) {
+            if (CHECKBIT((board->bitboard[bbWhite]), sq64)) {
                 return TOWHITE(i);
             }
             return TOBLACK(i);
         }
     }
-    assert(FALSE);
+    // assert(FALSE);
 }
 
 // return piece on given square by file/rank
@@ -81,26 +80,20 @@ void setPiece120(int piece, int sq, BOARD_STATE *board) {
     // assert(rank >= RANK_1 && rank <= RANK_8);
     // assert(piece >= EMPTY && piece <= bK);
 
-    // remove piece from bitboards
-    for (int i = EMPTY; i <= bK; i++) {
-        removeBitboard120(sq, &board->pieces[i]);
-    }
-
     const int color = COLOR(piece);
     const int generic = GENERIC(piece);
 
+    int sq64 = SQ120SQ64(sq);
+
     for (int i = 0; i < bbLength; i++) {
-        removeBitboard120(sq, &board->bitboard[i]);
+        CLEARBIT(board->bitboard[i], sq64);
     }
 
     // add piece to bitboard
     if (piece != EMPTY) {
-        addBitboard120(sq, &board->pieces[piece]);
-        addBitboard120(sq, &board->pieces[EMPTY]);
-
-        addBitboard120(sq, &board->bitboard[generic]);
-        addBitboard120(sq, &board->bitboard[color]);
-        addBitboard120(sq, &board->bitboard[bbAny]);
+        SETBIT(board->bitboard[generic], sq64);
+        SETBIT(board->bitboard[color], sq64);
+        SETBIT(board->bitboard[bbAny], sq64);
     }
 
     // update king placement

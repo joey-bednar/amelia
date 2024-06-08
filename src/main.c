@@ -39,7 +39,7 @@ int main() {
     initBoard(&board);
 
     printBoardIndex(&board);
-    int depth = 5;
+    int depth = 6;
     perft(depth);
     printBenchmark(depth);
 

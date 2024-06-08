@@ -32,7 +32,8 @@ ULL perft_rec(int depth, BOARD_STATE *board) {
 #if VERBOSE == 1
             printf("depth %d:\n", depth);
             printBoard(board);
-            printBitboard(board->pieces[EMPTY]);
+            printBitboard(board->bitboard[bbWhite]);
+            printBitboard(board->bitboard[bbBlack]);
             printf("\n================\n");
 #endif
 

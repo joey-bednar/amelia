@@ -14,7 +14,6 @@ void printBits(unsigned long long num) {
     printf("\n");
 }
 
-// TODO: fix bug here
 void printBitboard(unsigned long long bitboard) {
 
     printf("\n");
