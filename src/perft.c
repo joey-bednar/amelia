@@ -109,7 +109,8 @@ ULL perft(int depth) {
 }
 
 void printBenchmark(int depth) {
-    double times[] = {0.00002, 0.00003, 0.0005, 0.00736, 0.109, 2.79, 65.34};
+    // double times[] = {0.00002, 0.00003, 0.0005, 0.00736, 0.109, 2.79, 65.34};
+    double times[] = {0.00002, 0.00003, 0.0002, 0.002, 0.05, 1.24, 31.78};
 
     int length = sizeof(times) / sizeof(times[0]);
     if (depth >= length || depth < 0) {

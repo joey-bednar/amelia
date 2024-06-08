@@ -29,17 +29,10 @@ int main() {
     initPieceGenericMap(genericMap, toWhite, toBlack);
 
     clearBoard(&board);
-    // initBoard(&board);
-    // setPiece(wK, FILE_H, RANK_8, &board);
-    // setPiece(bK, FILE_H, RANK_1, &board);
-    // setPiece(wP, FILE_E, RANK_2, &board);
-    // setPiece(bP, FILE_D, RANK_4, &board);
-    // printBoard(&board);
-
     initBoard(&board);
 
     printBoardIndex(&board);
-    int depth = 6;
+    int depth = 5;
     perft(depth);
     printBenchmark(depth);
 
