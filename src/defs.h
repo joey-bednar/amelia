@@ -18,10 +18,11 @@
 #define TOBLACK(p) (toBlack[(p)])
 #define ONBOARD(sq) (onboardMap[(sq)])
 
-#define CHECKBIT(bb, sq64) (((bb)) >> ((sq64)) & 1UL)
-#define CLEARBIT(bb, sq64) ((bb) &= ~(1UL << sq64))
-#define SETBIT(bb, sq64) ((bb) |= (1UL << sq64))
+#define CHECKBIT(bb, sq64) (((bb)) >> ((sq64)) & 1ULL)
+#define CLEARBIT(bb, sq64) ((bb) &= ~(1ULL << sq64))
+#define SETBIT(bb, sq64) ((bb) |= (1ULL << sq64))
 #define CLEARBITBOARD(bb) ((bb) = 0)
+#define KNIGHTBB(sq64) (knightJumps[(sq64)])
 
 #define MAX_LEGAL_MOVES 256
 
@@ -60,6 +61,7 @@ typedef struct {
 } BOARD_STATE;
 
 typedef struct {
+    int piece;
     int startSquare;
     int endSquare;
     int captured;
@@ -80,12 +82,20 @@ extern int genericMap[bbLength];
 extern int toWhite[bbLength];
 extern int toBlack[bbLength];
 extern int onboardMap[120];
+extern ULL knightJumps[64];
 
-// board.c
+// init.c
 extern void initBoard(BOARD_STATE *board);
 extern void clearBoard(BOARD_STATE *board);
+extern void initSqMap(int *sq120sq64Map, int *sq64sq120Map, int *onboardMap);
+extern void initPieceGenericMap(int *genericMap, int *toWhite, int *toBlack);
+extern void initEnpassantMap(int *map);
+extern void initColorMap(int *map, int *notmap);
+extern void initKnightJumps(ULL *knightJumps);
+
+// board.c
 extern void printBoard(BOARD_STATE *board);
-extern void printBoardIndex(BOARD_STATE *board);
+extern void printBoardIndex();
 extern int bitScanForward(ULL bb);
 
 extern void setPiece(int piece, int file, int rank, BOARD_STATE *board);
@@ -93,8 +103,6 @@ extern void setPiece120(int piece, int sq, BOARD_STATE *board);
 
 extern int getPieceFR(int file, int rank, BOARD_STATE *board);
 extern int getPieceSq120(int sq, BOARD_STATE *board);
-extern void initSqMap(int *sq120sq64Map, int *sq64sq120Map, int *onboardMap);
-extern void initPieceGenericMap(int *genericMap, int *toWhite, int *toBlack);
 
 extern int hasEmptyEnemyPiece120(int sq, int color, BOARD_STATE *board);
 extern int hasEnemyPiece120(int sq, BOARD_STATE *board);
@@ -127,8 +135,6 @@ extern void printBitboard(unsigned long long num);
 extern void printBitboardIndex64();
 extern void printBitboardIndex120();
 extern int countBits(unsigned long long b);
-extern void initEnpassantMap(int *map);
-extern void initColorMap(int *map, int *notmap);
 
 // test.c
 extern void test();

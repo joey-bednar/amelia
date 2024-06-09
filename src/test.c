@@ -2,90 +2,6 @@
 #include <assert.h>
 #include <stdio.h>
 
-static void testMoves() {
-    BOARD_STATE board;
-
-    // init legal moves array
-    MOVE moves[MAX_LEGAL_MOVES];
-    for (int i = 0; i < MAX_LEGAL_MOVES; i++) {
-        moves[i].startSquare = OFFBOARD;
-        moves[i].endSquare = OFFBOARD;
-    }
-
-    clearBoard(&board);
-    initBoard(&board);
-    setPiece(wN, FILE_A, RANK_3, &board);
-    setPiece(EMPTY, FILE_B, RANK_1, &board);
-    printBoard(&board);
-
-    generateMoves(&board, moves);
-
-    printBoardIndex(&board);
-}
-
-static void testMakeMoves() {
-    BOARD_STATE board;
-
-    // init legal moves array
-    MOVE moves[MAX_LEGAL_MOVES];
-    for (int i = 0; i < MAX_LEGAL_MOVES; i++) {
-        moves[i].startSquare = OFFBOARD;
-        moves[i].endSquare = OFFBOARD;
-    }
-
-    clearBoard(&board);
-    initBoard(&board);
-    setPiece(wN, FILE_A, RANK_3, &board);
-    setPiece(EMPTY, FILE_B, RANK_1, &board);
-    generateMoves(&board, moves);
-
-    printf("Root:\n");
-    printBoard(&board);
-    printf("\n");
-
-    int i = 0;
-    while (moves[i].startSquare != OFFBOARD) {
-        printf("End:\n");
-        makeMove(&board, moves[i]);
-        printBoard(&board);
-        printf("\n====================\n");
-        printf("Restart:\n");
-        unmakeMove(&board, moves[i]);
-        printBoard(&board);
-        printf("\n");
-        i++;
-    }
-
-    for (int i = 0; i < MAX_LEGAL_MOVES; i++) {
-        moves[i].startSquare = OFFBOARD;
-        moves[i].endSquare = OFFBOARD;
-    }
-
-    clearBoard(&board);
-    initBoard(&board);
-    board.turn = BLACK;
-    generateMoves(&board, moves);
-
-    printf("Root:\n");
-    printBoard(&board);
-    printf("\n");
-
-    i = 0;
-    while (moves[i].startSquare != OFFBOARD) {
-        printf("End:\n");
-        makeMove(&board, moves[i]);
-        printBoard(&board);
-        printf("\n====================\n");
-        printf("Restart:\n");
-        unmakeMove(&board, moves[i]);
-        printBoard(&board);
-        printf("\n");
-        i++;
-    }
-
-    printBoardIndex(&board);
-}
-
 static void printAllBoards() {
     BOARD_STATE board;
 
@@ -181,10 +97,5 @@ static void testScanAll() {
 }
 
 void test() {
-    // testBitboardIndex();
-    // testBitboards();
-    // testMoves();
-    // testMakeMoves();
-    // printAllBoards();
     testScanAll();
 }

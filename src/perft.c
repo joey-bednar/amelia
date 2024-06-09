@@ -4,7 +4,7 @@
 #include <time.h>
 
 #define VERBOSE FALSE
-#define POSITION 0
+#define POSITION 3
 
 ULL perft_rec(int depth, BOARD_STATE *board) {
     int n_moves, i;
@@ -57,14 +57,6 @@ ULL perft(int depth) {
 
     board.enpassant = OFFBOARD;
     board.fiftyMove = 0;
-
-    // init legal moves array
-    MOVE moves[MAX_LEGAL_MOVES];
-    for (int i = 0; i < MAX_LEGAL_MOVES; i++) {
-        moves[i].startSquare = OFFBOARD;
-        moves[i].endSquare = OFFBOARD;
-        moves[i].captured = OFFBOARD;
-    }
 
     clearBoard(&board);
 
@@ -132,16 +124,23 @@ ULL perft(int depth) {
 
     printBoard(&board);
 
-    initEnpassantMap(epMap);
-
     clock_t t = clock();
     ULL num = perft_rec(depth, &board);
     t = clock() - t;
     double time_taken = ((double)t) / CLOCKS_PER_SEC; // in seconds
     printf("%lld", num);
 
+    // position 0
     ULL correct[] = {1,       20,        400,        8902,       197281,
                      4865609, 119060324, 3195901860, 84998978956};
+    // position 2
+    // ULL correct[] = {48,       2039,        97862,        4085603, 193690690,
+    //                  8031647685};
+
+    // position 3
+    // ULL correct[] = {14,       191,        2812,        43238,       674624,
+    //                  11030083, 178633661, 3009794393};
+
     if (depth < sizeof(correct) / sizeof(correct[0])) {
         printf("/%lld nodes ", correct[depth]);
     } else {

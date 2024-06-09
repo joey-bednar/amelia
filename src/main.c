@@ -11,27 +11,22 @@ int genericMap[bbLength];
 int toWhite[bbLength];
 int toBlack[bbLength];
 int onboardMap[120];
+ULL knightJumps[64];
 
 int main() {
     BOARD_STATE board;
 
-    // init legal moves array
-    MOVE moves[MAX_LEGAL_MOVES];
-    for (int i = 0; i < MAX_LEGAL_MOVES; i++) {
-        moves[i].startSquare = OFFBOARD;
-        moves[i].endSquare = OFFBOARD;
-        moves[i].captured = OFFBOARD;
-    }
     initEnpassantMap(epMap);
     initColorMap(colorMap, notcolorMap);
     initSqMap(sq120sq64Map, sq64sq120Map, onboardMap);
     initPieceGenericMap(genericMap, toWhite, toBlack);
+    initKnightJumps(knightJumps);
 
     clearBoard(&board);
     initBoard(&board);
 
-    printBoardIndex(&board);
-    int depth = 7;
+    printBoardIndex();
+    int depth = 5;
     perft(depth);
     printBenchmark(depth);
 
@@ -47,7 +42,7 @@ int main() {
 
     printBitboardIndex64();
     printBitboardIndex120();
-    printBoardIndex(&board);
+    printBoardIndex();
 
     return 0;
 }

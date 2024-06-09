@@ -5,36 +5,38 @@
 // play a move on the board
 void makeMove(BOARD_STATE *board, MOVE move) {
 
-    // if (move.castled != NO_CASTLE) {
-    //     printf("\n========================\n");
-    //     printBoard(board);
-    // }
-
-    // TODO: implement castling
-    if (move.castled == WK_CASTLE) {
+    switch (move.castled) {
+    case NO_CASTLE:
+        break;
+    case WK_CASTLE:
         setPiece120(wR, F1, board);
         setPiece120(EMPTY, H1, board);
         CLEARBIT(board->castle, WK_CASTLE);
         CLEARBIT(board->castle, WQ_CASTLE);
-    } else if (move.castled == WQ_CASTLE) {
+        break;
+    case WQ_CASTLE:
         setPiece120(wR, D1, board);
         setPiece120(EMPTY, A1, board);
         CLEARBIT(board->castle, WK_CASTLE);
         CLEARBIT(board->castle, WQ_CASTLE);
-    } else if (move.castled == BK_CASTLE) {
+        break;
+    case BK_CASTLE:
         setPiece120(bR, F8, board);
         setPiece120(EMPTY, H8, board);
         CLEARBIT(board->castle, BK_CASTLE);
         CLEARBIT(board->castle, BQ_CASTLE);
-    } else if (move.castled == BQ_CASTLE) {
+        break;
+    case BQ_CASTLE:
         setPiece120(bR, D8, board);
         setPiece120(EMPTY, A8, board);
         CLEARBIT(board->castle, BK_CASTLE);
         CLEARBIT(board->castle, BQ_CASTLE);
+        break;
     }
 
     // TODO: cleanup
     int piece = getPieceSq120(move.startSquare, board);
+
     setPiece120(EMPTY, move.startSquare, board);
     setPiece120(piece, move.endSquare, board);
 
@@ -58,10 +60,6 @@ void makeMove(BOARD_STATE *board, MOVE move) {
 
     if (move.twopawnmove) {
         board->enpassant = move.endSquare + offset[board->turn];
-        // if (!epMap[board->enpassant]) {
-        //     printf("error %d", board->enpassant);
-        //     assert(FALSE);
-        // }
     } else {
         board->enpassant = OFFBOARD;
     }
@@ -73,16 +71,11 @@ void makeMove(BOARD_STATE *board, MOVE move) {
         setPiece120(move.promotion, move.endSquare, board);
     }
     board->turn = !(board->turn);
-
-    // if (move.castled != NO_CASTLE) {
-    //     printBoard(board);
-    // }
 }
 
 // undo a move on the board
 void unmakeMove(BOARD_STATE *board, MOVE move) {
 
-    // TODO: implement castling
     if (move.castled == WK_CASTLE) {
         setPiece120(EMPTY, F1, board);
         setPiece120(wR, H1, board);
@@ -104,7 +97,6 @@ void unmakeMove(BOARD_STATE *board, MOVE move) {
         offset = N;
     }
 
-    // printf("unmove %d to %d\n",move.endSquare,move.startSquare);
     int piece = getPieceSq120(move.endSquare, board);
 
     if (move.epcapture) {
@@ -138,7 +130,7 @@ void unmakeMove(BOARD_STATE *board, MOVE move) {
 static void addMove(BOARD_STATE *board, MOVE *moves, int start, int end,
                     int captured, int epcapture, int twopawnmove, int castled,
                     int promotion, int *index) {
-    // printf("Move to sq %d\n", end);
+    // moves[*index].piece = piece;
     moves[*index].startSquare = start;
     moves[*index].endSquare = end;
     moves[*index].captured = captured;
@@ -197,13 +189,21 @@ static void generateSlidingMoves(BOARD_STATE *board, MOVE *moves, int sq,
     }
 }
 
-static void generateCastleMoves(BOARD_STATE *board, MOVE *moves, int sq,
-                                int *index) {
-    // TODO: can't castle while in check
-    // TODO: can't castle into check
-    // TODO: can't castle through check
-    // TODO: king can't move back to starting square
-    // TODO: rooks can't move back to starting square
+static int isAttackedKnight(BOARD_STATE *board, int sq, int enemycolor) {
+    if (!ONBOARD(sq)) {
+        return FALSE;
+    }
+
+    int sq64 = SQ120SQ64(sq);
+    ULL bb = (KNIGHTBB(sq64) & board->bitboard[bbKnight] &
+              board->bitboard[enemycolor]);
+    if (bb == 0) {
+        return FALSE;
+    }
+    return TRUE;
+}
+
+static void generateCastleMoves(BOARD_STATE *board, MOVE *moves, int *index) {
 
     static int castles = 0;
 
@@ -240,8 +240,6 @@ static void generateCastleMoves(BOARD_STATE *board, MOVE *moves, int sq,
                 addMove(board, moves, FR2SQ120(FILE_E, rank),
                         FR2SQ120(FILE_G, rank), EMPTY, FALSE, FALSE, kingside,
                         EMPTY, index);
-                // castles++;
-                // printf("K castle %d\n", castles);
             }
         }
         if (CHECKBIT(board->castle, queenside) &&
@@ -260,15 +258,9 @@ static void generateCastleMoves(BOARD_STATE *board, MOVE *moves, int sq,
                 addMove(board, moves, FR2SQ120(FILE_E, rank),
                         FR2SQ120(FILE_C, rank), EMPTY, FALSE, FALSE, queenside,
                         EMPTY, index);
-                // castles++;
-                // printf("Q castle %d\n", castles);
             }
         }
     }
-
-    // if (isAttacked(board, sq, !board->turn)) {
-    //     return;
-    // }
 }
 
 static void addPromotions(BOARD_STATE *board, MOVE *moves, int start, int end,
@@ -307,8 +299,6 @@ static void generatePseudoPawnMoves(BOARD_STATE *board, MOVE *moves, int sq,
     int one = sq + offset[0];
     int two = sq + offset[1];
 
-    // static int enpassant = 0;
-
     // up one
     if (isEmptySquare(one, board)) {
         if (SQ120R(one) == eighthrank) {
@@ -338,11 +328,7 @@ static void generatePseudoPawnMoves(BOARD_STATE *board, MOVE *moves, int sq,
                         NO_CASTLE, EMPTY, index);
             }
         } else if (epMap[enemysquare] && enemysquare == board->enpassant) {
-            // enpassant++;
 
-            // TODO: test further
-
-            // printf("en passant %d\n", enpassant);
             addMove(board, moves, sq, enemysquare, enemypawn, TRUE, FALSE,
                     NO_CASTLE, EMPTY, index);
         }
@@ -364,8 +350,23 @@ static void generatePseudoKingMoves(BOARD_STATE *board, MOVE *moves, int sq,
 
 static void generatePseudoKnightMoves(BOARD_STATE *board, MOVE *moves, int sq,
                                       int *index) {
-    int offsets[8] = {-21, 21, 19, -19, 8, -8, -12, 12};
-    generateSimpleMoves(board, moves, sq, index, offsets, 8);
+    // int offsets[8] = {-21, 21, 19, -19, 8, -8, -12, 12};
+    // generateSimpleMoves(board, moves, sq, index, offsets, 8);
+
+    int sq64 = SQ120SQ64(sq);
+    ULL bb = ~board->bitboard[board->turn] & KNIGHTBB(sq64);
+
+    while (bb != 0) {
+        int nextSq64 = bitScanForward(bb);
+        int nextSq120 = SQ64SQ120(nextSq64);
+
+        int squareContains = getPieceSq120(nextSq120, board);
+        addMove(board, moves, sq, nextSq120, squareContains, FALSE, FALSE,
+                NO_CASTLE, EMPTY, index);
+
+        ULL mask = (~1ULL << (nextSq64));
+        bb &= mask;
+    }
 }
 
 static void generatePseudoRookMoves(BOARD_STATE *board, MOVE *moves, int sq,
@@ -428,7 +429,6 @@ static int isAttackedSimple(BOARD_STATE *board, int sq, int *offsets,
 }
 
 int isAttacked(BOARD_STATE *board, int sq, int enemycolor) {
-    // assert(enemycolor != BOTH);
 
     int pawn[2] = {-9, 11};
     if (enemycolor == WHITE) {
@@ -437,19 +437,16 @@ int isAttacked(BOARD_STATE *board, int sq, int enemycolor) {
     }
 
     int king[8] = {9, 10, 11, 1, -9, -10, -11, -1};
-    int knight[8] = {-21, 21, 19, -19, 8, -8, -12, 12};
+    // int knight[8] = {-21, 21, 19, -19, 8, -8, -12, 12};
     int rook[4] = {-10, -1, 10, 1};
     int bishop[4] = {-11, -9, 9, 11};
 
     return isAttackedSimple(board, sq, king, 8, enemycolor, bbKing) ||
-           isAttackedSimple(board, sq, knight, 8, enemycolor, bbKnight) ||
+           // isAttackedSimple(board, sq, knight, 8, enemycolor, bbKnight) ||
+           isAttackedKnight(board, sq, enemycolor) ||
            isAttackedSimple(board, sq, pawn, 2, enemycolor, bbPawn) ||
            isAttackedSliding(board, sq, rook, 4, enemycolor, bbRook) ||
            isAttackedSliding(board, sq, bishop, 4, enemycolor, bbBishop);
-}
-
-static int inCheck(BOARD_STATE *board, int color) {
-    return isAttacked(board, board->kings[color], !(board->kings[color]));
 }
 
 int isLegalMove(BOARD_STATE *board, MOVE move) {
@@ -466,20 +463,8 @@ int generateMoves(BOARD_STATE *board, MOVE *moves) {
 
     int index = 0;
 
-    ULL bb;
-
     // only calc white/black moves on white/black's turn
-    switch (board->turn) {
-    case WHITE:
-        bb = board->bitboard[bbWhite];
-        break;
-
-    case BLACK:
-        bb = board->bitboard[bbBlack];
-        break;
-        // default:
-        //     assert(FALSE);
-    }
+    ULL bb = board->bitboard[board->turn];
 
     while (bb != 0) {
         int index64 = bitScanForward(bb);
@@ -512,7 +497,7 @@ int generateMoves(BOARD_STATE *board, MOVE *moves) {
         }
     }
 
-    generateCastleMoves(board, moves, 0, &index);
+    generateCastleMoves(board, moves, &index);
 
     return index;
 }
