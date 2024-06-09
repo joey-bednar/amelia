@@ -26,16 +26,52 @@ int main() {
     clearBoard(&board);
     initBoard(&board);
 
-    printBoardIndex();
-    int depth = 5;
-    perft(depth);
-    printBenchmark(depth);
+    // printBoardIndex();
+    // int depth = 5;
+    // perft(depth);
+    // printBenchmark(depth);
 
+    // clearBoard(&board);
+    // setPiece120(wK, E1, &board);
+    // setPiece120(bK, E8, &board);
+    // setPiece120(bR, A8, &board);
+    // setPiece120(wQ, A5, &board);
+
+    int startSq = 0;
+    int endSq = 0;
+    int max = -10000;
+    int depth = 5;
+
+    MOVE moves[MAX_LEGAL_MOVES];
+    int n_moves = generateMoves(&board, moves);
+
+    for (int i = 0; i < n_moves; i++) {
+        if (isLegalMove(&board, moves[i])) {
+            printf("%d to %d\n", moves[i].startSquare, moves[i].endSquare);
+            makeMove(&board, moves[i]);
+            printBoard(&board);
+            int score = -negaMax(&board, depth);
+            printf("negamax: %d; move: %d to %d\n", max, startSq, endSq);
+
+            unmakeMove(&board, moves[i]);
+            if (score > max) {
+                max = score;
+                startSq = moves[i].startSquare;
+                endSq = moves[i].endSquare;
+            }
+        }
+    }
+
+    printBoard(&board);
+
+    printf("final negamax: %d; move: %d to %d\n", max, startSq, endSq);
+    int e = eval(&board);
+    printf("eval: %d\n", e);
     // test();
 
     // printBitboardIndex64();
     // printBitboardIndex120();
-    // printBoardIndex();
+    printBoardIndex();
 
     return 0;
 }

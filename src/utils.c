@@ -90,7 +90,7 @@ void printBits(unsigned long long num) {
     printf("\n");
 }
 
-void printBitboard(unsigned long long bitboard) {
+void printBitboard(ULL bitboard) {
 
     printf("\n");
     for (int i = 0; i < 64; ++i) {
@@ -133,7 +133,7 @@ void printBitboardIndex120() {
     printf("\n");
 }
 
-int countBits(unsigned long long b) {
+int countBits(ULL b) {
     int r;
     for (r = 0; b; r++, b &= b - 1)
         ;

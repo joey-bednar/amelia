@@ -108,18 +108,7 @@ extern int hasEnemyPiece120(int sq, BOARD_STATE *board);
 extern int isEmptySquare(int sq, BOARD_STATE *board);
 
 extern int getGenericPieceSq120(int sq, BOARD_STATE *board);
-
 extern int getColorSq120(int sq, BOARD_STATE *board);
-
-// bitboard.c
-// extern void clearBitboard(unsigned long long *bitboard);
-// extern void addBitboard(int file, int rank, unsigned long long *bitboard);
-// extern void removeBitboard(int file, int rank, unsigned long long *bitboard);
-// extern int checkBitboard(int file, int rank, unsigned long long *bitboard);
-//
-// extern void addBitboard120(int sq, unsigned long long *bitboard);
-// extern void removeBitboard120(int sq, unsigned long long *bitboard);
-// extern int checkBitboard120(int sq, unsigned long long *bitboard);
 
 // moves.c
 extern int generateMoves(BOARD_STATE *board, MOVE *move);
@@ -145,5 +134,9 @@ extern void test();
 extern ULL perft(int depth);
 extern ULL perft_rec(int depth, BOARD_STATE *board);
 extern void printBenchmark(int depth);
+
+// eval.c
+extern int eval(BOARD_STATE *board);
+extern int negaMax(BOARD_STATE *board, int depth);
 
 #endif
