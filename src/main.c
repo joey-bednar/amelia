@@ -1,6 +1,5 @@
 #include "defs.h"
 #include <assert.h>
-#include <inttypes.h>
 #include <stdio.h>
 
 int epMap[120];
@@ -32,7 +31,7 @@ int main() {
     initBoard(&board);
 
     printBoardIndex(&board);
-    int depth = 5;
+    int depth = 6;
     perft(depth);
     printBenchmark(depth);
 

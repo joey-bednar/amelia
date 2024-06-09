@@ -110,8 +110,6 @@ static void generateSimpleMoves(BOARD_STATE *board, MOVE *moves, int sq,
 static void generateSlidingMoves(BOARD_STATE *board, MOVE *moves, int sq,
                                  int *index, int *offsets, int offsetssize) {
 
-    int piece = getPieceSq120(sq, board);
-
     for (int i = 0; i < offsetssize; i++) {
         int nextSq = sq + offsets[i];
 
@@ -125,12 +123,11 @@ static void generateSlidingMoves(BOARD_STATE *board, MOVE *moves, int sq,
             nextSq = nextSq + offsets[i];
         }
 
-        if (ONBOARD(nextSq)) {
-            if (CHECKBIT(board->bitboard[(!board->turn)], SQ120SQ64(nextSq))) {
-                int squareContains = getPieceSq120(nextSq, board);
-                addMove(board, moves, sq, nextSq, squareContains, FALSE, FALSE,
-                        NO_CASTLE, EMPTY, index);
-            }
+        if (ONBOARD(nextSq) &&
+            CHECKBIT(board->bitboard[(!board->turn)], SQ120SQ64(nextSq))) {
+            int squareContains = getPieceSq120(nextSq, board);
+            addMove(board, moves, sq, nextSq, squareContains, FALSE, FALSE,
+                    NO_CASTLE, EMPTY, index);
         }
     }
 }
@@ -152,7 +149,6 @@ static void addPromotions(BOARD_STATE *board, MOVE *moves, int start, int end,
 
 static void generatePseudoPawnMoves(BOARD_STATE *board, MOVE *moves, int sq,
                                     int *index) {
-    int piece = getPieceSq120(sq, board);
     int color = board->turn;
 
     int secondrank = RANK_2;
@@ -252,25 +248,21 @@ static void generatePseudoQueenMoves(BOARD_STATE *board, MOVE *moves, int sq,
 }
 
 static int isAttackedSliding(BOARD_STATE *board, int sq, int *offsets,
-                             int sizeoffset, int enemycolor, int wRB, int bRB) {
+                             int sizeoffset, int enemycolor, int RB) {
     for (int i = 0; i < sizeoffset; i++) {
         int nextSq = sq + offsets[i];
-
-        // if (CHECKBIT(board->bitboard[(enemycolor)], SQ120SQ64(nextSq))) {
 
         while (ONBOARD(nextSq) &&
                !CHECKBIT(board->bitboard[(bbAny)], SQ120SQ64(nextSq))) {
             nextSq = nextSq + offsets[i];
         }
 
-        if (ONBOARD(nextSq) &&
-            CHECKBIT(board->bitboard[(enemycolor)], SQ120SQ64(nextSq))) {
+        if (ONBOARD(nextSq)) {
 
-            // TODO: add generic check
-            int squareContains = getPieceSq120(nextSq, board);
+            ULL bb = (board->bitboard[bbQueen] | board->bitboard[RB]) &
+                     board->bitboard[enemycolor];
 
-            if (squareContains == bQ || squareContains == wQ ||
-                squareContains == wRB || squareContains == bRB) {
+            if (CHECKBIT(bb, SQ120SQ64(nextSq))) {
                 return TRUE;
             }
         }
@@ -279,8 +271,7 @@ static int isAttackedSliding(BOARD_STATE *board, int sq, int *offsets,
 }
 
 static int isAttackedSimple(BOARD_STATE *board, int sq, int *offsets,
-                            int sizeoffset, int enemycolor, int wKNP,
-                            int bKNP) {
+                            int sizeoffset, int enemycolor, int KNP) {
 
     for (int i = 0; i < sizeoffset; i++) {
         int nextSq = sq + offsets[i];
@@ -288,10 +279,7 @@ static int isAttackedSimple(BOARD_STATE *board, int sq, int *offsets,
         if (ONBOARD(nextSq) &&
             CHECKBIT(board->bitboard[(enemycolor)], SQ120SQ64(nextSq))) {
 
-            // TODO: add generic check
-            int squareContains = getPieceSq120(nextSq, board);
-            if (squareContains == wKNP || squareContains == bKNP) {
-
+            if (CHECKBIT(board->bitboard[(KNP)], SQ120SQ64(nextSq))) {
                 return TRUE;
             }
         }
@@ -314,11 +302,11 @@ int isAttacked(BOARD_STATE *board, int sq, int enemycolor) {
     int rook[4] = {-10, -1, 10, 1};
     int bishop[4] = {-11, -9, 9, 11};
 
-    return isAttackedSimple(board, sq, king, 8, enemycolor, wK, bK) ||
-           isAttackedSimple(board, sq, knight, 8, enemycolor, wN, bN) ||
-           isAttackedSimple(board, sq, pawn, 2, enemycolor, wP, bP) ||
-           isAttackedSliding(board, sq, rook, 4, enemycolor, wR, bR) ||
-           isAttackedSliding(board, sq, bishop, 4, enemycolor, wB, bB);
+    return isAttackedSimple(board, sq, king, 8, enemycolor, bbKing) ||
+           isAttackedSimple(board, sq, knight, 8, enemycolor, bbKnight) ||
+           isAttackedSimple(board, sq, pawn, 2, enemycolor, bbPawn) ||
+           isAttackedSliding(board, sq, rook, 4, enemycolor, bbRook) ||
+           isAttackedSliding(board, sq, bishop, 4, enemycolor, bbBishop);
 }
 
 static int inCheck(BOARD_STATE *board, int color) {
