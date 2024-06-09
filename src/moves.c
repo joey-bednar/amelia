@@ -7,33 +7,31 @@ void makeMove(BOARD_STATE *board, MOVE move) {
 
     // remove kingside/queenside castling ability
     // after castling. place rook in new position.
-    switch (move.castled) {
-    case NO_CASTLE:
-        break;
-    case WK_CASTLE:
-        setPiece120(wR, F1, board);
-        setPiece120(EMPTY, H1, board);
-        CLEARBIT(board->castle, WK_CASTLE);
-        CLEARBIT(board->castle, WQ_CASTLE);
-        break;
-    case WQ_CASTLE:
-        setPiece120(wR, D1, board);
-        setPiece120(EMPTY, A1, board);
-        CLEARBIT(board->castle, WK_CASTLE);
-        CLEARBIT(board->castle, WQ_CASTLE);
-        break;
-    case BK_CASTLE:
-        setPiece120(bR, F8, board);
-        setPiece120(EMPTY, H8, board);
-        CLEARBIT(board->castle, BK_CASTLE);
-        CLEARBIT(board->castle, BQ_CASTLE);
-        break;
-    case BQ_CASTLE:
-        setPiece120(bR, D8, board);
-        setPiece120(EMPTY, A8, board);
-        CLEARBIT(board->castle, BK_CASTLE);
-        CLEARBIT(board->castle, BQ_CASTLE);
-        break;
+    if (move.type == MOVE_KINGCASTLE) {
+        if (board->turn == WHITE) {
+            setPiece120(wR, F1, board);
+            setPiece120(EMPTY, H1, board);
+            CLEARBIT(board->castle, WK_CASTLE);
+            CLEARBIT(board->castle, WQ_CASTLE);
+        } else {
+            setPiece120(bR, F8, board);
+            setPiece120(EMPTY, H8, board);
+            CLEARBIT(board->castle, BK_CASTLE);
+            CLEARBIT(board->castle, BQ_CASTLE);
+        }
+    } else if (move.type == MOVE_QUEENCASTLE) {
+        if (board->turn == WHITE) {
+
+            setPiece120(wR, D1, board);
+            setPiece120(EMPTY, A1, board);
+            CLEARBIT(board->castle, WK_CASTLE);
+            CLEARBIT(board->castle, WQ_CASTLE);
+        } else {
+            setPiece120(bR, D8, board);
+            setPiece120(EMPTY, A8, board);
+            CLEARBIT(board->castle, BK_CASTLE);
+            CLEARBIT(board->castle, BQ_CASTLE);
+        }
     }
 
     int piece = getPieceSq120(move.startSquare, board);
@@ -62,7 +60,7 @@ void makeMove(BOARD_STATE *board, MOVE move) {
     // set new en passant square after two square pawn move.
     // delete en passant square if last move wasn't a two square pawn move
     const int offset[2] = {S, N};
-    if (move.twopawnmove) {
+    if (move.type == MOVE_DOUBLEPAWN) {
         board->enpassant = move.endSquare + offset[board->turn];
     } else {
         board->enpassant = OFFBOARD;
@@ -70,7 +68,7 @@ void makeMove(BOARD_STATE *board, MOVE move) {
 
     // delete en passant square after performing en passant
     // remove en passanted piece
-    if (move.epcapture) {
+    if (move.type == MOVE_EPCAPTURE) {
         board->enpassant = OFFBOARD;
         setPiece120(EMPTY, move.endSquare + offset[board->turn], board);
     } else if (move.promotion != EMPTY) {
@@ -83,36 +81,42 @@ void makeMove(BOARD_STATE *board, MOVE move) {
 // undo a move on the board
 void unmakeMove(BOARD_STATE *board, MOVE move) {
 
-    // if castling move, put rook back
-    if (move.castled == WK_CASTLE) {
-        CLEARBIT(board->bitboard[bbRook], SQ120SQ64(F1));
-        CLEARBIT(board->bitboard[bbWhite], SQ120SQ64(F1));
-        CLEARBIT(board->bitboard[bbAny], SQ120SQ64(F1));
-        SETBIT(board->bitboard[bbRook], SQ120SQ64(H1));
-        SETBIT(board->bitboard[bbWhite], SQ120SQ64(H1));
-        SETBIT(board->bitboard[bbAny], SQ120SQ64(H1));
-    } else if (move.castled == WQ_CASTLE) {
-        CLEARBIT(board->bitboard[bbRook], SQ120SQ64(D1));
-        CLEARBIT(board->bitboard[bbWhite], SQ120SQ64(D1));
-        CLEARBIT(board->bitboard[bbAny], SQ120SQ64(D1));
-        SETBIT(board->bitboard[bbRook], SQ120SQ64(A1));
-        SETBIT(board->bitboard[bbWhite], SQ120SQ64(A1));
-        SETBIT(board->bitboard[bbAny], SQ120SQ64(A1));
-    } else if (move.castled == BK_CASTLE) {
-        CLEARBIT(board->bitboard[bbRook], SQ120SQ64(F8));
-        CLEARBIT(board->bitboard[bbBlack], SQ120SQ64(F8));
-        CLEARBIT(board->bitboard[bbAny], SQ120SQ64(F8));
-        SETBIT(board->bitboard[bbRook], SQ120SQ64(H8));
-        SETBIT(board->bitboard[bbBlack], SQ120SQ64(H8));
-        SETBIT(board->bitboard[bbAny], SQ120SQ64(H8));
-    } else if (move.castled == BQ_CASTLE) {
-        CLEARBIT(board->bitboard[bbRook], SQ120SQ64(D8));
-        CLEARBIT(board->bitboard[bbBlack], SQ120SQ64(D8));
-        CLEARBIT(board->bitboard[bbAny], SQ120SQ64(D8));
-        SETBIT(board->bitboard[bbRook], SQ120SQ64(A8));
-        SETBIT(board->bitboard[bbBlack], SQ120SQ64(A8));
-        SETBIT(board->bitboard[bbAny], SQ120SQ64(A8));
+    if (move.type == MOVE_KINGCASTLE) {
+        if (board->turn == BLACK) {
+            CLEARBIT(board->bitboard[bbRook], SQ120SQ64(F1));
+            CLEARBIT(board->bitboard[bbWhite], SQ120SQ64(F1));
+            CLEARBIT(board->bitboard[bbAny], SQ120SQ64(F1));
+            SETBIT(board->bitboard[bbRook], SQ120SQ64(H1));
+            SETBIT(board->bitboard[bbWhite], SQ120SQ64(H1));
+            SETBIT(board->bitboard[bbAny], SQ120SQ64(H1));
+        } else {
+
+            CLEARBIT(board->bitboard[bbRook], SQ120SQ64(F8));
+            CLEARBIT(board->bitboard[bbBlack], SQ120SQ64(F8));
+            CLEARBIT(board->bitboard[bbAny], SQ120SQ64(F8));
+            SETBIT(board->bitboard[bbRook], SQ120SQ64(H8));
+            SETBIT(board->bitboard[bbBlack], SQ120SQ64(H8));
+            SETBIT(board->bitboard[bbAny], SQ120SQ64(H8));
+        }
+    } else if (move.type == MOVE_QUEENCASTLE) {
+        if (board->turn == BLACK) {
+            CLEARBIT(board->bitboard[bbRook], SQ120SQ64(D1));
+            CLEARBIT(board->bitboard[bbWhite], SQ120SQ64(D1));
+            CLEARBIT(board->bitboard[bbAny], SQ120SQ64(D1));
+            SETBIT(board->bitboard[bbRook], SQ120SQ64(A1));
+            SETBIT(board->bitboard[bbWhite], SQ120SQ64(A1));
+            SETBIT(board->bitboard[bbAny], SQ120SQ64(A1));
+        } else {
+
+            CLEARBIT(board->bitboard[bbRook], SQ120SQ64(D8));
+            CLEARBIT(board->bitboard[bbBlack], SQ120SQ64(D8));
+            CLEARBIT(board->bitboard[bbAny], SQ120SQ64(D8));
+            SETBIT(board->bitboard[bbRook], SQ120SQ64(A8));
+            SETBIT(board->bitboard[bbBlack], SQ120SQ64(A8));
+            SETBIT(board->bitboard[bbAny], SQ120SQ64(A8));
+        }
     }
+
     // reset castling abilities
     board->castle = move.priorcastle;
 
@@ -124,7 +128,7 @@ void unmakeMove(BOARD_STATE *board, MOVE move) {
     int piece = getPieceSq120(move.endSquare, board);
 
     // perform en passant
-    if (move.epcapture) {
+    if (move.type == MOVE_EPCAPTURE) {
         board->enpassant = move.endSquare;
         setPiece120(move.captured, move.endSquare + offset, board);
         setPiece120(EMPTY, move.endSquare, board);
@@ -153,16 +157,13 @@ void unmakeMove(BOARD_STATE *board, MOVE move) {
 }
 
 // add a move to the provided moves array
-static void addMove(BOARD_STATE *board, MOVE *moves, int start, int end,
-                    int captured, int epcapture, int twopawnmove, int castled,
-                    int promotion, int *index) {
+static void addMove(BOARD_STATE *board, MOVE *moves, int type, int start,
+                    int end, int captured, int promotion, int *index) {
     // moves[*index].piece = piece;
+    moves[*index].type = type;
     moves[*index].startSquare = start;
     moves[*index].endSquare = end;
     moves[*index].captured = captured;
-    moves[*index].epcapture = epcapture;
-    moves[*index].twopawnmove = twopawnmove;
-    moves[*index].castled = castled;
     moves[*index].promotion = promotion;
     moves[*index].priorep = board->enpassant;
     moves[*index].priorcastle = board->castle;
@@ -190,8 +191,7 @@ static void generateSlidingMoves(BOARD_STATE *board, MOVE *moves, int sq,
         // move
 
         while (isEmptySquare(nextSq, board)) {
-            addMove(board, moves, sq, nextSq, EMPTY, FALSE, FALSE, NO_CASTLE,
-                    EMPTY, index);
+            addMove(board, moves, MOVE_QUIET, sq, nextSq, EMPTY, EMPTY, index);
 
             nextSq = nextSq + offsets[i];
         }
@@ -199,8 +199,8 @@ static void generateSlidingMoves(BOARD_STATE *board, MOVE *moves, int sq,
         if (ONBOARD(nextSq) &&
             CHECKBIT(board->bitboard[(!board->turn)], SQ120SQ64(nextSq))) {
             int squareContains = getPieceSq120(nextSq, board);
-            addMove(board, moves, sq, nextSq, squareContains, FALSE, FALSE,
-                    NO_CASTLE, EMPTY, index);
+            addMove(board, moves, MOVE_CAPTURE, sq, nextSq, squareContains,
+                    EMPTY, index);
         }
     }
 }
@@ -238,9 +238,8 @@ static void generateCastleMoves(BOARD_STATE *board, MOVE *moves, int *index) {
                 CHECKBIT(board->bitboard[bbAny], FR2SQ64(FILE_G, rank));
 
             if (!throughcheck && !blocked) {
-                addMove(board, moves, FR2SQ120(FILE_E, rank),
-                        FR2SQ120(FILE_G, rank), EMPTY, FALSE, FALSE, kingside,
-                        EMPTY, index);
+                addMove(board, moves, MOVE_KINGCASTLE, FR2SQ120(FILE_E, rank),
+                        FR2SQ120(FILE_G, rank), EMPTY, EMPTY, index);
             }
         }
 
@@ -257,9 +256,8 @@ static void generateCastleMoves(BOARD_STATE *board, MOVE *moves, int *index) {
                 CHECKBIT(board->bitboard[bbAny], FR2SQ64(FILE_D, rank));
 
             if (!throughcheck && !blocked) {
-                addMove(board, moves, FR2SQ120(FILE_E, rank),
-                        FR2SQ120(FILE_C, rank), EMPTY, FALSE, FALSE, queenside,
-                        EMPTY, index);
+                addMove(board, moves, MOVE_QUEENCASTLE, FR2SQ120(FILE_E, rank),
+                        FR2SQ120(FILE_C, rank), EMPTY, EMPTY, index);
             }
         }
     }
@@ -270,6 +268,16 @@ static void generateCastleMoves(BOARD_STATE *board, MOVE *moves, int *index) {
 static void addPromotions(BOARD_STATE *board, MOVE *moves, int start, int end,
                           int captured, int color, int *index) {
     int promoteTo[4] = {wQ, wN, wR, wB};
+    int type[4] = {MOVE_QUEENPROMOTE, MOVE_KNIGHTPROMOTE, MOVE_ROOKPROMOTE,
+                   MOVE_BISHOPPROMOTE};
+
+    if (captured != EMPTY) {
+        type[0] = MOVE_QUEENPROMOTECAPTURE;
+        type[1] = MOVE_KNIGHTPROMOTECAPTURE;
+        type[2] = MOVE_ROOKPROMOTECAPTURE;
+        type[3] = MOVE_BISHOPPROMOTECAPTURE;
+    }
+
     if (color == BLACK) {
         promoteTo[0] = bQ;
         promoteTo[1] = bN;
@@ -277,8 +285,8 @@ static void addPromotions(BOARD_STATE *board, MOVE *moves, int start, int end,
         promoteTo[3] = bB;
     }
     for (int i = 0; i < 4; i++) {
-        addMove(board, moves, start, end, captured, FALSE, FALSE, FALSE,
-                promoteTo[i], index);
+        addMove(board, moves, type[i], start, end, captured, promoteTo[i],
+                index);
     }
 }
 
@@ -309,8 +317,7 @@ static void generatePseudoPawnMoves(BOARD_STATE *board, MOVE *moves, int sq,
         if (SQ120R(one) == eighthrank) {
             addPromotions(board, moves, sq, one, EMPTY, color, index);
         } else {
-            addMove(board, moves, sq, one, EMPTY, FALSE, FALSE, NO_CASTLE,
-                    EMPTY, index);
+            addMove(board, moves, MOVE_QUIET, sq, one, EMPTY, EMPTY, index);
         }
     }
 
@@ -329,21 +336,20 @@ static void generatePseudoPawnMoves(BOARD_STATE *board, MOVE *moves, int sq,
                 addPromotions(board, moves, sq, enemysquare, enemypiece, color,
                               index);
             } else {
-                addMove(board, moves, sq, enemysquare, enemypiece, FALSE, FALSE,
-                        NO_CASTLE, EMPTY, index);
+                addMove(board, moves, MOVE_CAPTURE, sq, enemysquare, enemypiece,
+                        EMPTY, index);
             }
         } else if (epMap[enemysquare] && enemysquare == board->enpassant) {
 
-            addMove(board, moves, sq, enemysquare, enemypawn, TRUE, FALSE,
-                    NO_CASTLE, EMPTY, index);
+            addMove(board, moves, MOVE_EPCAPTURE, sq, enemysquare, enemypawn,
+                    EMPTY, index);
         }
     }
 
     // up two
     if (SQ120R(sq) == secondrank && isEmptySquare(one, board) &&
         isEmptySquare(two, board)) {
-        addMove(board, moves, sq, two, EMPTY, FALSE, TRUE, NO_CASTLE, EMPTY,
-                index);
+        addMove(board, moves, MOVE_DOUBLEPAWN, sq, two, EMPTY, EMPTY, index);
     }
 }
 
@@ -358,8 +364,12 @@ static void generatePseudoPresetMoves(BOARD_STATE *board, MOVE *moves, int sq,
         int nextSq120 = SQ64SQ120(nextSq64);
 
         int squareContains = getPieceSq120(nextSq120, board);
-        addMove(board, moves, sq, nextSq120, squareContains, FALSE, FALSE,
-                NO_CASTLE, EMPTY, index);
+        int type = MOVE_CAPTURE;
+        if (squareContains == EMPTY) {
+            type = MOVE_QUIET;
+        }
+        addMove(board, moves, type, sq, nextSq120, squareContains, EMPTY,
+                index);
 
         ULL mask = (~1ULL << (nextSq64));
         bb &= mask;

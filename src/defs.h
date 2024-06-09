@@ -46,8 +46,24 @@ enum {
 enum {NW=-9, N=1, NE=11, E=10, SE=9, S=-1, SW=-11, W=-10};
 // clang-format on
 
-enum { NO_CASTLE, WK_CASTLE, WQ_CASTLE, BK_CASTLE, BQ_CASTLE };
+enum {
+    MOVE_QUIET,
+    MOVE_DOUBLEPAWN,
+    MOVE_KINGCASTLE,
+    MOVE_QUEENCASTLE,
+    MOVE_CAPTURE,
+    MOVE_EPCAPTURE,
+    MOVE_KNIGHTPROMOTE,
+    MOVE_BISHOPPROMOTE,
+    MOVE_ROOKPROMOTE,
+    MOVE_QUEENPROMOTE,
+    MOVE_KNIGHTPROMOTECAPTURE,
+    MOVE_BISHOPPROMOTECAPTURE,
+    MOVE_ROOKPROMOTECAPTURE,
+    MOVE_QUEENPROMOTECAPTURE
+};
 
+enum { NO_CASTLE, WK_CASTLE, WQ_CASTLE, BK_CASTLE, BQ_CASTLE };
 typedef unsigned long long ULL;
 
 typedef struct {
@@ -62,6 +78,7 @@ typedef struct {
 } BOARD_STATE;
 
 typedef struct {
+    int type;
     int piece;
     int startSquare;
     int endSquare;

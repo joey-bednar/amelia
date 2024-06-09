@@ -4,7 +4,7 @@
 #include <time.h>
 
 #define VERBOSE FALSE
-#define POSITION 2
+#define POSITION 0
 
 ULL perft_rec(int depth, BOARD_STATE *board) {
     int n_moves, i;
