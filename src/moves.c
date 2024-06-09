@@ -5,21 +5,30 @@
 // play a move on the board
 void makeMove(BOARD_STATE *board, MOVE move) {
 
+    // if (move.castled != NO_CASTLE) {
+    //     printf("\n========================\n");
+    //     printBoard(board);
+    // }
+
     // TODO: implement castling
     if (move.castled == WK_CASTLE) {
         setPiece120(wR, F1, board);
+        setPiece120(EMPTY, H1, board);
         CLEARBIT(board->castle, WK_CASTLE);
         CLEARBIT(board->castle, WQ_CASTLE);
-    } else if(move.castled == WQ_CASTLE) {
+    } else if (move.castled == WQ_CASTLE) {
         setPiece120(wR, D1, board);
+        setPiece120(EMPTY, A1, board);
         CLEARBIT(board->castle, WK_CASTLE);
         CLEARBIT(board->castle, WQ_CASTLE);
-    } else if(move.castled == BK_CASTLE) {
+    } else if (move.castled == BK_CASTLE) {
         setPiece120(bR, F8, board);
+        setPiece120(EMPTY, H8, board);
         CLEARBIT(board->castle, BK_CASTLE);
         CLEARBIT(board->castle, BQ_CASTLE);
-    } else if(move.castled == BQ_CASTLE) {
+    } else if (move.castled == BQ_CASTLE) {
         setPiece120(bR, D8, board);
+        setPiece120(EMPTY, A8, board);
         CLEARBIT(board->castle, BK_CASTLE);
         CLEARBIT(board->castle, BQ_CASTLE);
     }
@@ -28,6 +37,22 @@ void makeMove(BOARD_STATE *board, MOVE move) {
     int piece = getPieceSq120(move.startSquare, board);
     setPiece120(EMPTY, move.startSquare, board);
     setPiece120(piece, move.endSquare, board);
+
+    if (piece == wR && move.startSquare == H1) {
+        CLEARBIT(board->castle, WK_CASTLE);
+    } else if (piece == wR && move.startSquare == A1) {
+        CLEARBIT(board->castle, WQ_CASTLE);
+    } else if (piece == bR && move.startSquare == H8) {
+        CLEARBIT(board->castle, BK_CASTLE);
+    } else if (piece == bR && move.startSquare == A8) {
+        CLEARBIT(board->castle, BQ_CASTLE);
+    } else if (piece == wK && move.startSquare == E1) {
+        CLEARBIT(board->castle, WK_CASTLE);
+        CLEARBIT(board->castle, WQ_CASTLE);
+    } else if (piece == bK && move.startSquare == E8) {
+        CLEARBIT(board->castle, BK_CASTLE);
+        CLEARBIT(board->castle, BQ_CASTLE);
+    }
 
     int offset[2] = {S, N};
 
@@ -48,21 +73,28 @@ void makeMove(BOARD_STATE *board, MOVE move) {
         setPiece120(move.promotion, move.endSquare, board);
     }
     board->turn = !(board->turn);
+
+    // if (move.castled != NO_CASTLE) {
+    //     printBoard(board);
+    // }
 }
 
 // undo a move on the board
 void unmakeMove(BOARD_STATE *board, MOVE move) {
 
-
     // TODO: implement castling
     if (move.castled == WK_CASTLE) {
         setPiece120(EMPTY, F1, board);
-    } else if(move.castled == WQ_CASTLE) {
+        setPiece120(wR, H1, board);
+    } else if (move.castled == WQ_CASTLE) {
         setPiece120(EMPTY, D1, board);
-    } else if(move.castled == BK_CASTLE) {
+        setPiece120(wR, A1, board);
+    } else if (move.castled == BK_CASTLE) {
         setPiece120(EMPTY, F8, board);
-    } else if(move.castled == BQ_CASTLE) {
+        setPiece120(bR, H8, board);
+    } else if (move.castled == BQ_CASTLE) {
         setPiece120(EMPTY, D8, board);
+        setPiece120(bR, A8, board);
     }
     board->castle = move.priorcastle;
 
@@ -167,35 +199,70 @@ static void generateSlidingMoves(BOARD_STATE *board, MOVE *moves, int sq,
 
 static void generateCastleMoves(BOARD_STATE *board, MOVE *moves, int sq,
                                 int *index) {
-    // TODO: can't castle in check
+    // TODO: can't castle while in check
+    // TODO: can't castle into check
     // TODO: can't castle through check
     // TODO: king can't move back to starting square
     // TODO: rooks can't move back to starting square
 
-    printf("wk: %d/%d; bk: %d/%d\n",board->kings[WHITE],E1,board->kings[BLACK],E8);
-    if (board->kings[WHITE] == E1) {
+    static int castles = 0;
 
-        printf("here");
-        if (getPieceSq120(H1, board) == wR) {
-
-            addMove(board, moves, E1, G1, EMPTY, FALSE, FALSE, WK_CASTLE, EMPTY,
-                    index);
-        }
-        if (getPieceSq120(A1, board) == wR) {
-
-            addMove(board, moves, E1, C1, EMPTY, FALSE, FALSE, WQ_CASTLE, EMPTY,
-                    index);
-        }
+    int rank = RANK_1;
+    int queenside = WQ_CASTLE;
+    int kingside = WK_CASTLE;
+    int rook = wR;
+    if (board->turn == BLACK) {
+        rank = RANK_8;
+        queenside = BQ_CASTLE;
+        kingside = BK_CASTLE;
+        rook = bR;
     }
 
-    if (board->kings[BLACK] == E8) {
-        if (getPieceSq120(H8, board) == wR) {
-            addMove(board, moves, E8, G8, EMPTY, FALSE, FALSE, BK_CASTLE, EMPTY,
-                    index);
+    int color = board->turn;
+
+    if (isAttacked(board, board->kings[color], !color)) {
+        return;
+    }
+
+    if (board->kings[color] == FR2SQ120(FILE_E, rank)) {
+        if (CHECKBIT(board->castle, kingside) &&
+            getPieceSq120(FR2SQ120(FILE_H, rank), board) == rook) {
+
+            int throughcheck =
+                isAttacked(board, FR2SQ120(FILE_F, rank), !color) ||
+                isAttacked(board, FR2SQ120(FILE_G, rank), !color);
+
+            int blocked =
+                CHECKBIT(board->bitboard[bbAny], FR2SQ64(FILE_F, rank)) ||
+                CHECKBIT(board->bitboard[bbAny], FR2SQ64(FILE_G, rank));
+
+            if (!throughcheck && !blocked) {
+                addMove(board, moves, FR2SQ120(FILE_E, rank),
+                        FR2SQ120(FILE_G, rank), EMPTY, FALSE, FALSE, kingside,
+                        EMPTY, index);
+                // castles++;
+                // printf("K castle %d\n", castles);
+            }
         }
-        if (getPieceSq120(A8, board) == wR) {
-            addMove(board, moves, E8, C8, EMPTY, FALSE, FALSE, BQ_CASTLE, EMPTY,
-                    index);
+        if (CHECKBIT(board->castle, queenside) &&
+            getPieceSq120(FR2SQ120(FILE_A, rank), board) == rook) {
+
+            int throughcheck =
+                isAttacked(board, FR2SQ120(FILE_C, rank), !color) ||
+                isAttacked(board, FR2SQ120(FILE_D, rank), !color);
+
+            int blocked =
+                CHECKBIT(board->bitboard[bbAny], FR2SQ64(FILE_B, rank)) ||
+                CHECKBIT(board->bitboard[bbAny], FR2SQ64(FILE_C, rank)) ||
+                CHECKBIT(board->bitboard[bbAny], FR2SQ64(FILE_D, rank));
+
+            if (!throughcheck && !blocked) {
+                addMove(board, moves, FR2SQ120(FILE_E, rank),
+                        FR2SQ120(FILE_C, rank), EMPTY, FALSE, FALSE, queenside,
+                        EMPTY, index);
+                // castles++;
+                // printf("Q castle %d\n", castles);
+            }
         }
     }
 
@@ -445,7 +512,7 @@ int generateMoves(BOARD_STATE *board, MOVE *moves) {
         }
     }
 
-    // generateCastleMoves(board, moves, 0, &index);
+    generateCastleMoves(board, moves, 0, &index);
 
     return index;
 }

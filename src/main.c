@@ -31,10 +31,9 @@ int main() {
     initBoard(&board);
 
     printBoardIndex(&board);
-    int depth = 5;
+    int depth = 7;
     perft(depth);
     printBenchmark(depth);
-
 
     // int castle = 0;
     // SETBIT(castle, WK_CASTLE);
