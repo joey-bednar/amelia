@@ -56,7 +56,7 @@ void makeMove(BOARD_STATE *board, MOVE move) {
         CLEARBIT(board->castle, BQ_CASTLE);
     }
 
-    int offset[2] = {S, N};
+    const int offset[2] = {S, N};
 
     if (move.twopawnmove) {
         board->enpassant = move.endSquare + offset[board->turn];
@@ -143,25 +143,6 @@ static void addMove(BOARD_STATE *board, MOVE *moves, int start, int end,
     (*index)++;
 }
 
-// generate all legal moves using array of offsets
-// move from sq to sq+offset[i]. If square is empty or enemy piece, add to moves
-// list. Used for kings and knights
-static void generateSimpleMoves(BOARD_STATE *board, MOVE *moves, int sq,
-                                int *index, int *offsets, int offsetssize) {
-
-    for (int i = 0; i < offsetssize; i++) {
-        int nextSq = sq + offsets[i];
-
-        // if square is empty or can capture enemy piece, it is a pseudolegal
-        // move
-        if (hasEmptyEnemyPiece120(nextSq, board->turn, board)) {
-            int squareContains = getPieceSq120(nextSq, board);
-            addMove(board, moves, sq, nextSq, squareContains, FALSE, FALSE,
-                    NO_CASTLE, EMPTY, index);
-        }
-    }
-}
-
 // same as generateSimpleMoves() but continues in offset direction until not
 // possible. Used for sliding pieces (bishop,rook,queen)
 static void generateSlidingMoves(BOARD_STATE *board, MOVE *moves, int sq,
@@ -187,20 +168,6 @@ static void generateSlidingMoves(BOARD_STATE *board, MOVE *moves, int sq,
                     NO_CASTLE, EMPTY, index);
         }
     }
-}
-
-static int isAttackedKnight(BOARD_STATE *board, int sq, int enemycolor) {
-    if (!ONBOARD(sq)) {
-        return FALSE;
-    }
-
-    int sq64 = SQ120SQ64(sq);
-    ULL bb = (KNIGHTBB(sq64) & board->bitboard[bbKnight] &
-              board->bitboard[enemycolor]);
-    if (bb == 0) {
-        return FALSE;
-    }
-    return TRUE;
 }
 
 static void generateCastleMoves(BOARD_STATE *board, MOVE *moves, int *index) {
@@ -342,19 +309,10 @@ static void generatePseudoPawnMoves(BOARD_STATE *board, MOVE *moves, int sq,
     }
 }
 
-static void generatePseudoKingMoves(BOARD_STATE *board, MOVE *moves, int sq,
-                                    int *index) {
-    int offsets[8] = {9, 10, 11, 1, -9, -10, -11, -1};
-    generateSimpleMoves(board, moves, sq, index, offsets, 8);
-}
-
-static void generatePseudoKnightMoves(BOARD_STATE *board, MOVE *moves, int sq,
-                                      int *index) {
-    // int offsets[8] = {-21, 21, 19, -19, 8, -8, -12, 12};
-    // generateSimpleMoves(board, moves, sq, index, offsets, 8);
-
+static void generatePseudoPresetMoves(BOARD_STATE *board, MOVE *moves, int sq,
+                                      ULL bitboard, int *index) {
     int sq64 = SQ120SQ64(sq);
-    ULL bb = ~board->bitboard[board->turn] & KNIGHTBB(sq64);
+    ULL bb = ~board->bitboard[board->turn] & bitboard;
 
     while (bb != 0) {
         int nextSq64 = bitScanForward(bb);
@@ -367,6 +325,17 @@ static void generatePseudoKnightMoves(BOARD_STATE *board, MOVE *moves, int sq,
         ULL mask = (~1ULL << (nextSq64));
         bb &= mask;
     }
+}
+
+static void generatePseudoKingMoves(BOARD_STATE *board, MOVE *moves, int sq,
+                                    int *index) {
+    generatePseudoPresetMoves(board, moves, sq, KINGBB(SQ120SQ64(sq)), index);
+}
+
+static void generatePseudoKnightMoves(BOARD_STATE *board, MOVE *moves, int sq,
+                                      int *index) {
+
+    generatePseudoPresetMoves(board, moves, sq, KNIGHTBB(SQ120SQ64(sq)), index);
 }
 
 static void generatePseudoRookMoves(BOARD_STATE *board, MOVE *moves, int sq,
@@ -385,6 +354,22 @@ static void generatePseudoQueenMoves(BOARD_STATE *board, MOVE *moves, int sq,
                                      int *index) {
     generatePseudoRookMoves(board, moves, sq, index);
     generatePseudoBishopMoves(board, moves, sq, index);
+}
+
+static int isAttackedPreset(BOARD_STATE *board, int sq, int enemycolor,
+                            ULL bitboard, int genericPiece) {
+    if (!ONBOARD(sq)) {
+        return FALSE;
+    }
+
+    int sq64 = SQ120SQ64(sq);
+    ULL bb = (bitboard & board->bitboard[genericPiece] &
+              board->bitboard[enemycolor]);
+
+    if (bb == 0) {
+        return FALSE;
+    }
+    return TRUE;
 }
 
 static int isAttackedSliding(BOARD_STATE *board, int sq, int *offsets,
@@ -410,8 +395,8 @@ static int isAttackedSliding(BOARD_STATE *board, int sq, int *offsets,
     return FALSE;
 }
 
-static int isAttackedSimple(BOARD_STATE *board, int sq, int *offsets,
-                            int sizeoffset, int enemycolor, int KNP) {
+static int isAttackedPawn(BOARD_STATE *board, int sq, int *offsets,
+                          int sizeoffset, int enemycolor) {
 
     for (int i = 0; i < sizeoffset; i++) {
         int nextSq = sq + offsets[i];
@@ -419,7 +404,7 @@ static int isAttackedSimple(BOARD_STATE *board, int sq, int *offsets,
         if (ONBOARD(nextSq) &&
             CHECKBIT(board->bitboard[(enemycolor)], SQ120SQ64(nextSq))) {
 
-            if (CHECKBIT(board->bitboard[(KNP)], SQ120SQ64(nextSq))) {
+            if (CHECKBIT(board->bitboard[(bbPawn)], SQ120SQ64(nextSq))) {
                 return TRUE;
             }
         }
@@ -436,15 +421,14 @@ int isAttacked(BOARD_STATE *board, int sq, int enemycolor) {
         pawn[1] = -11;
     }
 
-    int king[8] = {9, 10, 11, 1, -9, -10, -11, -1};
-    // int knight[8] = {-21, 21, 19, -19, 8, -8, -12, 12};
     int rook[4] = {-10, -1, 10, 1};
     int bishop[4] = {-11, -9, 9, 11};
 
-    return isAttackedSimple(board, sq, king, 8, enemycolor, bbKing) ||
-           // isAttackedSimple(board, sq, knight, 8, enemycolor, bbKnight) ||
-           isAttackedKnight(board, sq, enemycolor) ||
-           isAttackedSimple(board, sq, pawn, 2, enemycolor, bbPawn) ||
+    return isAttackedPreset(board, sq, enemycolor, KINGBB(SQ120SQ64(sq)),
+                            bbKing) ||
+           isAttackedPreset(board, sq, enemycolor, KNIGHTBB(SQ120SQ64(sq)),
+                            bbKnight) ||
+           isAttackedPawn(board, sq, pawn, 2, enemycolor) ||
            isAttackedSliding(board, sq, rook, 4, enemycolor, bbRook) ||
            isAttackedSliding(board, sq, bishop, 4, enemycolor, bbBishop);
 }

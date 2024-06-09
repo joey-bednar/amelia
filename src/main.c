@@ -12,6 +12,7 @@ int toWhite[bbLength];
 int toBlack[bbLength];
 int onboardMap[120];
 ULL knightJumps[64];
+ULL kingJumps[64];
 
 int main() {
     BOARD_STATE board;
@@ -20,7 +21,7 @@ int main() {
     initColorMap(colorMap, notcolorMap);
     initSqMap(sq120sq64Map, sq64sq120Map, onboardMap);
     initPieceGenericMap(genericMap, toWhite, toBlack);
-    initKnightJumps(knightJumps);
+    initJumps(knightJumps, kingJumps);
 
     clearBoard(&board);
     initBoard(&board);

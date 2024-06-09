@@ -23,6 +23,7 @@
 #define SETBIT(bb, sq64) ((bb) |= (1ULL << sq64))
 #define CLEARBITBOARD(bb) ((bb) = 0)
 #define KNIGHTBB(sq64) (knightJumps[(sq64)])
+#define KINGBB(sq64) (kingJumps[(sq64)])
 
 #define MAX_LEGAL_MOVES 256
 
@@ -83,6 +84,7 @@ extern int toWhite[bbLength];
 extern int toBlack[bbLength];
 extern int onboardMap[120];
 extern ULL knightJumps[64];
+extern ULL kingJumps[64];
 
 // init.c
 extern void initBoard(BOARD_STATE *board);
@@ -91,7 +93,7 @@ extern void initSqMap(int *sq120sq64Map, int *sq64sq120Map, int *onboardMap);
 extern void initPieceGenericMap(int *genericMap, int *toWhite, int *toBlack);
 extern void initEnpassantMap(int *map);
 extern void initColorMap(int *map, int *notmap);
-extern void initKnightJumps(ULL *knightJumps);
+extern void initJumps(ULL *knightJumps, ULL *kingJumps);
 
 // board.c
 extern void printBoard(BOARD_STATE *board);

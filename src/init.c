@@ -144,21 +144,29 @@ void initPieceGenericMap(int *genericMap, int *toWhite, int *toBlack) {
     toBlack[bbKing] = bK;
 }
 
-void initKnightJumps(ULL *knightJumps) {
-    int offsets[8] = {-21, 21, 19, -19, 8, -8, -12, 12};
+void initJumps(ULL *knightJumps, ULL *kingJumps) {
+    int offsetsKnight[8] = {-21, 21, 19, -19, 8, -8, -12, 12};
+    int offsetsKing[8] = {9, 10, 11, 1, -9, -10, -11, -1};
     for (int rank = RANK_8; rank >= RANK_1; rank--) {
         for (int file = FILE_A; file <= FILE_H; file++) {
             int sq120 = FR2SQ120(file, rank);
             int sq64 = FR2SQ64(file, rank);
 
-            ULL bb = 0;
+            ULL bitboardKnight = 0;
+            ULL bitboardKing = 0;
             for (int i = 0; i < 8; i++) {
-                int nextSq = sq120 + offsets[i];
-                if (ONBOARD(nextSq)) {
-                    SETBIT(bb, SQ120SQ64(nextSq));
+                int nextSqKnight = sq120 + offsetsKnight[i];
+                int nextSqKing = sq120 + offsetsKing[i];
+                if (ONBOARD(nextSqKnight)) {
+                    SETBIT(bitboardKnight, SQ120SQ64(nextSqKnight));
+                }
+
+                if (ONBOARD(nextSqKing)) {
+                    SETBIT(bitboardKing, SQ120SQ64(nextSqKing));
                 }
             }
-            knightJumps[sq64] = bb;
+            knightJumps[sq64] = bitboardKnight;
+            kingJumps[sq64] = bitboardKing;
         }
     }
     printBitboard(knightJumps[0]);
