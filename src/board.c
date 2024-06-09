@@ -14,7 +14,10 @@ void clearBoard(BOARD_STATE *board) {
 
     board->turn = WHITE;
     board->fiftyMove = 0;
-    board->castle = 0b1111;
+    SETBIT(board->castle, WK_CASTLE);
+    SETBIT(board->castle, WQ_CASTLE);
+    SETBIT(board->castle, BK_CASTLE);
+    SETBIT(board->castle, BQ_CASTLE);
     board->enpassant = OFFBOARD;
 }
 

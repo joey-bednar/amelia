@@ -18,7 +18,7 @@
 #define TOBLACK(p) (toBlack[(p)])
 #define ONBOARD(sq) (onboardMap[(sq)])
 
-#define CHECKBIT(bb, sq64) (((bb)) >> ((sq64)) & 1ULL)
+#define CHECKBIT(bb, sq64) (((bb)) >> ((sq64)) & 1UL)
 #define CLEARBIT(bb, sq64) ((bb) &= ~(1UL << sq64))
 #define SETBIT(bb, sq64) ((bb) |= (1UL << sq64))
 #define CLEARBITBOARD(bb) ((bb) = 0)
@@ -32,14 +32,14 @@ enum { FILE_A, FILE_B, FILE_C, FILE_D, FILE_E, FILE_F, FILE_G, FILE_H, FILE_NONE
 enum { RANK_1, RANK_2, RANK_3, RANK_4, RANK_5, RANK_6, RANK_7, RANK_8, RANK_NONE };
 enum { WHITE, BLACK, BOTH, NONE };
 enum {
-  A1 = 21, B1, C1, D1, E1, F1, G1, H1,
-  A2 = 31, B2, C2, D2, E2, F2, G2, H2,
-  A3 = 41, B3, C3, D3, E3, F3, G3, H3,
-  A4 = 51, B4, C4, D4, E4, F4, G4, H4,
-  A5 = 61, B5, C5, D5, E5, F5, G5, H5,
-  A6 = 71, B6, C6, D6, E6, F6, G6, H6,
-  A7 = 81, B7, C7, D7, E7, F7, G7, H7,
-  A8 = 91, B8, C8, D8, E8, F8, G8, H8,
+  A1 = 21, A2, A3, A4, A5, A6, A7, A8,
+  B1 = 31, B2, B3, B4, B5, B6, B7, B8,
+  C1 = 41, C2, C3, C4, C5, C6, C7, C8,
+  D1 = 51, D2, D3, D4, D5, D6, D7, D8,
+  E1 = 61, E2, E3, E4, E5, E6, E7, E8,
+  F1 = 71, F2, F3, F4, F5, F6, F7, F8,
+  G1 = 81, G2, G3, G4, G5, G6, G7, G8,
+  H1 = 91, H2, H3, H4, H5, H6, H7, H8,
 };
 enum {NW=-9, N=1, NE=11, E=10, SE=9, S=-1, SW=-11, W=-10};
 // clang-format on
@@ -68,6 +68,7 @@ typedef struct {
     int castled;
     int promotion;
     int priorep;
+    int priorcastle;
 } MOVE;
 
 extern int epMap[120];

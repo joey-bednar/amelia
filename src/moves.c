@@ -5,6 +5,25 @@
 // play a move on the board
 void makeMove(BOARD_STATE *board, MOVE move) {
 
+    // TODO: implement castling
+    if (move.castled == WK_CASTLE) {
+        setPiece120(wR, F1, board);
+        CLEARBIT(board->castle, WK_CASTLE);
+        CLEARBIT(board->castle, WQ_CASTLE);
+    } else if(move.castled == WQ_CASTLE) {
+        setPiece120(wR, D1, board);
+        CLEARBIT(board->castle, WK_CASTLE);
+        CLEARBIT(board->castle, WQ_CASTLE);
+    } else if(move.castled == BK_CASTLE) {
+        setPiece120(bR, F8, board);
+        CLEARBIT(board->castle, BK_CASTLE);
+        CLEARBIT(board->castle, BQ_CASTLE);
+    } else if(move.castled == BQ_CASTLE) {
+        setPiece120(bR, D8, board);
+        CLEARBIT(board->castle, BK_CASTLE);
+        CLEARBIT(board->castle, BQ_CASTLE);
+    }
+
     // TODO: cleanup
     int piece = getPieceSq120(move.startSquare, board);
     setPiece120(EMPTY, move.startSquare, board);
@@ -33,6 +52,19 @@ void makeMove(BOARD_STATE *board, MOVE move) {
 
 // undo a move on the board
 void unmakeMove(BOARD_STATE *board, MOVE move) {
+
+
+    // TODO: implement castling
+    if (move.castled == WK_CASTLE) {
+        setPiece120(EMPTY, F1, board);
+    } else if(move.castled == WQ_CASTLE) {
+        setPiece120(EMPTY, D1, board);
+    } else if(move.castled == BK_CASTLE) {
+        setPiece120(EMPTY, F8, board);
+    } else if(move.castled == BQ_CASTLE) {
+        setPiece120(EMPTY, D8, board);
+    }
+    board->castle = move.priorcastle;
 
     // TODO: cleanup
     int offset = S;
@@ -83,6 +115,7 @@ static void addMove(BOARD_STATE *board, MOVE *moves, int start, int end,
     moves[*index].castled = castled;
     moves[*index].promotion = promotion;
     moves[*index].priorep = board->enpassant;
+    moves[*index].priorcastle = board->castle;
     (*index)++;
 }
 
@@ -130,6 +163,45 @@ static void generateSlidingMoves(BOARD_STATE *board, MOVE *moves, int sq,
                     NO_CASTLE, EMPTY, index);
         }
     }
+}
+
+static void generateCastleMoves(BOARD_STATE *board, MOVE *moves, int sq,
+                                int *index) {
+    // TODO: can't castle in check
+    // TODO: can't castle through check
+    // TODO: king can't move back to starting square
+    // TODO: rooks can't move back to starting square
+
+    printf("wk: %d/%d; bk: %d/%d\n",board->kings[WHITE],E1,board->kings[BLACK],E8);
+    if (board->kings[WHITE] == E1) {
+
+        printf("here");
+        if (getPieceSq120(H1, board) == wR) {
+
+            addMove(board, moves, E1, G1, EMPTY, FALSE, FALSE, WK_CASTLE, EMPTY,
+                    index);
+        }
+        if (getPieceSq120(A1, board) == wR) {
+
+            addMove(board, moves, E1, C1, EMPTY, FALSE, FALSE, WQ_CASTLE, EMPTY,
+                    index);
+        }
+    }
+
+    if (board->kings[BLACK] == E8) {
+        if (getPieceSq120(H8, board) == wR) {
+            addMove(board, moves, E8, G8, EMPTY, FALSE, FALSE, BK_CASTLE, EMPTY,
+                    index);
+        }
+        if (getPieceSq120(A8, board) == wR) {
+            addMove(board, moves, E8, C8, EMPTY, FALSE, FALSE, BQ_CASTLE, EMPTY,
+                    index);
+        }
+    }
+
+    // if (isAttacked(board, sq, !board->turn)) {
+    //     return;
+    // }
 }
 
 static void addPromotions(BOARD_STATE *board, MOVE *moves, int start, int end,
@@ -372,6 +444,8 @@ int generateMoves(BOARD_STATE *board, MOVE *moves) {
             break;
         }
     }
+
+    // generateCastleMoves(board, moves, 0, &index);
 
     return index;
 }

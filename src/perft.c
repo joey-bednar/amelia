@@ -49,7 +49,12 @@ ULL perft_rec(int depth, BOARD_STATE *board) {
 ULL perft(int depth) {
     BOARD_STATE board;
     board.turn = WHITE;
-    board.castle = 0b1111;
+
+    SETBIT(board.castle, WK_CASTLE);
+    SETBIT(board.castle, WQ_CASTLE);
+    SETBIT(board.castle, BK_CASTLE);
+    SETBIT(board.castle, BQ_CASTLE);
+
     board.enpassant = OFFBOARD;
     board.fiftyMove = 0;
 
@@ -66,6 +71,46 @@ ULL perft(int depth) {
 #if POSITION == 0
 
     initBoard(&board);
+
+#endif
+
+#if POSITION == 2
+
+    setPiece(wK, FILE_E, RANK_1, &board);
+    setPiece(wQ, FILE_F, RANK_3, &board);
+    setPiece(wR, FILE_H, RANK_1, &board);
+    setPiece(wR, FILE_A, RANK_1, &board);
+    setPiece(wB, FILE_D, RANK_2, &board);
+    setPiece(wB, FILE_E, RANK_2, &board);
+    setPiece(wN, FILE_C, RANK_3, &board);
+    setPiece(wN, FILE_E, RANK_5, &board);
+
+    setPiece(wP, FILE_A, RANK_2, &board);
+    setPiece(wP, FILE_B, RANK_2, &board);
+    setPiece(wP, FILE_C, RANK_2, &board);
+    setPiece(wP, FILE_D, RANK_5, &board);
+    setPiece(wP, FILE_E, RANK_4, &board);
+    setPiece(wP, FILE_F, RANK_2, &board);
+    setPiece(wP, FILE_G, RANK_2, &board);
+    setPiece(wP, FILE_H, RANK_2, &board);
+
+    setPiece(bK, FILE_E, RANK_8, &board);
+    setPiece(bQ, FILE_E, RANK_7, &board);
+    setPiece(bR, FILE_A, RANK_8, &board);
+    setPiece(bR, FILE_H, RANK_8, &board);
+    setPiece(bB, FILE_A, RANK_6, &board);
+    setPiece(bB, FILE_G, RANK_7, &board);
+    setPiece(bN, FILE_B, RANK_6, &board);
+    setPiece(bN, FILE_F, RANK_6, &board);
+
+    setPiece(bP, FILE_A, RANK_7, &board);
+    setPiece(bP, FILE_B, RANK_4, &board);
+    setPiece(bP, FILE_C, RANK_7, &board);
+    setPiece(bP, FILE_D, RANK_7, &board);
+    setPiece(bP, FILE_E, RANK_6, &board);
+    setPiece(bP, FILE_F, RANK_7, &board);
+    setPiece(bP, FILE_G, RANK_6, &board);
+    setPiece(bP, FILE_H, RANK_3, &board);
 
 #endif
 
