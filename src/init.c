@@ -169,7 +169,4 @@ void initJumps(ULL *knightJumps, ULL *kingJumps) {
             kingJumps[sq64] = bitboardKing;
         }
     }
-    printBitboard(knightJumps[0]);
-    printBitboard(knightJumps[1]);
-    printBitboard(knightJumps[2]);
 }

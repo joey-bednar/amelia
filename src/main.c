@@ -27,23 +27,15 @@ int main() {
     initBoard(&board);
 
     printBoardIndex();
-    int depth = 5;
+    int depth = 4;
     perft(depth);
     printBenchmark(depth);
 
-    // int castle = 0;
-    // SETBIT(castle, WK_CASTLE);
-    // SETBIT(castle, WQ_CASTLE);
-    // int val = CHECKBIT(castle, BQ_CASTLE);
-    // printf("%d\n",castle);
-    // printf("%d",val);
-    // printBits(castle);
-
     // test();
 
-    printBitboardIndex64();
-    printBitboardIndex120();
-    printBoardIndex();
+    // printBitboardIndex64();
+    // printBitboardIndex120();
+    // printBoardIndex();
 
     return 0;
 }
