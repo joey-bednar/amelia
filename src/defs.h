@@ -96,9 +96,6 @@ extern void initColorMap(int *map, int *notmap);
 extern void initJumps(ULL *knightJumps, ULL *kingJumps);
 
 // board.c
-extern void printBoard(BOARD_STATE *board);
-extern void printBoardIndex();
-extern int bitScanForward(ULL bb);
 
 extern void setPiece(int piece, int file, int rank, BOARD_STATE *board);
 extern void setPiece120(int piece, int sq, BOARD_STATE *board);
@@ -137,6 +134,9 @@ extern void printBitboard(unsigned long long num);
 extern void printBitboardIndex64();
 extern void printBitboardIndex120();
 extern int countBits(unsigned long long b);
+extern void printBoard(BOARD_STATE *board);
+extern void printBoardIndex();
+extern int bitScanForward(ULL bb);
 
 // test.c
 extern void test();

@@ -36,7 +36,6 @@ void makeMove(BOARD_STATE *board, MOVE move) {
         break;
     }
 
-    // TODO: cleanup
     int piece = getPieceSq120(move.startSquare, board);
 
     // move piece to target square
@@ -117,7 +116,6 @@ void unmakeMove(BOARD_STATE *board, MOVE move) {
     // reset castling abilities
     board->castle = move.priorcastle;
 
-    // TODO: cleanup
     int offset = S;
     if (board->turn == WHITE) {
         offset = N;
@@ -207,17 +205,16 @@ static void generateSlidingMoves(BOARD_STATE *board, MOVE *moves, int sq,
     }
 }
 
+// add all legal castling moves to the moves array
 static void generateCastleMoves(BOARD_STATE *board, MOVE *moves, int *index) {
 
     int rank = RANK_1;
     int queenside = WQ_CASTLE;
     int kingside = WK_CASTLE;
-    int rook = wR;
     if (board->turn == BLACK) {
         rank = RANK_8;
         queenside = BQ_CASTLE;
         kingside = BK_CASTLE;
-        rook = bR;
     }
 
     int color = board->turn;
@@ -268,6 +265,8 @@ static void generateCastleMoves(BOARD_STATE *board, MOVE *moves, int *index) {
     }
 }
 
+// used by generatePseudoPawnMoves. add all four possible promotion moves to
+// moves list.
 static void addPromotions(BOARD_STATE *board, MOVE *moves, int start, int end,
                           int captured, int color, int *index) {
     int promoteTo[4] = {wQ, wN, wR, wB};
@@ -283,6 +282,7 @@ static void addPromotions(BOARD_STATE *board, MOVE *moves, int start, int end,
     }
 }
 
+// add all pseudolegal pawn moves to moves list
 static void generatePseudoPawnMoves(BOARD_STATE *board, MOVE *moves, int sq,
                                     int *index) {
     int color = board->turn;
@@ -347,6 +347,8 @@ static void generatePseudoPawnMoves(BOARD_STATE *board, MOVE *moves, int sq,
     }
 }
 
+// use pregenerated attack bitboards to generate all pseudolegal moves
+// and add to array.
 static void generatePseudoPresetMoves(BOARD_STATE *board, MOVE *moves, int sq,
                                       ULL bitboard, int *index) {
     ULL bb = ~board->bitboard[board->turn] & bitboard;
@@ -364,17 +366,6 @@ static void generatePseudoPresetMoves(BOARD_STATE *board, MOVE *moves, int sq,
     }
 }
 
-static void generatePseudoKingMoves(BOARD_STATE *board, MOVE *moves, int sq,
-                                    int *index) {
-    generatePseudoPresetMoves(board, moves, sq, KINGBB(SQ120SQ64(sq)), index);
-}
-
-static void generatePseudoKnightMoves(BOARD_STATE *board, MOVE *moves, int sq,
-                                      int *index) {
-
-    generatePseudoPresetMoves(board, moves, sq, KNIGHTBB(SQ120SQ64(sq)), index);
-}
-
 static void generatePseudoRookMoves(BOARD_STATE *board, MOVE *moves, int sq,
                                     int *index) {
     int offsets[4] = {-10, -1, 10, 1};
@@ -385,111 +376,6 @@ static void generatePseudoBishopMoves(BOARD_STATE *board, MOVE *moves, int sq,
                                       int *index) {
     int offsets[4] = {-11, -9, 9, 11};
     generateSlidingMoves(board, moves, sq, index, offsets, 4);
-}
-
-static void generatePseudoQueenMoves(BOARD_STATE *board, MOVE *moves, int sq,
-                                     int *index) {
-    generatePseudoRookMoves(board, moves, sq, index);
-    generatePseudoBishopMoves(board, moves, sq, index);
-}
-
-// return TRUE if sq(120) is attacked by an enemy piece. calculated
-// using preset attack bitboards
-static int isAttackedPreset(BOARD_STATE *board, int sq, int enemycolor,
-                            ULL bitboard, int genericPiece) {
-
-    // check if enemy piece exists on possible attacking squares
-    ULL bb = (bitboard & board->bitboard[genericPiece] &
-              board->bitboard[enemycolor]);
-
-    return !(ONBOARD(sq) && bb == 0);
-}
-
-// return TRUE if sq(120) is attacked by an enemy piece on the file/rank/diag
-// given by the offset directions
-static int isAttackedSliding(BOARD_STATE *board, int sq, const int *offsets,
-                             const int sizeoffset, int enemycolor, int RB) {
-    for (int i = 0; i < sizeoffset; i++) {
-        int nextSq = sq + offsets[i];
-
-        while (ONBOARD(nextSq) &&
-               !CHECKBIT(board->bitboard[(bbAny)], SQ120SQ64(nextSq))) {
-            nextSq = nextSq + offsets[i];
-        }
-
-        if (ONBOARD(nextSq)) {
-
-            ULL bb = (board->bitboard[bbQueen] | board->bitboard[RB]) &
-                     board->bitboard[enemycolor];
-
-            if (CHECKBIT(bb, SQ120SQ64(nextSq))) {
-                return TRUE;
-            }
-        }
-    }
-    return FALSE;
-}
-
-// return TRUE if sq(120) is attacked by an enemy pawn
-static int isAttackedPawn(BOARD_STATE *board, int sq, int *offsets,
-                          int sizeoffset, int enemycolor) {
-
-    ULL pawns = board->bitboard[bbPawn] & board->bitboard[enemycolor];
-
-    ULL right;
-    ULL left;
-
-    switch (enemycolor) {
-    case WHITE:
-        // white pawns
-        right = (pawns << 9);
-        left = (pawns >> 7);
-        break;
-
-    case BLACK:
-        // black pawns
-        right = (pawns << 7);
-        left = (pawns >> 9);
-        break;
-    }
-
-    ULL bbp = (right & (~0ULL << 8)) | (left & (~0ULL >> 8));
-
-    return CHECKBIT(bbp, SQ120SQ64(sq));
-}
-
-// return TRUE if sq(120) is attacked by the enemy color
-int isAttacked(BOARD_STATE *board, int sq, int enemycolor) {
-
-    if (enemycolor == WHITE) {
-        const int pawn[2] = {-9, 11};
-    }
-    int pawn[2] = {-9, 11};
-    if (enemycolor == WHITE) {
-        pawn[0] = 9;
-        pawn[1] = -11;
-    }
-
-    const int rook[4] = {-10, -1, 10, 1};
-    const int bishop[4] = {-11, -9, 9, 11};
-
-    return isAttackedPreset(board, sq, enemycolor, KINGBB(SQ120SQ64(sq)),
-                            bbKing) ||
-           isAttackedPreset(board, sq, enemycolor, KNIGHTBB(SQ120SQ64(sq)),
-                            bbKnight) ||
-           isAttackedPawn(board, sq, pawn, 2, enemycolor) ||
-           isAttackedSliding(board, sq, rook, 4, enemycolor, bbRook) ||
-           isAttackedSliding(board, sq, bishop, 4, enemycolor, bbBishop);
-}
-
-// return TRUE if move is legal
-int isLegalMove(BOARD_STATE *board, MOVE move) {
-    int color = board->turn;
-    makeMove(board, move);
-    int kingsq = board->kings[color];
-    int check = isAttacked(board, kingsq, board->turn);
-    unmakeMove(board, move);
-    return !check;
 }
 
 // generate all legal moves and insert them into the moves list
@@ -520,13 +406,16 @@ int generateMoves(BOARD_STATE *board, MOVE *moves) {
             generatePseudoBishopMoves(board, moves, sq, &index);
             break;
         case bbKnight:
-            generatePseudoKnightMoves(board, moves, sq, &index);
+            generatePseudoPresetMoves(board, moves, sq, KNIGHTBB(SQ120SQ64(sq)),
+                                      &index);
             break;
         case bbQueen:
-            generatePseudoQueenMoves(board, moves, sq, &index);
+            generatePseudoRookMoves(board, moves, sq, &index);
+            generatePseudoBishopMoves(board, moves, sq, &index);
             break;
         case bbKing:
-            generatePseudoKingMoves(board, moves, sq, &index);
+            generatePseudoPresetMoves(board, moves, sq, KINGBB(SQ120SQ64(sq)),
+                                      &index);
             break;
         }
     }
