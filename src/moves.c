@@ -5,6 +5,8 @@
 // play a move on the board
 void makeMove(BOARD_STATE *board, MOVE move) {
 
+    // remove kingside/queenside castling ability
+    // after castling. place rook in new position.
     switch (move.castled) {
     case NO_CASTLE:
         break;
@@ -37,9 +39,11 @@ void makeMove(BOARD_STATE *board, MOVE move) {
     // TODO: cleanup
     int piece = getPieceSq120(move.startSquare, board);
 
+    // move piece to target square
     setPiece120(EMPTY, move.startSquare, board);
     setPiece120(piece, move.endSquare, board);
 
+    // update castling permissions if moving a king/rook
     if (piece == wR && move.startSquare == H1) {
         CLEARBIT(board->castle, WK_CASTLE);
     } else if (piece == wR && move.startSquare == A1) {
@@ -56,39 +60,61 @@ void makeMove(BOARD_STATE *board, MOVE move) {
         CLEARBIT(board->castle, BQ_CASTLE);
     }
 
+    // set new en passant square after two square pawn move.
+    // delete en passant square if last move wasn't a two square pawn move
     const int offset[2] = {S, N};
-
     if (move.twopawnmove) {
         board->enpassant = move.endSquare + offset[board->turn];
     } else {
         board->enpassant = OFFBOARD;
     }
 
+    // delete en passant square after performing en passant
+    // remove en passanted piece
     if (move.epcapture) {
         board->enpassant = OFFBOARD;
         setPiece120(EMPTY, move.endSquare + offset[board->turn], board);
     } else if (move.promotion != EMPTY) {
         setPiece120(move.promotion, move.endSquare, board);
     }
+
     board->turn = !(board->turn);
 }
 
 // undo a move on the board
 void unmakeMove(BOARD_STATE *board, MOVE move) {
 
+    // if castling move, put rook back
     if (move.castled == WK_CASTLE) {
-        setPiece120(EMPTY, F1, board);
-        setPiece120(wR, H1, board);
+        CLEARBIT(board->bitboard[bbRook], SQ120SQ64(F1));
+        CLEARBIT(board->bitboard[bbWhite], SQ120SQ64(F1));
+        CLEARBIT(board->bitboard[bbAny], SQ120SQ64(F1));
+        SETBIT(board->bitboard[bbRook], SQ120SQ64(H1));
+        SETBIT(board->bitboard[bbWhite], SQ120SQ64(H1));
+        SETBIT(board->bitboard[bbAny], SQ120SQ64(H1));
     } else if (move.castled == WQ_CASTLE) {
-        setPiece120(EMPTY, D1, board);
-        setPiece120(wR, A1, board);
+        CLEARBIT(board->bitboard[bbRook], SQ120SQ64(D1));
+        CLEARBIT(board->bitboard[bbWhite], SQ120SQ64(D1));
+        CLEARBIT(board->bitboard[bbAny], SQ120SQ64(D1));
+        SETBIT(board->bitboard[bbRook], SQ120SQ64(A1));
+        SETBIT(board->bitboard[bbWhite], SQ120SQ64(A1));
+        SETBIT(board->bitboard[bbAny], SQ120SQ64(A1));
     } else if (move.castled == BK_CASTLE) {
-        setPiece120(EMPTY, F8, board);
-        setPiece120(bR, H8, board);
+        CLEARBIT(board->bitboard[bbRook], SQ120SQ64(F8));
+        CLEARBIT(board->bitboard[bbBlack], SQ120SQ64(F8));
+        CLEARBIT(board->bitboard[bbAny], SQ120SQ64(F8));
+        SETBIT(board->bitboard[bbRook], SQ120SQ64(H8));
+        SETBIT(board->bitboard[bbBlack], SQ120SQ64(H8));
+        SETBIT(board->bitboard[bbAny], SQ120SQ64(H8));
     } else if (move.castled == BQ_CASTLE) {
-        setPiece120(EMPTY, D8, board);
-        setPiece120(bR, A8, board);
+        CLEARBIT(board->bitboard[bbRook], SQ120SQ64(D8));
+        CLEARBIT(board->bitboard[bbBlack], SQ120SQ64(D8));
+        CLEARBIT(board->bitboard[bbAny], SQ120SQ64(D8));
+        SETBIT(board->bitboard[bbRook], SQ120SQ64(A8));
+        SETBIT(board->bitboard[bbBlack], SQ120SQ64(A8));
+        SETBIT(board->bitboard[bbAny], SQ120SQ64(A8));
     }
+    // reset castling abilities
     board->castle = move.priorcastle;
 
     // TODO: cleanup
@@ -99,6 +125,7 @@ void unmakeMove(BOARD_STATE *board, MOVE move) {
 
     int piece = getPieceSq120(move.endSquare, board);
 
+    // perform en passant
     if (move.epcapture) {
         board->enpassant = move.endSquare;
         setPiece120(move.captured, move.endSquare + offset, board);
@@ -108,7 +135,10 @@ void unmakeMove(BOARD_STATE *board, MOVE move) {
         return;
     }
 
+    // put captured piece back
     setPiece120(move.captured, move.endSquare, board);
+
+    // undo promotion
     if (move.promotion == EMPTY) {
         setPiece120(piece, move.startSquare, board);
     } else {
@@ -119,9 +149,7 @@ void unmakeMove(BOARD_STATE *board, MOVE move) {
         setPiece120(pawn, move.startSquare, board);
     }
 
-    if (move.twopawnmove) {
-        board->enpassant = move.priorep;
-    }
+    board->enpassant = move.priorep;
 
     board->turn = !(board->turn);
 }
@@ -141,6 +169,15 @@ static void addMove(BOARD_STATE *board, MOVE *moves, int start, int end,
     moves[*index].priorep = board->enpassant;
     moves[*index].priorcastle = board->castle;
     (*index)++;
+
+    // types
+    // simple
+    // capture simple
+    // en passant capture
+    // two pawn move
+    // simple promotion
+    // capture promotion
+    // castle 4 types
 }
 
 // same as generateSimpleMoves() but continues in offset direction until not
@@ -172,8 +209,6 @@ static void generateSlidingMoves(BOARD_STATE *board, MOVE *moves, int sq,
 
 static void generateCastleMoves(BOARD_STATE *board, MOVE *moves, int *index) {
 
-    static int castles = 0;
-
     int rank = RANK_1;
     int queenside = WQ_CASTLE;
     int kingside = WK_CASTLE;
@@ -191,9 +226,11 @@ static void generateCastleMoves(BOARD_STATE *board, MOVE *moves, int *index) {
         return;
     }
 
+    ULL bb = board->bitboard[bbRook] & board->bitboard[color];
+
     if (board->kings[color] == FR2SQ120(FILE_E, rank)) {
         if (CHECKBIT(board->castle, kingside) &&
-            getPieceSq120(FR2SQ120(FILE_H, rank), board) == rook) {
+            CHECKBIT(bb, FR2SQ64(FILE_H, rank))) {
 
             int throughcheck =
                 isAttacked(board, FR2SQ120(FILE_F, rank), !color) ||
@@ -209,8 +246,9 @@ static void generateCastleMoves(BOARD_STATE *board, MOVE *moves, int *index) {
                         EMPTY, index);
             }
         }
+
         if (CHECKBIT(board->castle, queenside) &&
-            getPieceSq120(FR2SQ120(FILE_A, rank), board) == rook) {
+            CHECKBIT(bb, FR2SQ64(FILE_A, rank))) {
 
             int throughcheck =
                 isAttacked(board, FR2SQ120(FILE_C, rank), !color) ||
@@ -311,7 +349,6 @@ static void generatePseudoPawnMoves(BOARD_STATE *board, MOVE *moves, int sq,
 
 static void generatePseudoPresetMoves(BOARD_STATE *board, MOVE *moves, int sq,
                                       ULL bitboard, int *index) {
-    int sq64 = SQ120SQ64(sq);
     ULL bb = ~board->bitboard[board->turn] & bitboard;
 
     while (bb != 0) {
@@ -356,24 +393,22 @@ static void generatePseudoQueenMoves(BOARD_STATE *board, MOVE *moves, int sq,
     generatePseudoBishopMoves(board, moves, sq, index);
 }
 
+// return TRUE if sq(120) is attacked by an enemy piece. calculated
+// using preset attack bitboards
 static int isAttackedPreset(BOARD_STATE *board, int sq, int enemycolor,
                             ULL bitboard, int genericPiece) {
-    if (!ONBOARD(sq)) {
-        return FALSE;
-    }
 
-    int sq64 = SQ120SQ64(sq);
+    // check if enemy piece exists on possible attacking squares
     ULL bb = (bitboard & board->bitboard[genericPiece] &
               board->bitboard[enemycolor]);
 
-    if (bb == 0) {
-        return FALSE;
-    }
-    return TRUE;
+    return !(ONBOARD(sq) && bb == 0);
 }
 
-static int isAttackedSliding(BOARD_STATE *board, int sq, int *offsets,
-                             int sizeoffset, int enemycolor, int RB) {
+// return TRUE if sq(120) is attacked by an enemy piece on the file/rank/diag
+// given by the offset directions
+static int isAttackedSliding(BOARD_STATE *board, int sq, const int *offsets,
+                             const int sizeoffset, int enemycolor, int RB) {
     for (int i = 0; i < sizeoffset; i++) {
         int nextSq = sq + offsets[i];
 
@@ -395,34 +430,37 @@ static int isAttackedSliding(BOARD_STATE *board, int sq, int *offsets,
     return FALSE;
 }
 
+// return TRUE if sq(120) is attacked by an enemy pawn
 static int isAttackedPawn(BOARD_STATE *board, int sq, int *offsets,
                           int sizeoffset, int enemycolor) {
 
     for (int i = 0; i < sizeoffset; i++) {
         int nextSq = sq + offsets[i];
 
-        if (ONBOARD(nextSq) &&
-            CHECKBIT(board->bitboard[(enemycolor)], SQ120SQ64(nextSq))) {
+        ULL bb = board->bitboard[enemycolor] & board->bitboard[bbPawn];
 
-            if (CHECKBIT(board->bitboard[(bbPawn)], SQ120SQ64(nextSq))) {
-                return TRUE;
-            }
+        if (ONBOARD(nextSq) && CHECKBIT(bb, SQ120SQ64(nextSq))) {
+            return TRUE;
         }
     }
 
     return FALSE;
 }
 
+// return TRUE if sq(120) is attacked by the enemy color
 int isAttacked(BOARD_STATE *board, int sq, int enemycolor) {
 
+    if (enemycolor == WHITE) {
+        const int pawn[2] = {-9, 11};
+    }
     int pawn[2] = {-9, 11};
     if (enemycolor == WHITE) {
         pawn[0] = 9;
         pawn[1] = -11;
     }
 
-    int rook[4] = {-10, -1, 10, 1};
-    int bishop[4] = {-11, -9, 9, 11};
+    const int rook[4] = {-10, -1, 10, 1};
+    const int bishop[4] = {-11, -9, 9, 11};
 
     return isAttackedPreset(board, sq, enemycolor, KINGBB(SQ120SQ64(sq)),
                             bbKing) ||
@@ -433,6 +471,7 @@ int isAttacked(BOARD_STATE *board, int sq, int enemycolor) {
            isAttackedSliding(board, sq, bishop, 4, enemycolor, bbBishop);
 }
 
+// return TRUE if move is legal
 int isLegalMove(BOARD_STATE *board, MOVE move) {
     int color = board->turn;
     makeMove(board, move);
