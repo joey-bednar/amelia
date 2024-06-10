@@ -22,7 +22,7 @@ int negaMax(BOARD_STATE *board, int depth) {
     if (depth == 0) {
         return eval(board);
     }
-    int max = -555;
+    int max = -999;
 
     MOVE moves[MAX_LEGAL_MOVES];
     int n_moves = generateMoves(board, moves);
@@ -46,4 +46,30 @@ int negaMax(BOARD_STATE *board, int depth) {
     }
 
     return max;
+}
+
+void printBestMove(int depth, BOARD_STATE *board) {
+    int startSq = 0;
+    int endSq = 0;
+    int max = -10000;
+
+    MOVE moves[MAX_LEGAL_MOVES];
+    int n_moves = generateMoves(board, moves);
+
+    for (int i = 0; i < n_moves; i++) {
+        if (isLegalMove(board, moves[i])) {
+            makeMove(board, moves[i]);
+            int score = -negaMax(board, depth);
+
+            unmakeMove(board, moves[i]);
+            if (score > max) {
+                max = score;
+                startSq = moves[i].startSquare;
+                endSq = moves[i].endSquare;
+                // printf("negamax: %d; move: %d to %d\n", max, startSq, endSq);
+            }
+        }
+    }
+
+    printf("(%d): move %d to %d\n", max, startSq, endSq);
 }

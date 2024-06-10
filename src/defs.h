@@ -72,7 +72,8 @@ typedef struct {
     int kings[2];
 
     int turn;
-    int fiftyMove;
+    int halfmove;
+    int fullmove;
     int castle;
     int enpassant;
 } BOARD_STATE;
@@ -127,6 +128,8 @@ extern int isEmptySquare(int sq, BOARD_STATE *board);
 extern int getGenericPieceSq120(int sq, BOARD_STATE *board);
 extern int getColorSq120(int sq, BOARD_STATE *board);
 
+extern void loadFEN(char *fen, BOARD_STATE *board);
+
 // moves.c
 extern int generateMoves(BOARD_STATE *board, MOVE *move);
 extern void makeMove(BOARD_STATE *board, MOVE move);
@@ -155,5 +158,6 @@ extern void printBenchmark(int depth);
 // eval.c
 extern int eval(BOARD_STATE *board);
 extern int negaMax(BOARD_STATE *board, int depth);
+extern void printBestMove(int depth, BOARD_STATE *board);
 
 #endif

@@ -4,7 +4,7 @@
 #include <time.h>
 
 #define VERBOSE FALSE
-#define POSITION 2
+#define POSITION 3
 
 ULL perft_rec(int depth, BOARD_STATE *board) {
     int n_moves, i;
@@ -48,77 +48,26 @@ ULL perft_rec(int depth, BOARD_STATE *board) {
 
 ULL perft(int depth) {
     BOARD_STATE board;
-    board.turn = WHITE;
-
-    SETBIT(board.castle, WK_CASTLE);
-    SETBIT(board.castle, WQ_CASTLE);
-    SETBIT(board.castle, BK_CASTLE);
-    SETBIT(board.castle, BQ_CASTLE);
-
-    board.enpassant = OFFBOARD;
-    board.fiftyMove = 0;
-
     clearBoard(&board);
 
 #if POSITION == 0
 
-    initBoard(&board);
+    // initBoard(&board);
+
+    loadFEN("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1", &board);
 
 #endif
 
 #if POSITION == 2
 
-    setPiece(wK, FILE_E, RANK_1, &board);
-    setPiece(wQ, FILE_F, RANK_3, &board);
-    setPiece(wR, FILE_H, RANK_1, &board);
-    setPiece(wR, FILE_A, RANK_1, &board);
-    setPiece(wB, FILE_D, RANK_2, &board);
-    setPiece(wB, FILE_E, RANK_2, &board);
-    setPiece(wN, FILE_C, RANK_3, &board);
-    setPiece(wN, FILE_E, RANK_5, &board);
-
-    setPiece(wP, FILE_A, RANK_2, &board);
-    setPiece(wP, FILE_B, RANK_2, &board);
-    setPiece(wP, FILE_C, RANK_2, &board);
-    setPiece(wP, FILE_D, RANK_5, &board);
-    setPiece(wP, FILE_E, RANK_4, &board);
-    setPiece(wP, FILE_F, RANK_2, &board);
-    setPiece(wP, FILE_G, RANK_2, &board);
-    setPiece(wP, FILE_H, RANK_2, &board);
-
-    setPiece(bK, FILE_E, RANK_8, &board);
-    setPiece(bQ, FILE_E, RANK_7, &board);
-    setPiece(bR, FILE_A, RANK_8, &board);
-    setPiece(bR, FILE_H, RANK_8, &board);
-    setPiece(bB, FILE_A, RANK_6, &board);
-    setPiece(bB, FILE_G, RANK_7, &board);
-    setPiece(bN, FILE_B, RANK_6, &board);
-    setPiece(bN, FILE_F, RANK_6, &board);
-
-    setPiece(bP, FILE_A, RANK_7, &board);
-    setPiece(bP, FILE_B, RANK_4, &board);
-    setPiece(bP, FILE_C, RANK_7, &board);
-    setPiece(bP, FILE_D, RANK_7, &board);
-    setPiece(bP, FILE_E, RANK_6, &board);
-    setPiece(bP, FILE_F, RANK_7, &board);
-    setPiece(bP, FILE_G, RANK_6, &board);
-    setPiece(bP, FILE_H, RANK_3, &board);
+    loadFEN("r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq -",
+            &board);
 
 #endif
 
 #if POSITION == 3
 
-    setPiece(wP, FILE_B, RANK_5, &board);
-    setPiece(wP, FILE_E, RANK_2, &board);
-    setPiece(wP, FILE_G, RANK_2, &board);
-    setPiece(wR, FILE_B, RANK_4, &board);
-    setPiece(wK, FILE_A, RANK_5, &board);
-
-    setPiece(bP, FILE_C, RANK_7, &board);
-    setPiece(bP, FILE_D, RANK_6, &board);
-    setPiece(bP, FILE_F, RANK_4, &board);
-    setPiece(bR, FILE_H, RANK_5, &board);
-    setPiece(bK, FILE_H, RANK_4, &board);
+    loadFEN("8/2p5/3p4/KP5r/1R3p1k/8/4P1P1/8 w - - ", &board);
 
 #endif
 

@@ -62,6 +62,8 @@ void printBoard(BOARD_STATE *board) {
     }
     printf("Turn: %d\n", board->turn);
     printf("En passant: %d\n", board->enpassant);
+    printf("Castling: %d\n", board->castle);
+    printf("Half: %d, Full: %d\n", board->halfmove, board->fullmove);
 }
 
 // prints the pieces on the board

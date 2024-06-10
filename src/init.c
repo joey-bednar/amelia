@@ -13,12 +13,13 @@ void clearBoard(BOARD_STATE *board) {
     }
 
     board->turn = WHITE;
-    board->fiftyMove = 0;
+    board->enpassant = OFFBOARD;
+    board->halfmove = 0;
+    board->fullmove = 0;
     SETBIT(board->castle, WK_CASTLE);
     SETBIT(board->castle, WQ_CASTLE);
     SETBIT(board->castle, BK_CASTLE);
     SETBIT(board->castle, BQ_CASTLE);
-    board->enpassant = OFFBOARD;
 }
 
 // sets up the pieces for a new game
