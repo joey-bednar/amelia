@@ -5,77 +5,171 @@
 // play a move on the board
 void makeMove(BOARD_STATE *board, MOVE move) {
 
+    if (move.type == MOVE_QUIET) {
+        int piece = getPieceSq120(move.startSquare, board);
+
+        // move piece to target square
+        CLEARBIT(board->bitboard[GENERIC(piece)], SQ120SQ64(move.startSquare));
+        CLEARBIT(board->bitboard[board->turn], SQ120SQ64(move.startSquare));
+        CLEARBIT(board->bitboard[bbAny], SQ120SQ64(move.startSquare));
+        // setPiece120(EMPTY, move.startSquare, board);
+        // setPiece120(piece, move.endSquare, board);
+
+        SETBIT(board->bitboard[GENERIC(piece)], SQ120SQ64(move.endSquare));
+        SETBIT(board->bitboard[board->turn], SQ120SQ64(move.endSquare));
+        SETBIT(board->bitboard[bbAny], SQ120SQ64(move.endSquare));
+
+        if (CHECKBIT(board->bitboard[bbKing], SQ120SQ64(move.endSquare))) {
+            board->kings[board->turn] = move.endSquare;
+            if (board->turn == WHITE) {
+                CLEARBIT(board->castle, WK_CASTLE);
+                CLEARBIT(board->castle, WQ_CASTLE);
+            } else {
+                CLEARBIT(board->castle, BK_CASTLE);
+                CLEARBIT(board->castle, BQ_CASTLE);
+            }
+        }
+
+        // update castling permissions if moving a king/rook
+        if (piece == wR && move.startSquare == H1) {
+            CLEARBIT(board->castle, WK_CASTLE);
+        } else if (piece == wR && move.startSquare == A1) {
+            CLEARBIT(board->castle, WQ_CASTLE);
+        } else if (piece == bR && move.startSquare == H8) {
+            CLEARBIT(board->castle, BK_CASTLE);
+        } else if (piece == bR && move.startSquare == A8) {
+            CLEARBIT(board->castle, BQ_CASTLE);
+        }
+        board->enpassant = OFFBOARD;
+
+        board->turn = !(board->turn);
+        return;
+    } else if (move.type == MOVE_CAPTURE) {
+        int piece = getPieceSq120(move.startSquare, board);
+
+        // move piece to target square
+        setPiece120(EMPTY, move.startSquare, board);
+        setPiece120(piece, move.endSquare, board);
+
+        // update castling permissions if moving a king/rook
+        if (piece == wR && move.startSquare == H1) {
+            CLEARBIT(board->castle, WK_CASTLE);
+        } else if (piece == wR && move.startSquare == A1) {
+            CLEARBIT(board->castle, WQ_CASTLE);
+        } else if (piece == bR && move.startSquare == H8) {
+            CLEARBIT(board->castle, BK_CASTLE);
+        } else if (piece == bR && move.startSquare == A8) {
+            CLEARBIT(board->castle, BQ_CASTLE);
+        } else if (piece == wK && move.startSquare == E1) {
+            CLEARBIT(board->castle, WK_CASTLE);
+            CLEARBIT(board->castle, WQ_CASTLE);
+        } else if (piece == bK && move.startSquare == E8) {
+            CLEARBIT(board->castle, BK_CASTLE);
+            CLEARBIT(board->castle, BQ_CASTLE);
+        }
+
+        board->enpassant = OFFBOARD;
+
+        board->turn = !(board->turn);
+        return;
+
+    } else if (move.type == MOVE_DOUBLEPAWN) {
+
+        int piece = getPieceSq120(move.startSquare, board);
+
+        // move piece to target square
+        setPiece120(EMPTY, move.startSquare, board);
+        setPiece120(piece, move.endSquare, board);
+
+        // set new en passant square after two square pawn move.
+        // delete en passant square if last move wasn't a two square pawn move
+        const int offset[2] = {S, N};
+        board->enpassant = move.endSquare + offset[board->turn];
+
+        board->turn = !(board->turn);
+        return;
+    }
+
     // remove kingside/queenside castling ability
     // after castling. place rook in new position.
-    if (move.type == MOVE_KINGCASTLE) {
+    else if (move.type == MOVE_KINGCASTLE) {
         if (board->turn == WHITE) {
+
+            setPiece120(EMPTY, move.startSquare, board);
+            setPiece120(wK, move.endSquare, board);
+
             setPiece120(wR, F1, board);
             setPiece120(EMPTY, H1, board);
             CLEARBIT(board->castle, WK_CASTLE);
             CLEARBIT(board->castle, WQ_CASTLE);
         } else {
+
+            setPiece120(EMPTY, move.startSquare, board);
+            setPiece120(bK, move.endSquare, board);
+
             setPiece120(bR, F8, board);
             setPiece120(EMPTY, H8, board);
             CLEARBIT(board->castle, BK_CASTLE);
             CLEARBIT(board->castle, BQ_CASTLE);
         }
+
+        board->enpassant = OFFBOARD;
+        board->turn = !(board->turn);
+        return;
+
     } else if (move.type == MOVE_QUEENCASTLE) {
         if (board->turn == WHITE) {
+            setPiece120(EMPTY, move.startSquare, board);
+            setPiece120(wK, move.endSquare, board);
 
             setPiece120(wR, D1, board);
             setPiece120(EMPTY, A1, board);
             CLEARBIT(board->castle, WK_CASTLE);
             CLEARBIT(board->castle, WQ_CASTLE);
         } else {
+
+            setPiece120(EMPTY, move.startSquare, board);
+            setPiece120(bK, move.endSquare, board);
+
             setPiece120(bR, D8, board);
             setPiece120(EMPTY, A8, board);
             CLEARBIT(board->castle, BK_CASTLE);
             CLEARBIT(board->castle, BQ_CASTLE);
         }
-    }
 
-    int piece = getPieceSq120(move.startSquare, board);
-
-    // move piece to target square
-    setPiece120(EMPTY, move.startSquare, board);
-    setPiece120(piece, move.endSquare, board);
-
-    // update castling permissions if moving a king/rook
-    if (piece == wR && move.startSquare == H1) {
-        CLEARBIT(board->castle, WK_CASTLE);
-    } else if (piece == wR && move.startSquare == A1) {
-        CLEARBIT(board->castle, WQ_CASTLE);
-    } else if (piece == bR && move.startSquare == H8) {
-        CLEARBIT(board->castle, BK_CASTLE);
-    } else if (piece == bR && move.startSquare == A8) {
-        CLEARBIT(board->castle, BQ_CASTLE);
-    } else if (piece == wK && move.startSquare == E1) {
-        CLEARBIT(board->castle, WK_CASTLE);
-        CLEARBIT(board->castle, WQ_CASTLE);
-    } else if (piece == bK && move.startSquare == E8) {
-        CLEARBIT(board->castle, BK_CASTLE);
-        CLEARBIT(board->castle, BQ_CASTLE);
-    }
-
-    // set new en passant square after two square pawn move.
-    // delete en passant square if last move wasn't a two square pawn move
-    const int offset[2] = {S, N};
-    if (move.type == MOVE_DOUBLEPAWN) {
-        board->enpassant = move.endSquare + offset[board->turn];
-    } else {
         board->enpassant = OFFBOARD;
-    }
+        board->turn = !(board->turn);
+        return;
 
-    // delete en passant square after performing en passant
-    // remove en passanted piece
-    if (move.type == MOVE_EPCAPTURE) {
+    } else if (move.type == MOVE_EPCAPTURE) {
+        int piece = getPieceSq120(move.startSquare, board);
+
+        // move piece to target square
+        setPiece120(EMPTY, move.startSquare, board);
+        setPiece120(piece, move.endSquare, board);
+        board->enpassant = OFFBOARD;
+
+        // delete en passant square after performing en passant
+        // remove en passanted piece
+        const int offset[2] = {S, N};
         board->enpassant = OFFBOARD;
         setPiece120(EMPTY, move.endSquare + offset[board->turn], board);
-    } else if (move.promotion != EMPTY) {
-        setPiece120(move.promotion, move.endSquare, board);
-    }
+        board->turn = !(board->turn);
+        return;
+    } else if (CHECKBIT(move.type, 3)) {
+        int piece = getPieceSq120(move.startSquare, board);
 
-    board->turn = !(board->turn);
+        // move piece to target square
+        setPiece120(EMPTY, move.startSquare, board);
+        setPiece120(piece, move.endSquare, board);
+
+        board->enpassant = OFFBOARD;
+
+        setPiece120(move.promotion, move.endSquare, board);
+
+        board->turn = !(board->turn);
+        return;
+    }
 }
 
 // undo a move on the board
