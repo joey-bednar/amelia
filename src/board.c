@@ -204,10 +204,10 @@ void loadFEN(char *fen, BOARD_STATE *board) {
     int file = 0;
     while (fen[i] != ' ' && fen[i] != '-') {
 
-        if (fen[i] >= '0' && fen[i] <= '8') {
-            rank = (int)(fen[i] - '0');
-        } else if (fen[i] >= 'a' && fen[i] <= 'h') {
+        if (fen[i] >= 'a' && fen[i] <= 'h') {
             file = (int)(fen[i] - 'a');
+        } else if (fen[i] >= '1' && fen[i] <= '8') {
+            rank = (int)(fen[i] - '1');
             board->enpassant = FR2SQ120(file, rank);
         }
         i++;
