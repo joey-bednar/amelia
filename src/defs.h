@@ -153,11 +153,13 @@ extern void test();
 // perft.c
 extern ULL perft(int depth);
 extern ULL perft_rec(int depth, BOARD_STATE *board);
+extern ULL perft_rec_bulk(int depth, BOARD_STATE *board);
 extern void printBenchmark(int depth);
 
 // eval.c
 extern int eval(BOARD_STATE *board);
 extern int negaMax(BOARD_STATE *board, int depth);
 extern void printBestMove(int depth, BOARD_STATE *board);
+extern void makeBestMove(int depth, BOARD_STATE *board);
 
 #endif
