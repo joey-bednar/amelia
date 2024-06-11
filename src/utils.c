@@ -60,7 +60,11 @@ void printBoard(BOARD_STATE *board) {
         }
         printf("\n");
     }
-    printf("Turn: %d\n", board->turn);
+    if (board->turn == WHITE) {
+        printf("White to move.\n");
+    } else {
+        printf("Black to move.\n");
+    }
     printf("En passant: %d\n", board->enpassant);
     printf("Castling: %d\n", board->castle);
     printf("Half: %d, Full: %d\n", board->halfmove, board->fullmove);

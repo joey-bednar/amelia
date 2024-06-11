@@ -48,6 +48,36 @@ int negaMax(BOARD_STATE *board, int depth) {
     return max;
 }
 
+void makeBestMove(int depth, BOARD_STATE *board) {
+    int max = -10000;
+    MOVE best;
+
+    MOVE moves[MAX_LEGAL_MOVES];
+    int n_moves = generateMoves(board, moves);
+
+    for (int i = 0; i < n_moves; i++) {
+        if (isLegalMove(board, moves[i])) {
+            makeMove(board, moves[i]);
+            int score = -negaMax(board, depth);
+            unmakeMove(board, moves[i]);
+            if (score > 500) {
+                max = score;
+                best = moves[i];
+                // printf("(%d): move %d to %d\n", max);
+                break;
+            } else if (score > max) {
+                max = score;
+                best = moves[i];
+                // printf("(%d): move %d to %d\n", max);
+            }
+        }
+    }
+
+    makeMove(board, best);
+
+    // printf("(%d): move %d to %d\n", max, startSq, endSq);
+}
+
 void printBestMove(int depth, BOARD_STATE *board) {
     int startSq = 0;
     int endSq = 0;
@@ -60,13 +90,18 @@ void printBestMove(int depth, BOARD_STATE *board) {
         if (isLegalMove(board, moves[i])) {
             makeMove(board, moves[i]);
             int score = -negaMax(board, depth);
-
             unmakeMove(board, moves[i]);
-            if (score > max) {
+            if (score > 500) {
+                startSq = moves[i].startSquare;
+                endSq = moves[i].endSquare;
+                max = score;
+                printf("(%d): move %d to %d\n", max, startSq, endSq);
+                break;
+            } else if (score > max) {
                 max = score;
                 startSq = moves[i].startSquare;
                 endSq = moves[i].endSquare;
-                // printf("negamax: %d; move: %d to %d\n", max, startSq, endSq);
+                printf("(%d): move %d to %d\n", max, startSq, endSq);
             }
         }
     }

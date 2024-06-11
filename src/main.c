@@ -26,14 +26,68 @@ int main() {
     clearBoard(&board);
     initBoard(&board);
 
-    int depth = 5;
-    perft(depth);
-    printBenchmark(depth);
+    char moveString[32];
+    int input = TRUE;
+    while (TRUE) {
 
-    // for(int i=0;i<6;i++) {
+        printf("Input move: ");
+        while (input) {
+            scanf("%s", moveString);
+            input = FALSE;
+        }
+        printf("Move: %s\n", moveString);
+
+        MOVE moves[MAX_LEGAL_MOVES];
+        int n_moves = generateMoves(&board, moves);
+
+        // char moveString[4] = "e2e4";
+
+        int file = (int)(moveString[0] - 'a');
+        int rank = (int)(moveString[1] - '1');
+        int start = FR2SQ120(file, rank);
+        file = (int)(moveString[2] - 'a');
+        rank = (int)(moveString[3] - '1');
+        int end = FR2SQ120(file, rank);
+
+        int legal = FALSE;
+        for (int i = 0; i < n_moves; i++) {
+            if (moves[i].startSquare == start && moves[i].endSquare == end &&
+                isLegalMove(&board, moves[i])) {
+                printf("Played move %s\n", moveString);
+                makeMove(&board, moves[i]);
+                printBoard(&board);
+                printf("\n\n\n\n");
+                legal = TRUE;
+            }
+        }
+
+        if (!legal) {
+            printf("Illegal move!\n");
+        } else {
+            makeBestMove(4, &board);
+            printBoard(&board);
+            printf("\n\n\n\n");
+        }
+
+        input = TRUE;
+    }
+
+    // int depth = 6;
+    // perft(depth);
+    // printBenchmark(depth);
+
+    // loadFEN("r1b2r1k/1pq5/p2p2Q1/3n4/Pn2p3/6R1/BP4PP/3R3K w - - 1 2",
+    // &board); for (int i = 1; i < 6; i++) {
+    //     printf("Depth %d:\n",i);
     //     printBestMove(i, &board);
     // }
-    // printBoard(&board);
+
+    // int depth = 4;
+    // printBestMove(depth, &board);
+
+    loadFEN("rnbqkbnr/ppp1p1pp/8/3pPp2/8/8/PPPP1PPP/RNBQKBNR w KQkq f6 0 3",
+            &board);
+    printBoard(&board);
 
     // test();
 
