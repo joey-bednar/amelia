@@ -24,25 +24,27 @@ ULL perft_rec_bulk(int depth, BOARD_STATE *board) {
 
     for (i = 0; i < n_moves; i++) {
 
-        if (isLegalMove(board, move_list[i])) {
 #if VERBOSE == 1
-            printf("depth %d:\n", depth);
-            printBoard(board);
-            printf("\n");
+        printf("depth %d:\n", depth);
+        printBoard(board);
+        printf("\n");
 #endif
 
-            makeMove(board, move_list[i]);
+        makeMove(board, move_list[i]);
 
 #if VERBOSE == 1
-            printf("depth %d:\n", depth);
-            printBoard(board);
-            printBitboard(board->bitboard[bbWhite]);
-            printBitboard(board->bitboard[bbBlack]);
-            printf("\n================\n");
+        printf("depth %d:\n", depth);
+        printBoard(board);
+        printBitboard(board->bitboard[bbWhite]);
+        printBitboard(board->bitboard[bbBlack]);
+        printf("\n================\n");
 #endif
+
+        if (!isAttacked(board, board->kings[!board->turn], board->turn)) {
             nodes += perft_rec_bulk(depth - 1, board);
-            unmakeMove(board, move_list[i]);
         }
+
+        unmakeMove(board, move_list[i]);
     }
     return nodes;
 }
