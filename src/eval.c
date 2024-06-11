@@ -48,7 +48,7 @@ int negaMax(BOARD_STATE *board, int depth) {
     return max;
 }
 
-void makeBestMove(int depth, BOARD_STATE *board) {
+MOVE makeBestMove(int depth, BOARD_STATE *board) {
     int max = -10000;
     MOVE best;
 
@@ -74,6 +74,7 @@ void makeBestMove(int depth, BOARD_STATE *board) {
     }
 
     makeMove(board, best);
+    return best;
 
     // printf("(%d): move %d to %d\n", max, startSq, endSq);
 }

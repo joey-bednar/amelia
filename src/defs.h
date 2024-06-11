@@ -160,6 +160,9 @@ extern void printBenchmark(int depth);
 extern int eval(BOARD_STATE *board);
 extern int negaMax(BOARD_STATE *board, int depth);
 extern void printBestMove(int depth, BOARD_STATE *board);
-extern void makeBestMove(int depth, BOARD_STATE *board);
+extern MOVE makeBestMove(int depth, BOARD_STATE *board);
+
+// ui.c
+extern void playHuman(BOARD_STATE *board);
 
 #endif
