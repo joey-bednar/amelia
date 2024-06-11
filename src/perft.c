@@ -4,30 +4,34 @@
 #include <time.h>
 
 #define VERBOSE FALSE
-#define POSITION 3
+#define POSITION 0
 
-ULL perft_rec(int depth, BOARD_STATE *board) {
+ULL perft_rec_bulk(int depth, BOARD_STATE *board) {
+    MOVE move_list[256];
     int n_moves, i;
     ULL nodes = 0;
 
-    if (depth == 0) {
-        return 1ULL;
+    n_moves = generateMoves(board, move_list);
+    int legal = 0;
+    for (int i = 0; i < n_moves; i++) {
+        if (isLegalMove(board, move_list[i])) {
+            legal++;
+        }
     }
 
-    MOVE moves[MAX_LEGAL_MOVES];
-
-    n_moves = generateMoves(board, moves);
+    if (depth == 1)
+        return (ULL)legal;
 
     for (i = 0; i < n_moves; i++) {
-        if (isLegalMove(board, moves[i])) {
 
+        if (isLegalMove(board, move_list[i])) {
 #if VERBOSE == 1
             printf("depth %d:\n", depth);
             printBoard(board);
             printf("\n");
 #endif
 
-            makeMove(board, moves[i]);
+            makeMove(board, move_list[i]);
 
 #if VERBOSE == 1
             printf("depth %d:\n", depth);
@@ -36,13 +40,10 @@ ULL perft_rec(int depth, BOARD_STATE *board) {
             printBitboard(board->bitboard[bbBlack]);
             printf("\n================\n");
 #endif
-
-            nodes += perft_rec(depth - 1, board);
-
-            unmakeMove(board, moves[i]);
+            nodes += perft_rec_bulk(depth - 1, board);
+            unmakeMove(board, move_list[i]);
         }
     }
-
     return nodes;
 }
 
@@ -74,7 +75,7 @@ ULL perft(int depth) {
     printBoard(&board);
 
     clock_t t = clock();
-    ULL num = perft_rec(depth, &board);
+    ULL num = perft_rec_bulk(depth, &board);
     t = clock() - t;
     double time_taken = ((double)t) / CLOCKS_PER_SEC; // in seconds
     printf("%lld", num);
