@@ -29,6 +29,7 @@
 
 #define CHAR2FILE(c) ((int)((c) - 'a'))
 #define CHAR2RANK(c) ((int)((c) - '1'))
+#define CHAR2SQ120(f, r) (FR2SQ120((CHAR2FILE((f))), (CHAR2RANK((r)))))
 
 // clang-format off
 enum { EMPTY, wP, wN, wB, wR, wQ, wK, bP, bN, bB, bR, bQ, bK, OFFBOARD };
@@ -131,8 +132,6 @@ extern int isEmptySquare(int sq, BOARD_STATE *board);
 extern int getGenericPieceSq120(int sq, BOARD_STATE *board);
 extern int getColorSq120(int sq, BOARD_STATE *board);
 
-extern void loadFEN(char *fen, BOARD_STATE *board);
-
 // moves.c
 extern int generateMoves(BOARD_STATE *board, MOVE *move);
 extern void makeMove(BOARD_STATE *board, MOVE move);
@@ -169,6 +168,7 @@ extern MOVE makeBestMove(int depth, BOARD_STATE *board);
 extern void playHuman(BOARD_STATE *board);
 
 // uci.c
+extern int loadFEN(char *fen, BOARD_STATE *board, int startIndex);
 extern void startUCI();
 
 #endif

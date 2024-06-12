@@ -35,7 +35,7 @@ int main() {
     // printBenchmark(depth);
 
     // loadFEN("r1b2r1k/1pq5/p2p2Q1/3n4/Pn2p3/6R1/BP4PP/3R3K w - - 1 2",
-    // &board); for (int i = 1; i < 6; i++) {
+    // &board,0); for (int i = 1; i < 6; i++) {
     //     printf("Depth %d:\n",i);
     //     printBestMove(i, &board);
     // }
