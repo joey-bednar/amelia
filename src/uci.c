@@ -210,19 +210,23 @@ int loadFEN(char *fen, BOARD_STATE *board, int startIndex) {
 
 void startUCI() {
     BOARD_STATE board;
+    initBoard(&board);
 
     while (TRUE) {
         char input[INPUTLEN];
         fgets(input, INPUTLEN, stdin);
-        if (strcmp("uci\n", input) == 0) {
+        if (strcmp("ucinewgame", input) == 0) {
+            printf("readyok\n");
+            initBoard(&board);
+        } else if (strncmp("uci", input, 3) == 0) {
+            printf("id name joey\n");
+            printf("id author joey\n");
             printf("uciok\n");
         } else if (strcmp("isready\n", input) == 0) {
             printf("readyok\n");
-        } else if (strcmp("ucinewgame\n", input) == 0) {
-            clearBoard(&board);
         } else if (strcmp("position startpos\n", input) == 0) {
             initBoard(&board);
-            printf("Starting position\n");
+            // printf("Starting position\n");
         } else if (strncmp("position startpos \n", input, POSSTARTLEN) == 0) {
             initBoard(&board);
             parseMoves(input, &board, POSSTARTLEN);
@@ -231,13 +235,13 @@ void startUCI() {
             int i = loadFEN(input, &board, POSFENLEN);
             parseMoves(input, &board, i);
         } else if (strncmp("go\n", input, 2) == 0) {
+            printBestMove(2, &board);
             // printf("go\n");
         } else if (strcmp("stop\n", input) == 0) {
             // printf("stop\n");
         } else if (strcmp("quit\n", input) == 0) {
             break;
         }
-        printBoard(&board);
-        fflush(stdin);
+        fflush(stdout);
     }
 }

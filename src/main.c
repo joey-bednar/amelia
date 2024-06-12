@@ -26,6 +26,11 @@ int main() {
     clearBoard(&board);
     initBoard(&board);
 
+    // loadFEN("r1bqk2r/1ppp1ppp/2n2n2/2b1p3/2B1P3/3P1N2/1pPQ1PPP/RN3RK1 b kq -
+    // 1 9",&board,0);
+
+    // printBestMove(2, &board);
+
     startUCI();
 
     // playHuman(&board);
@@ -51,7 +56,7 @@ int main() {
 
     // printBitboardIndex64();
     // printBitboardIndex120();
-    printBoardIndex();
+    // printBoardIndex();
 
     return 0;
 }

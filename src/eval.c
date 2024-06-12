@@ -80,8 +80,8 @@ MOVE makeBestMove(int depth, BOARD_STATE *board) {
 }
 
 void printBestMove(int depth, BOARD_STATE *board) {
-    int startSq = 0;
-    int endSq = 0;
+    MOVE best;
+
     int max = -10000;
 
     MOVE moves[MAX_LEGAL_MOVES];
@@ -93,19 +93,44 @@ void printBestMove(int depth, BOARD_STATE *board) {
             int score = -negaMax(board, depth);
             unmakeMove(board, moves[i]);
             if (score > 500) {
-                startSq = moves[i].startSquare;
-                endSq = moves[i].endSquare;
+                best = moves[i];
                 max = score;
-                printf("(%d): move %d to %d\n", max, startSq, endSq);
+                // printf("(%d): move %d to %d\n", max, startSq, endSq);
                 break;
             } else if (score > max) {
                 max = score;
-                startSq = moves[i].startSquare;
-                endSq = moves[i].endSquare;
-                printf("(%d): move %d to %d\n", max, startSq, endSq);
+                best = moves[i];
+                // printf("(%d): move %d to %d\n", max, startSq, endSq);
             }
         }
     }
 
-    printf("(%d): move %d to %d\n", max, startSq, endSq);
+    char startFile = SQ120F(best.startSquare) + 'a';
+    char startRank = SQ120R(best.startSquare) + '1';
+    char endFile = SQ120F(best.endSquare) + 'a';
+    char endRank = SQ120R(best.endSquare) + '1';
+
+    char promote = '\0';
+    if (best.type == MOVE_QUEENPROMOTE ||
+        best.type == MOVE_QUEENPROMOTECAPTURE) {
+        promote = 'q';
+    } else if (best.type == MOVE_ROOKPROMOTE ||
+               best.type == MOVE_ROOKPROMOTECAPTURE) {
+        promote = 'r';
+    } else if (best.type == MOVE_BISHOPPROMOTE ||
+               best.type == MOVE_BISHOPPROMOTECAPTURE) {
+        promote = 'b';
+    } else if (best.type == MOVE_KNIGHTPROMOTE ||
+               best.type == MOVE_KNIGHTPROMOTECAPTURE) {
+        promote = 'k';
+    }
+
+    if (promote != '\0') {
+        printf("bestmove %c%c%c%c%c\n", startFile, startRank, endFile, endRank,
+               promote);
+        // printf("%d %d\n",best.startSquare,best.endSquare);
+    } else {
+        printf("bestmove %c%c%c%c\n", startFile, startRank, endFile, endRank);
+        // printf("%d %d\n",best.startSquare,best.endSquare);
+    }
 }
