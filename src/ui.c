@@ -19,11 +19,12 @@ void playHuman(BOARD_STATE *board) {
 
         // char moveString[4] = "e2e4";
 
-        int file = (int)(moveString[0] - 'a');
-        int rank = (int)(moveString[1] - '1');
+        int file = CHAR2FILE(moveString[0]);
+        int rank = CHAR2RANK(moveString[1]);
         int start = FR2SQ120(file, rank);
-        file = (int)(moveString[2] - 'a');
-        rank = (int)(moveString[3] - '1');
+
+        file = CHAR2FILE(moveString[2]);
+        rank = CHAR2RANK(moveString[3]);
         int end = FR2SQ120(file, rank);
 
         int legal = FALSE;

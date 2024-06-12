@@ -26,7 +26,9 @@ int main() {
     clearBoard(&board);
     initBoard(&board);
 
-    playHuman(&board);
+    startUCI();
+
+    // playHuman(&board);
 
     // int depth = 6;
     // perft(depth);

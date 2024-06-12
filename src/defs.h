@@ -27,6 +27,9 @@
 
 #define MAX_LEGAL_MOVES 256
 
+#define CHAR2FILE(c) ((int)((c) - 'a'))
+#define CHAR2RANK(c) ((int)((c) - '1'))
+
 // clang-format off
 enum { EMPTY, wP, wN, wB, wR, wQ, wK, bP, bN, bB, bR, bQ, bK, OFFBOARD };
 enum { bbWhite, bbBlack, bbPawn, bbKnight, bbBishop, bbRook, bbQueen, bbKing, bbAny, bbLength };
@@ -164,5 +167,8 @@ extern MOVE makeBestMove(int depth, BOARD_STATE *board);
 
 // ui.c
 extern void playHuman(BOARD_STATE *board);
+
+// uci.c
+extern void startUCI();
 
 #endif
