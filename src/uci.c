@@ -40,10 +40,8 @@ static void playUCIMove(BOARD_STATE *board, int start, int end, char promo) {
             isLegalMove(board, moves[i])) {
             if (promo == ' ' || promo == '\n') {
                 makeMove(board, moves[i]);
-                // printBoard(board);
             } else if (moves[i].type == piece || moves[i].type == pieceCap) {
                 makeMove(board, moves[i]);
-                // printBoard(board);
             }
         }
     }
@@ -219,14 +217,13 @@ void startUCI() {
             printf("readyok\n");
             initBoard(&board);
         } else if (strncmp("uci", input, 3) == 0) {
-            printf("id name joey\n");
-            printf("id author joey\n");
+            printf("id name Annie Edison\n");
+            printf("id author Joey Bednar\n");
             printf("uciok\n");
         } else if (strcmp("isready\n", input) == 0) {
             printf("readyok\n");
         } else if (strcmp("position startpos\n", input) == 0) {
             initBoard(&board);
-            // printf("Starting position\n");
         } else if (strncmp("position startpos \n", input, POSSTARTLEN) == 0) {
             initBoard(&board);
             parseMoves(input, &board, POSSTARTLEN);
@@ -235,8 +232,7 @@ void startUCI() {
             int i = loadFEN(input, &board, POSFENLEN);
             parseMoves(input, &board, i);
         } else if (strncmp("go\n", input, 2) == 0) {
-            printBestMove(2, &board);
-            // printf("go\n");
+            printBestMove(3, &board);
         } else if (strcmp("stop\n", input) == 0) {
             // printf("stop\n");
         } else if (strcmp("quit\n", input) == 0) {
