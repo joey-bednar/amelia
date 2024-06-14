@@ -2,6 +2,7 @@
 #include <stdio.h>
 
 #define NEGINF -99999
+#define NEGMATE -50000
 #define POSINF 99999
 
 // return the value of all pieces of a given color using piece values and square
@@ -51,9 +52,9 @@ static int computePieceTotals(ULL bb, int color, BOARD_STATE *board) {
 }
 
 int eval(BOARD_STATE *board) {
-    static int count = 0;
-    count++;
-    printf("count: %d\n", count);
+    // static int count = 0;
+    // count++;
+    // printf("count: %d\n", count);
 
     ULL mine = board->bitboard[board->turn];
     ULL yours = board->bitboard[!board->turn];
@@ -107,7 +108,7 @@ static int alphabeta(BOARD_STATE *board, int depth, int alpha, int beta) {
     if (legal == 0) {
         if (isAttacked(board, board->kings[board->turn], !board->turn)) {
             // checkmate
-            return NEGINF;
+            return NEGMATE;
         } else {
             // stalemate
             return 0;
@@ -178,7 +179,7 @@ MOVE makeBestMove(int depth, BOARD_STATE *board) {
 void printBestMove(int depth, BOARD_STATE *board) {
     MOVE best;
 
-    int score = NEGINF;
+    int max = NEGINF;
     int alpha = NEGINF;
     int beta = POSINF;
 
@@ -188,15 +189,11 @@ void printBestMove(int depth, BOARD_STATE *board) {
     for (int i = 0; i < n_moves; i++) {
         if (isLegalMove(board, moves[i])) {
             makeMove(board, moves[i]);
-            score = -alphabeta(board, depth - 1, -beta, -alpha);
+            int score = -alphabeta(board, depth - 1, -beta, -alpha);
             unmakeMove(board, moves[i]);
-
-            if (score >= beta) {
-                continue;
-            }
-            if (score > alpha) {
-                alpha = score;
+            if (score >= max) {
                 best = moves[i];
+                max = score;
             }
         }
     }
@@ -224,9 +221,7 @@ void printBestMove(int depth, BOARD_STATE *board) {
     if (promote != '\0') {
         printf("bestmove %c%c%c%c%c\n", startFile, startRank, endFile, endRank,
                promote);
-        // printf("%d %d\n",best.startSquare,best.endSquare);
     } else {
         printf("bestmove %c%c%c%c\n", startFile, startRank, endFile, endRank);
-        // printf("%d %d\n",best.startSquare,best.endSquare);
     }
 }
