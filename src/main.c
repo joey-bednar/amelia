@@ -22,6 +22,7 @@ int main() {
     initSqMap(sq120sq64Map, sq64sq120Map, onboardMap);
     initPieceGenericMap(genericMap, toWhite, toBlack);
     initJumps(knightJumps, kingJumps);
+    initPieceSqMaps();
 
     clearBoard(&board);
     initBoard(&board);

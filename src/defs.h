@@ -108,6 +108,13 @@ extern int onboardMap[120];
 extern ULL knightJumps[64];
 extern ULL kingJumps[64];
 
+extern int pawnSqTable[64];
+extern int knightSqTable[64];
+extern int bishopSqTable[64];
+extern int rookSqTable[64];
+extern int queenSqTable[64];
+extern int kingSqTable[64];
+
 // init.c
 extern void initBoard(BOARD_STATE *board);
 extern void clearBoard(BOARD_STATE *board);
@@ -116,6 +123,7 @@ extern void initPieceGenericMap(int *genericMap, int *toWhite, int *toBlack);
 extern void initEnpassantMap(int *map);
 extern void initColorMap(int *map, int *notmap);
 extern void initJumps(ULL *knightJumps, ULL *kingJumps);
+extern void initPieceSqMaps();
 
 // board.c
 
