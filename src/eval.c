@@ -51,9 +51,9 @@ static int computePieceTotals(ULL bb, int color, BOARD_STATE *board) {
 }
 
 int eval(BOARD_STATE *board) {
-    // static int count = 0;
-    // count++;
-    // printf("count: %d\n",count);
+    static int count = 0;
+    count++;
+    printf("count: %d\n", count);
 
     ULL mine = board->bitboard[board->turn];
     ULL yours = board->bitboard[!board->turn];
@@ -69,9 +69,18 @@ int eval(BOARD_STATE *board) {
 static int alphabeta(BOARD_STATE *board, int depth, int alpha, int beta) {
     int score = NEGINF;
 
+    int legal = 0;
+
     if (depth == 0) {
         return eval(board);
     }
+
+    if (board->halfmove >= 100) {
+        return 0;
+    }
+
+    // TODO: add repetition check
+    // TODO: add max depth check
 
     MOVE moves[MAX_LEGAL_MOVES];
     int n_moves = generateMoves(board, moves);
@@ -79,6 +88,7 @@ static int alphabeta(BOARD_STATE *board, int depth, int alpha, int beta) {
     for (int i = 0; i < n_moves; i++) {
         if (isLegalMove(board, moves[i])) {
 
+            legal++;
             makeMove(board, moves[i]);
 
             score = -alphabeta(board, depth - 1, -beta, -alpha);
@@ -91,6 +101,16 @@ static int alphabeta(BOARD_STATE *board, int depth, int alpha, int beta) {
             if (score > alpha) {
                 alpha = score;
             }
+        }
+    }
+
+    if (legal == 0) {
+        if (isAttacked(board, board->kings[board->turn], !board->turn)) {
+            // checkmate
+            return NEGINF;
+        } else {
+            // stalemate
+            return 0;
         }
     }
 
@@ -155,68 +175,10 @@ MOVE makeBestMove(int depth, BOARD_STATE *board) {
     // printf("(%d): move %d to %d\n", max, startSq, endSq);
 }
 
-// void printBestMove(int depth, BOARD_STATE *board) {
-//     MOVE best;
-//
-//     int max = -99999;
-//
-//     MOVE moves[MAX_LEGAL_MOVES];
-//     int n_moves = generateMoves(board, moves);
-//
-//     for (int i = 0; i < n_moves; i++) {
-//         if (isLegalMove(board, moves[i])) {
-//             makeMove(board, moves[i]);
-//             int score = -negaMax(board, depth);
-//             unmakeMove(board, moves[i]);
-//             if (score > 10000) {
-//                 best = moves[i];
-//                 max = score;
-//                 // printf("(%d): move %d to %d\n", max, startSq, endSq);
-//                 break;
-//             } else if (score > max) {
-//                 max = score;
-//                 best = moves[i];
-//                 // printf("(%d): move %d to %d\n", max, startSq, endSq);
-//             }
-//         }
-//     }
-//
-//     char startFile = SQ120F(best.startSquare) + 'a';
-//     char startRank = SQ120R(best.startSquare) + '1';
-//     char endFile = SQ120F(best.endSquare) + 'a';
-//     char endRank = SQ120R(best.endSquare) + '1';
-//
-//     char promote = '\0';
-//     if (best.type == MOVE_QUEENPROMOTE ||
-//         best.type == MOVE_QUEENPROMOTECAPTURE) {
-//         promote = 'q';
-//     } else if (best.type == MOVE_ROOKPROMOTE ||
-//                best.type == MOVE_ROOKPROMOTECAPTURE) {
-//         promote = 'r';
-//     } else if (best.type == MOVE_BISHOPPROMOTE ||
-//                best.type == MOVE_BISHOPPROMOTECAPTURE) {
-//         promote = 'b';
-//     } else if (best.type == MOVE_KNIGHTPROMOTE ||
-//                best.type == MOVE_KNIGHTPROMOTECAPTURE) {
-//         promote = 'k';
-//     }
-//
-//     if (promote != '\0') {
-//         printf("bestmove %c%c%c%c%c\n", startFile, startRank, endFile,
-//         endRank,
-//                promote);
-//         // printf("%d %d\n",best.startSquare,best.endSquare);
-//     } else {
-//         printf("bestmove %c%c%c%c\n", startFile, startRank, endFile,
-//         endRank);
-//         // printf("%d %d\n",best.startSquare,best.endSquare);
-//     }
-// }
-
 void printBestMove(int depth, BOARD_STATE *board) {
     MOVE best;
 
-    int max = NEGINF;
+    int score = NEGINF;
     int alpha = NEGINF;
     int beta = POSINF;
 
@@ -226,11 +188,15 @@ void printBestMove(int depth, BOARD_STATE *board) {
     for (int i = 0; i < n_moves; i++) {
         if (isLegalMove(board, moves[i])) {
             makeMove(board, moves[i]);
-            int score = -alphabeta(board, depth - 1, -beta, -alpha);
+            score = -alphabeta(board, depth - 1, -beta, -alpha);
             unmakeMove(board, moves[i]);
-            if (score >= max) {
+
+            if (score >= beta) {
+                continue;
+            }
+            if (score > alpha) {
+                alpha = score;
                 best = moves[i];
-                max = score;
             }
         }
     }

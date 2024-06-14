@@ -26,6 +26,7 @@
 #define KINGBB(sq64) (kingJumps[(sq64)])
 
 #define MAX_LEGAL_MOVES 256
+#define MAX_DEPTH 10
 
 #define CHAR2FILE(c) ((int)((c) - 'a'))
 #define CHAR2RANK(c) ((int)((c) - '1'))
