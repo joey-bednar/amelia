@@ -28,6 +28,7 @@ You can also [spectate active games](https://lichess.org/@/AnnieEdison/tv).
 ### Evaluation
 
 - Bitscan material count
+- Piece square tables
 
 ### Protocol
 
