@@ -1,5 +1,5 @@
 # Thanks to Job Vranish (https://spin.atomicobject.com/2016/08/26/makefile-c-projects/)
-TARGET_EXEC := main
+TARGET_EXEC := annie
 
 BUILD_DIR := build
 SRC_DIRS := src
