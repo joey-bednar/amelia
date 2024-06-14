@@ -7,27 +7,19 @@ int sq120sq64Map[120];
 int sq64sq120Map[64];
 int colorMap[OFFBOARD + 1];
 int notcolorMap[OFFBOARD + 1];
-int genericMap[bbLength];
-int toWhite[bbLength];
-int toBlack[bbLength];
+int genericMap[OFFBOARD + 1];
+int toWhite[OFFBOARD + 1];
+int toBlack[OFFBOARD + 1];
 int onboardMap[120];
 ULL knightJumps[64];
 ULL kingJumps[64];
 
 int main() {
     BOARD_STATE board;
-
-    initEnpassantMap(epMap);
-    initColorMap(colorMap, notcolorMap);
-    initSqMap(sq120sq64Map, sq64sq120Map, onboardMap);
-    initPieceGenericMap(genericMap, toWhite, toBlack);
-    initJumps(knightJumps, kingJumps);
-    initPieceSqMaps();
-
-    clearBoard(&board);
-    initBoard(&board);
+    init(&board);
 
     startUCI();
+    // perft(5);
 
     return 0;
 }

@@ -16,7 +16,7 @@ static void printAllBoards() {
     printf("\n");
 
     // board 120 index
-    printBoardIndex(&board);
+    printBoardIndex();
     printf("\n");
 
     // sq to file

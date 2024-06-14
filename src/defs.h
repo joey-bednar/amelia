@@ -101,9 +101,9 @@ extern int sq120sq64Map[120];
 extern int sq64sq120Map[64];
 extern int colorMap[OFFBOARD + 1];
 extern int notcolorMap[OFFBOARD + 1];
-extern int genericMap[bbLength];
-extern int toWhite[bbLength];
-extern int toBlack[bbLength];
+extern int genericMap[OFFBOARD + 1];
+extern int toWhite[OFFBOARD + 1];
+extern int toBlack[OFFBOARD + 1];
 extern int onboardMap[120];
 extern ULL knightJumps[64];
 extern ULL kingJumps[64];
@@ -118,12 +118,7 @@ extern int kingSqTable[64];
 // init.c
 extern void initBoard(BOARD_STATE *board);
 extern void clearBoard(BOARD_STATE *board);
-extern void initSqMap(int *sq120sq64Map, int *sq64sq120Map, int *onboardMap);
-extern void initPieceGenericMap(int *genericMap, int *toWhite, int *toBlack);
-extern void initEnpassantMap(int *map);
-extern void initColorMap(int *map, int *notmap);
-extern void initJumps(ULL *knightJumps, ULL *kingJumps);
-extern void initPieceSqMaps();
+extern void init(BOARD_STATE *board);
 
 // board.c
 

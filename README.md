@@ -24,6 +24,7 @@ You can also [spectate active games](https://lichess.org/@/AnnieEdison/tv).
 ### Search
 
 - Negamax
+- Alpha-Beta Pruning
 
 ### Evaluation
 
