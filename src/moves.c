@@ -156,7 +156,7 @@ void makeMove(BOARD_STATE *board, MOVE move) {
         setPiece120(EMPTY, move.endSquare + offset[board->turn], board);
         board->turn = !(board->turn);
         return;
-    } else if (CHECKBIT(move.type, 3)) {
+    } else if (move.type >= MOVE_KNIGHTPROMOTE) {
         int piece = getPieceSq120(move.startSquare, board);
 
         // move piece to target square

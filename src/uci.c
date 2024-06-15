@@ -44,10 +44,12 @@ static void playUCIMove(BOARD_STATE *board, int start, int end, char promo) {
             isLegalMove(board, moves[i])) {
             if (promo == ' ' || promo == '\n') {
                 makeMove(board, moves[i]);
-                // printf("move\n");
+                // printf("move no promote\n");
+                return;
             } else if (moves[i].type == piece || moves[i].type == pieceCap) {
                 makeMove(board, moves[i]);
-                // printf("move\n");
+                // printf("move promote type %d\n",moves[i].type);
+                return;
             }
         }
     }
@@ -67,9 +69,11 @@ static void parseMoves(char *string, BOARD_STATE *board, int startIndex) {
 
             char promo = string[i + 4];
 
-            // printf("parseMoves: %d %d\n",startSq,endSq);
+            // printf("parseMoves: %d %d %c\n",startSq,endSq,promo);
 
+            // printBoard(board);
             playUCIMove(board, startSq, endSq, promo);
+            // printBoard(board);
 
             if (promo == ' ') {
                 i = i + 4;
@@ -215,9 +219,6 @@ int loadFEN(char *fen, BOARD_STATE *board, int startIndex) {
 
     return i + 9;
 }
-
-// TODO: bug position fen 8/Pk3pp1/7p/4P3/1N2bP2/1P6/1r6/4K3 w - - 1 54 moves
-// a7a8q
 
 void startUCI() {
     BOARD_STATE board;
