@@ -7,6 +7,8 @@
 #define POSSTARTLEN 17
 #define POSFENLEN 13
 
+#define DEFAULTDEPTH 5
+
 static void playUCIMove(BOARD_STATE *board, int start, int end, char promo) {
     int piece;
     int pieceCap;
@@ -214,6 +216,9 @@ int loadFEN(char *fen, BOARD_STATE *board, int startIndex) {
     return i + 9;
 }
 
+// TODO: bug position fen 8/Pk3pp1/7p/4P3/1N2bP2/1P6/1r6/4K3 w - - 1 54 moves
+// a7a8q
+
 void startUCI() {
     BOARD_STATE board;
     initBoard(&board);
@@ -243,7 +248,7 @@ void startUCI() {
             int i = loadFEN(input, &board, POSFENLEN);
             parseMoves(input, &board, i);
         } else if (strncmp("go\n", input, 2) == 0) {
-            printBestMove(5, &board);
+            printBestMove(DEFAULTDEPTH, &board);
         } else if (strcmp("stop\n", input) == 0) {
             // printf("stop\n");
         } else if (strcmp("quit\n", input) == 0) {

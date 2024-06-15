@@ -168,9 +168,6 @@ extern int negaMax(BOARD_STATE *board, int depth);
 extern void printBestMove(int depth, BOARD_STATE *board);
 extern MOVE makeBestMove(int depth, BOARD_STATE *board);
 
-// ui.c
-extern void playHuman(BOARD_STATE *board);
-
 // uci.c
 extern int loadFEN(char *fen, BOARD_STATE *board, int startIndex);
 extern void startUCI();

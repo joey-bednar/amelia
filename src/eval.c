@@ -1,9 +1,9 @@
 #include "defs.h"
 #include <stdio.h>
 
-#define NEGINF -99999
-#define NEGMATE -50000
-#define POSINF 99999
+#define MATE 50000
+#define MATETHRESHOLD 50
+#define INF 99999
 
 // return the value of all pieces of a given color using piece values and square
 // tables
@@ -67,8 +67,66 @@ int eval(BOARD_STATE *board) {
     return total;
 }
 
+// static int quiesce(BOARD_STATE *board, int alpha, int beta) {
+//     int stand_pat = eval(board);
+//     if (stand_pat >= beta) {
+//         return beta;
+//     }
+//     if (alpha < stand_pat) {
+//         alpha = stand_pat;
+//     }
+//
+//     if (board->halfmove >= 100) {
+//         return 0;
+//     }
+//
+//     // TODO: add repetition check
+//     // TODO: add max depth check
+//
+//     MOVE moves[MAX_LEGAL_MOVES];
+//     int n_moves = generateMoves(board, moves);
+//
+//     int legal = 0;
+//
+//     for (int i = 0; i < n_moves; i++) {
+//         if (isLegalMove(board, moves[i])) {
+//             legal++;
+//
+//             if (moves[i].type > MOVE_QUEENCASTLE &&
+//                 isLegalMove(board, moves[i])) {
+//
+//                 legal++;
+//                 makeMove(board, moves[i]);
+//
+//                 int score = -quiesce(board, -beta, -alpha);
+//                 // int score = eval(board);
+//                 unmakeMove(board, moves[i]);
+//
+//                 if (score >= beta) {
+//                     return beta;
+//                 }
+//                 if (score > alpha) {
+//                     alpha = score;
+//                 }
+//             }
+//         }
+//     }
+//
+//     if (legal == 0) {
+//         if (isAttacked(board, board->kings[board->turn], !board->turn)) {
+//             // checkmate
+//             return -MATE; // - depth;
+//         } else {
+//             // stalemate
+//             return 0;
+//         }
+//     }
+//
+//     return alpha;
+// }
+
 static int alphabeta(BOARD_STATE *board, int depth, int alpha, int beta) {
-    int score = NEGINF;
+    int score = -INF;
 
     int legal = 0;
 
@@ -93,7 +151,6 @@ static int alphabeta(BOARD_STATE *board, int depth, int alpha, int beta) {
             makeMove(board, moves[i]);
 
             score = -alphabeta(board, depth - 1, -beta, -alpha);
-
             unmakeMove(board, moves[i]);
 
             if (score >= beta) {
@@ -108,7 +165,7 @@ static int alphabeta(BOARD_STATE *board, int depth, int alpha, int beta) {
     if (legal == 0) {
         if (isAttacked(board, board->kings[board->turn], !board->turn)) {
             // checkmate
-            return NEGMATE;
+            return -MATE - depth;
         } else {
             // stalemate
             return 0;
@@ -122,7 +179,7 @@ int negaMax(BOARD_STATE *board, int depth) {
     if (depth == 0) {
         return eval(board);
     }
-    int max = NEGINF;
+    int max = -INF;
 
     MOVE moves[MAX_LEGAL_MOVES];
     int n_moves = generateMoves(board, moves);
@@ -145,43 +202,56 @@ int negaMax(BOARD_STATE *board, int depth) {
     return max;
 }
 
-MOVE makeBestMove(int depth, BOARD_STATE *board) {
-    int max = -99999;
-    MOVE best;
+static void printMoveText(MOVE move) {
 
-    MOVE moves[MAX_LEGAL_MOVES];
-    int n_moves = generateMoves(board, moves);
+    char startFile = SQ120F(move.startSquare) + 'a';
+    char startRank = SQ120R(move.startSquare) + '1';
+    char endFile = SQ120F(move.endSquare) + 'a';
+    char endRank = SQ120R(move.endSquare) + '1';
 
-    for (int i = 0; i < n_moves; i++) {
-        if (isLegalMove(board, moves[i])) {
-            makeMove(board, moves[i]);
-            int score = -negaMax(board, depth);
-            unmakeMove(board, moves[i]);
-            if (score > POSINF) {
-                max = score;
-                best = moves[i];
-                // printf("(%d): move %d to %d\n", max);
-                break;
-            } else if (score > max) {
-                max = score;
-                best = moves[i];
-                // printf("(%d): move %d to %d\n", max);
-            }
-        }
+    char promote = '\0';
+    if (move.type == MOVE_QUEENPROMOTE ||
+        move.type == MOVE_QUEENPROMOTECAPTURE) {
+        promote = 'q';
+    } else if (move.type == MOVE_ROOKPROMOTE ||
+               move.type == MOVE_ROOKPROMOTECAPTURE) {
+        promote = 'r';
+    } else if (move.type == MOVE_BISHOPPROMOTE ||
+               move.type == MOVE_BISHOPPROMOTECAPTURE) {
+        promote = 'b';
+    } else if (move.type == MOVE_KNIGHTPROMOTE ||
+               move.type == MOVE_KNIGHTPROMOTECAPTURE) {
+        promote = 'k';
     }
 
-    makeMove(board, best);
-    return best;
+    if (promote != '\0') {
+        printf("%c%c%c%c%c", startFile, startRank, endFile, endRank, promote);
+    } else {
+        printf("%c%c%c%c", startFile, startRank, endFile, endRank);
+    }
+}
 
-    // printf("(%d): move %d to %d\n", max, startSq, endSq);
+static void printInfo(int score, int depth) {
+    if (score + MATETHRESHOLD >= MATE && score - MATETHRESHOLD <= MATE) {
+        int dist = (MATE - score) + depth;
+        int mate = (dist + 1) / 2;
+        printf("info score mate %d\n", mate);
+    } else if (score + MATETHRESHOLD >= -MATE &&
+               score - MATETHRESHOLD <= -MATE) {
+        int dist = (-MATE - score) + depth;
+        int mate = (dist + 1) / 2;
+        printf("info score mate -%d\n", mate);
+    } else {
+        printf("info score cp %d\n", score);
+    }
 }
 
 void printBestMove(int depth, BOARD_STATE *board) {
     MOVE best;
 
-    int max = NEGINF;
-    int alpha = NEGINF;
-    int beta = POSINF;
+    int max = -INF;
+    int alpha = -INF;
+    int beta = INF;
 
     MOVE moves[MAX_LEGAL_MOVES];
     int n_moves = generateMoves(board, moves);
@@ -194,34 +264,17 @@ void printBestMove(int depth, BOARD_STATE *board) {
             if (score >= max) {
                 best = moves[i];
                 max = score;
+
+                printInfo(score, depth);
+
+                printf("info currmove ");
+                printMoveText(best);
+                printf("\n");
             }
         }
     }
 
-    char startFile = SQ120F(best.startSquare) + 'a';
-    char startRank = SQ120R(best.startSquare) + '1';
-    char endFile = SQ120F(best.endSquare) + 'a';
-    char endRank = SQ120R(best.endSquare) + '1';
-
-    char promote = '\0';
-    if (best.type == MOVE_QUEENPROMOTE ||
-        best.type == MOVE_QUEENPROMOTECAPTURE) {
-        promote = 'q';
-    } else if (best.type == MOVE_ROOKPROMOTE ||
-               best.type == MOVE_ROOKPROMOTECAPTURE) {
-        promote = 'r';
-    } else if (best.type == MOVE_BISHOPPROMOTE ||
-               best.type == MOVE_BISHOPPROMOTECAPTURE) {
-        promote = 'b';
-    } else if (best.type == MOVE_KNIGHTPROMOTE ||
-               best.type == MOVE_KNIGHTPROMOTECAPTURE) {
-        promote = 'k';
-    }
-
-    if (promote != '\0') {
-        printf("bestmove %c%c%c%c%c\n", startFile, startRank, endFile, endRank,
-               promote);
-    } else {
-        printf("bestmove %c%c%c%c\n", startFile, startRank, endFile, endRank);
-    }
+    printf("bestmove ");
+    printMoveText(best);
+    printf("\n");
 }
