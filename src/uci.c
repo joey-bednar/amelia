@@ -3,7 +3,7 @@
 #include <stdio.h>
 #include <string.h>
 
-#define INPUTLEN 50000
+#define INPUTLEN 1000
 #define POSSTARTLEN 17
 #define POSFENLEN 13
 
@@ -32,6 +32,8 @@ static void playUCIMove(BOARD_STATE *board, int start, int end, char promo) {
         break;
     }
 
+    // printf("playUCIMove %d %d\n",start,end);
+
     MOVE moves[MAX_LEGAL_MOVES];
     int n_moves = generateMoves(board, moves);
 
@@ -40,8 +42,10 @@ static void playUCIMove(BOARD_STATE *board, int start, int end, char promo) {
             isLegalMove(board, moves[i])) {
             if (promo == ' ' || promo == '\n') {
                 makeMove(board, moves[i]);
+                // printf("move\n");
             } else if (moves[i].type == piece || moves[i].type == pieceCap) {
                 makeMove(board, moves[i]);
+                // printf("move\n");
             }
         }
     }
@@ -50,14 +54,18 @@ static void playUCIMove(BOARD_STATE *board, int start, int end, char promo) {
 static void parseMoves(char *string, BOARD_STATE *board, int startIndex) {
     int i = startIndex;
 
-    while (string[i] != '\n') {
+    while (string[i] != '\n' && string[i] != '\0') {
         if (string[i] == ' ') {
             i++;
         } else {
+
+            // printf("string[%d]: %c\n",i,string[i]);
             int startSq = CHAR2SQ120(string[i], string[i + 1]);
             int endSq = CHAR2SQ120(string[i + 2], string[i + 3]);
 
             char promo = string[i + 4];
+
+            // printf("parseMoves: %d %d\n",startSq,endSq);
 
             playUCIMove(board, startSq, endSq, promo);
 
@@ -203,7 +211,7 @@ int loadFEN(char *fen, BOARD_STATE *board, int startIndex) {
     }
     board->fullmove = fullmove;
 
-    return i;
+    return i + 9;
 }
 
 void startUCI() {
@@ -212,6 +220,9 @@ void startUCI() {
 
     while (TRUE) {
         char input[INPUTLEN];
+        for (int i = 0; i < INPUTLEN; i++) {
+            input[i] = '\0';
+        }
         fgets(input, INPUTLEN, stdin);
         if (strcmp("ucinewgame", input) == 0) {
             printf("readyok\n");
@@ -238,6 +249,7 @@ void startUCI() {
         } else if (strcmp("quit\n", input) == 0) {
             break;
         }
+        // printBoard(&board);
         fflush(stdout);
     }
 }
