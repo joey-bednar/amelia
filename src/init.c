@@ -155,23 +155,23 @@ static void initPieceGenericMap() {
     genericMap[bQ] = bbQueen;
     genericMap[bK] = bbKing;
 
-    toWhite[EMPTY] = EMPTY;
-    toWhite[OFFBOARD] = OFFBOARD;
-    toWhite[bbPawn] = wP;
-    toWhite[bbKnight] = wN;
-    toWhite[bbBishop] = wB;
-    toWhite[bbRook] = wR;
-    toWhite[bbQueen] = wQ;
-    toWhite[bbKing] = wK;
+    toColor[WHITE][EMPTY] = EMPTY;
+    toColor[WHITE][OFFBOARD] = OFFBOARD;
+    toColor[WHITE][bbPawn] = wP;
+    toColor[WHITE][bbKnight] = wN;
+    toColor[WHITE][bbBishop] = wB;
+    toColor[WHITE][bbRook] = wR;
+    toColor[WHITE][bbQueen] = wQ;
+    toColor[WHITE][bbKing] = wK;
 
-    toBlack[EMPTY] = EMPTY;
-    toBlack[OFFBOARD] = OFFBOARD;
-    toBlack[bbPawn] = bP;
-    toBlack[bbKnight] = bN;
-    toBlack[bbBishop] = bB;
-    toBlack[bbRook] = bR;
-    toBlack[bbQueen] = bQ;
-    toBlack[bbKing] = bK;
+    toColor[BLACK][EMPTY] = EMPTY;
+    toColor[BLACK][OFFBOARD] = OFFBOARD;
+    toColor[BLACK][bbPawn] = bP;
+    toColor[BLACK][bbKnight] = bN;
+    toColor[BLACK][bbBishop] = bB;
+    toColor[BLACK][bbRook] = bR;
+    toColor[BLACK][bbQueen] = bQ;
+    toColor[BLACK][bbKing] = bK;
 }
 
 static void initJumps() {

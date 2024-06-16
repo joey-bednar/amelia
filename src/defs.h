@@ -14,8 +14,11 @@
 #define NOTCOLOR(p) (notcolorMap[(p)])
 
 #define GENERIC(p) (genericMap[(p)])
-#define TOWHITE(p) (toWhite[(p)])
-#define TOBLACK(p) (toBlack[(p)])
+// #define TOWHITE(p) (toWhite[(p)])
+// #define TOBLACK(p) (toBlack[(p)])
+#define TOWHITE(p) (toColor[WHITE][(p)])
+#define TOBLACK(p) (toColor[BLACK][(p)])
+#define TOCOLOR(c, p) (toColor[c][(p)])
 #define ONBOARD(sq) (onboardMap[(sq)])
 
 #define CHECKBIT(bb, sq64) (((bb)) >> ((sq64)) & 1ULL)
@@ -85,16 +88,17 @@ typedef struct {
 
 typedef struct {
     int type;
-    int piece;
     int startSquare;
     int endSquare;
     int captured;
-    int epcapture;
-    int twopawnmove;
-    int castled;
     int promotion;
+    int castle;
+    int enpassant;
+    int twopawnmove;
+
     int priorep;
     int priorcastle;
+
 } MOVE;
 
 extern int epMap[120];
@@ -103,8 +107,9 @@ extern int sq64sq120Map[64];
 extern int colorMap[OFFBOARD + 1];
 extern int notcolorMap[OFFBOARD + 1];
 extern int genericMap[OFFBOARD + 1];
-extern int toWhite[OFFBOARD + 1];
-extern int toBlack[OFFBOARD + 1];
+
+extern int toColor[2][OFFBOARD + 1];
+
 extern int onboardMap[120];
 extern ULL knightJumps[64];
 extern ULL kingJumps[64];

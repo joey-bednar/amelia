@@ -210,17 +210,13 @@ static void printMoveText(MOVE move) {
     char endRank = SQ120R(move.endSquare) + '1';
 
     char promote = '\0';
-    if (move.type == MOVE_QUEENPROMOTE ||
-        move.type == MOVE_QUEENPROMOTECAPTURE) {
+    if (GENERIC(move.promotion) == bbQueen) {
         promote = 'q';
-    } else if (move.type == MOVE_ROOKPROMOTE ||
-               move.type == MOVE_ROOKPROMOTECAPTURE) {
+    } else if (GENERIC(move.promotion) == bbRook) {
         promote = 'r';
-    } else if (move.type == MOVE_BISHOPPROMOTE ||
-               move.type == MOVE_BISHOPPROMOTECAPTURE) {
+    } else if (GENERIC(move.promotion) == bbBishop) {
         promote = 'b';
-    } else if (move.type == MOVE_KNIGHTPROMOTE ||
-               move.type == MOVE_KNIGHTPROMOTECAPTURE) {
+    } else if (GENERIC(move.promotion) == bbKnight) {
         promote = 'k';
     }
 

@@ -11,24 +11,19 @@
 
 static void playUCIMove(BOARD_STATE *board, int start, int end, char promo) {
     int piece;
-    int pieceCap;
 
     switch (promo) {
     case 'q':
-        piece = MOVE_QUEENPROMOTE;
-        pieceCap = MOVE_QUEENPROMOTECAPTURE;
+        piece = bbQueen;
         break;
     case 'r':
-        piece = MOVE_ROOKPROMOTE;
-        pieceCap = MOVE_ROOKPROMOTECAPTURE;
+        piece = bbRook;
         break;
     case 'b':
-        piece = MOVE_BISHOPPROMOTE;
-        pieceCap = MOVE_BISHOPPROMOTECAPTURE;
+        piece = bbBishop;
         break;
     case 'n':
-        piece = MOVE_KNIGHTPROMOTE;
-        pieceCap = MOVE_KNIGHTPROMOTECAPTURE;
+        piece = bbKnight;
         break;
     default:
         break;
@@ -46,7 +41,7 @@ static void playUCIMove(BOARD_STATE *board, int start, int end, char promo) {
                 makeMove(board, moves[i]);
                 // printf("move no promote\n");
                 return;
-            } else if (moves[i].type == piece || moves[i].type == pieceCap) {
+            } else if (GENERIC(moves[i].promotion) == piece) {
                 makeMove(board, moves[i]);
                 // printf("move promote type %d\n",moves[i].type);
                 return;
