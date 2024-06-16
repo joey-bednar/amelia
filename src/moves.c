@@ -62,20 +62,18 @@ static void unmakeCastleMove(BOARD_STATE *board, int end) {
 static void unsafeClearPiece(BOARD_STATE *board, int piece, int sq) {
     // move piece to target square
     CLEARBIT(board->bitboard[GENERIC(piece)], SQ120SQ64(sq));
-    CLEARBIT(board->bitboard[board->turn], SQ120SQ64(sq));
+    CLEARBIT(board->bitboard[COLOR(piece)], SQ120SQ64(sq));
     CLEARBIT(board->bitboard[bbAny], SQ120SQ64(sq));
 }
 
 static void unsafePlacePiece(BOARD_STATE *board, int piece, int sq) {
     SETBIT(board->bitboard[GENERIC(piece)], SQ120SQ64(sq));
-    SETBIT(board->bitboard[board->turn], SQ120SQ64(sq));
+    SETBIT(board->bitboard[COLOR(piece)], SQ120SQ64(sq));
     SETBIT(board->bitboard[bbAny], SQ120SQ64(sq));
 }
 
-static void makeCastleMove(BOARD_STATE *board, int end) {
+static void castleRooks(BOARD_STATE *board, int end) {
     if (end == G1) {
-        unsafeClearPiece(board, wK, E1);
-        unsafePlacePiece(board, wK, end);
         board->kings[WHITE] = end;
 
         unsafeClearPiece(board, wR, H1);
@@ -84,8 +82,6 @@ static void makeCastleMove(BOARD_STATE *board, int end) {
         CLEARBIT(board->castle, WQ_CASTLE);
     } else if (end == C1) {
 
-        unsafeClearPiece(board, wK, E1);
-        unsafePlacePiece(board, wK, end);
         board->kings[WHITE] = end;
 
         unsafeClearPiece(board, wR, A1);
@@ -94,8 +90,6 @@ static void makeCastleMove(BOARD_STATE *board, int end) {
         CLEARBIT(board->castle, WK_CASTLE);
         CLEARBIT(board->castle, WQ_CASTLE);
     } else if (end == C8) {
-        unsafeClearPiece(board, bK, E8);
-        unsafePlacePiece(board, bK, end);
         board->kings[BLACK] = end;
 
         unsafeClearPiece(board, bR, A8);
@@ -104,8 +98,6 @@ static void makeCastleMove(BOARD_STATE *board, int end) {
         CLEARBIT(board->castle, BK_CASTLE);
         CLEARBIT(board->castle, BQ_CASTLE);
     } else if (end == G8) {
-        unsafeClearPiece(board, bK, E8);
-        unsafePlacePiece(board, bK, end);
         board->kings[BLACK] = end;
 
         unsafeClearPiece(board, bR, H8);
@@ -118,100 +110,56 @@ static void makeCastleMove(BOARD_STATE *board, int end) {
 
 // play a move on the board
 void makeMove(BOARD_STATE *board, MOVE move) {
+    int piece =
+        TOCOLOR(board->turn, getGenericPieceSq120(move.startSquare, board));
 
-    if (move.captured != EMPTY && move.promotion == EMPTY && !move.enpassant) {
-        int piece = getPieceSq120(move.startSquare, board);
+    // move rooks for castling moves
+    if (move.castle) {
+        castleRooks(board, move.endSquare);
+    }
 
-        // move piece to target square
-        setPiece120(EMPTY, move.startSquare, board);
-        setPiece120(piece, move.endSquare, board);
-
-        // update castling permissions if moving a king/rook
-        updateCastling(board, move);
-
+    // remove pieces from end square/en passant square
+    if (move.enpassant) {
+        const int offset[2] = {S, N};
         board->enpassant = OFFBOARD;
 
-        board->turn = !(board->turn);
-        return;
+        for (int i = 0; i <= bbAny; i++) {
+            CLEARBIT(board->bitboard[i],
+                     SQ120SQ64(move.endSquare + offset[board->turn]));
+        }
+    } else if (move.captured != EMPTY) {
+        for (int i = 0; i <= bbAny; i++) {
+            CLEARBIT(board->bitboard[i], SQ120SQ64(move.endSquare));
+        }
+    }
 
-    } else if (move.twopawnmove) {
+    // update castling permissions
+    updateCastling(board, move);
 
-        int piece = TOCOLOR(board->turn, bbPawn);
-        // int piece = getPieceSq120(move.startSquare, board);
+    // move piece to target square
+    unsafeClearPiece(board, piece, move.startSquare);
 
-        // move piece to target square
-        unsafeClearPiece(board, piece, move.startSquare);
+    if (move.promotion) {
+        unsafePlacePiece(board, move.promotion, move.endSquare);
+    } else {
         unsafePlacePiece(board, piece, move.endSquare);
+    }
 
-        // set new en passant square after two square pawn move.
-        // delete en passant square if last move wasn't a two square pawn move
+    // update king position
+    if (CHECKBIT(board->bitboard[bbKing], SQ120SQ64(move.endSquare))) {
+        board->kings[board->turn] = move.endSquare;
+    }
+
+    // update en passant square
+    if (move.twopawnmove) {
         const int offset[2] = {S, N};
         board->enpassant = move.endSquare + offset[board->turn];
-
-        board->turn = !(board->turn);
-        return;
-    }
-
-    // remove kingside/queenside castling ability
-    // after castling. place rook in new position.
-    else if (move.castle) {
-        makeCastleMove(board, move.endSquare);
-
-        board->enpassant = OFFBOARD;
-        board->turn = !(board->turn);
-        return;
-    }
-
-    else if (move.enpassant) {
-        int piece = TOCOLOR(board->turn, bbPawn);
-
-        // move piece to target square
-        unsafeClearPiece(board, piece, move.startSquare);
-        unsafePlacePiece(board, piece, move.endSquare);
-
-        board->enpassant = OFFBOARD;
-
-        // delete en passant square after performing en passant
-        // remove en passanted piece
-        const int offset[2] = {S, N};
-        board->enpassant = OFFBOARD;
-        setPiece120(EMPTY, move.endSquare + offset[board->turn], board);
-        board->turn = !(board->turn);
-        return;
-    } else if (move.promotion != EMPTY) {
-
-        int piece =
-            TOCOLOR(board->turn, getGenericPieceSq120(move.startSquare, board));
-
-        // move piece to target square
-        setPiece120(EMPTY, move.startSquare, board);
-        setPiece120(piece, move.endSquare, board);
-
-        board->enpassant = OFFBOARD;
-
-        setPiece120(move.promotion, move.endSquare, board);
-
-        board->turn = !(board->turn);
-        return;
     } else {
-        int piece =
-            TOCOLOR(board->turn, getGenericPieceSq120(move.startSquare, board));
-
-        updateCastling(board, move);
-
-        // move piece to target square
-        unsafeClearPiece(board, piece, move.startSquare);
-        unsafePlacePiece(board, piece, move.endSquare);
-
-        if (CHECKBIT(board->bitboard[bbKing], SQ120SQ64(move.endSquare))) {
-            board->kings[board->turn] = move.endSquare;
-        }
-
         board->enpassant = OFFBOARD;
-
-        board->turn = !(board->turn);
-        return;
     }
+
+    board->turn = !(board->turn);
+    return;
 }
 
 // undo a move on the board
@@ -229,31 +177,33 @@ void unmakeMove(BOARD_STATE *board, MOVE move) {
         offset = N;
     }
 
-    int piece = getPieceSq120(move.endSquare, board);
+    int piece =
+        TOCOLOR(!board->turn, getGenericPieceSq120(move.endSquare, board));
 
     // perform en passant
     if (move.enpassant) {
         board->enpassant = move.endSquare;
-        setPiece120(move.captured, move.endSquare + offset, board);
-        // unsafeClearPiece(board, piece, move.endSquare);
-        setPiece120(EMPTY, move.endSquare, board);
-        setPiece120(piece, move.startSquare, board);
-        // unsafePlacePiece(board, piece, move.startSquare);
+
+        assert(move.captured != EMPTY);
+
+        unsafePlacePiece(board, move.captured, move.endSquare + offset);
+
+        unsafeClearPiece(board, piece, move.endSquare);
+        unsafePlacePiece(board, piece, move.startSquare);
         board->turn = !(board->turn);
         return;
     }
 
     // put captured piece back
+    // unsafeClearPiece(board, piece, move.endSquare);
+    // unsafePlacePiece(board, move.captured, move.endSquare);
     setPiece120(move.captured, move.endSquare, board);
 
     // undo promotion
     if (move.promotion == EMPTY) {
         setPiece120(piece, move.startSquare, board);
     } else {
-        int pawn = wP;
-        if (COLOR(piece) == BLACK) {
-            pawn = bP;
-        }
+        int pawn = TOCOLOR(COLOR(piece), bbPawn);
         setPiece120(pawn, move.startSquare, board);
     }
 
