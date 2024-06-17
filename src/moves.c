@@ -165,17 +165,13 @@ void makeMove(BOARD_STATE *board, MOVE move) {
 // undo a move on the board
 void unmakeMove(BOARD_STATE *board, MOVE move) {
 
+    // move rooks back
     if (move.castle) {
         unmakeCastleMove(board, move.endSquare);
     }
 
     // reset castling abilities
     board->castle = move.priorcastle;
-
-    int offset = S;
-    if (board->turn == WHITE) {
-        offset = N;
-    }
 
     int piece =
         TOCOLOR(!board->turn, getGenericPieceSq120(move.endSquare, board));
@@ -184,27 +180,39 @@ void unmakeMove(BOARD_STATE *board, MOVE move) {
     if (move.enpassant) {
         board->enpassant = move.endSquare;
 
-        assert(move.captured != EMPTY);
+        int offset = S;
+        if (board->turn == WHITE) {
+            offset = N;
+        }
 
+        // put back captured piece
         unsafePlacePiece(board, move.captured, move.endSquare + offset);
 
+        // move pawn back to original square
         unsafeClearPiece(board, piece, move.endSquare);
         unsafePlacePiece(board, piece, move.startSquare);
         board->turn = !(board->turn);
         return;
     }
 
-    // put captured piece back
-    // unsafeClearPiece(board, piece, move.endSquare);
-    // unsafePlacePiece(board, move.captured, move.endSquare);
-    setPiece120(move.captured, move.endSquare, board);
+    // remove piece from end square and replace with captured piece if possible
+    unsafeClearPiece(board, piece, move.endSquare);
+    if (move.captured != EMPTY) {
+        unsafePlacePiece(board, move.captured, move.endSquare);
+    }
 
     // undo promotion
     if (move.promotion == EMPTY) {
-        setPiece120(piece, move.startSquare, board);
+        // setPiece120(piece, move.startSquare, board);
+        unsafePlacePiece(board, piece, move.startSquare);
     } else {
         int pawn = TOCOLOR(COLOR(piece), bbPawn);
-        setPiece120(pawn, move.startSquare, board);
+        unsafePlacePiece(board, pawn, move.startSquare);
+    }
+
+    // update king position
+    if (GENERIC(piece) == bbKing) {
+        board->kings[!board->turn] = move.startSquare;
     }
 
     board->enpassant = move.priorep;

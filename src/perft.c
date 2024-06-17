@@ -4,7 +4,7 @@
 #include <time.h>
 
 #define VERBOSE FALSE
-#define POSITION 2
+#define POSITION 0
 
 ULL perft_rec_bulk(int depth, BOARD_STATE *board) {
     MOVE move_list[256];
