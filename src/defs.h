@@ -28,7 +28,7 @@
 #define KNIGHTBB(sq64) (knightJumps[(sq64)])
 #define KINGBB(sq64) (kingJumps[(sq64)])
 
-#define MAX_LEGAL_MOVES 256
+#define MAX_LEGAL_MOVES 512
 #define MAX_DEPTH 10
 
 #define CHAR2FILE(c) ((int)((c) - 'a'))
@@ -87,7 +87,6 @@ typedef struct {
 } BOARD_STATE;
 
 typedef struct {
-    int type;
     int startSquare;
     int endSquare;
     int captured;

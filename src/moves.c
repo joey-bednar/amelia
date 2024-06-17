@@ -276,7 +276,8 @@ static void generateSlidingMoves(BOARD_STATE *board, MOVE *moves, int sq,
 
         if (ONBOARD(nextSq) &&
             CHECKBIT(board->bitboard[(!board->turn)], SQ120SQ64(nextSq))) {
-            int squareContains = getPieceSq120(nextSq, board);
+            int squareContains =
+                TOCOLOR(!board->turn, getGenericPieceSq120(nextSq, board));
             addMove(board, moves, sq, nextSq, squareContains, EMPTY, FALSE,
                     FALSE, FALSE, index);
         }
@@ -402,7 +403,8 @@ static void generatePseudoPawnMoves(BOARD_STATE *board, MOVE *moves, int sq,
         }
 
         if (CHECKBIT(board->bitboard[(!board->turn)], SQ120SQ64(enemysquare))) {
-            int enemypiece = getPieceSq120(enemysquare, board);
+            int enemypiece =
+                TOCOLOR(!board->turn, getGenericPieceSq120(enemysquare, board));
 
             if (SQ120R(enemysquare) == eighthrank) {
                 addPromotions(board, moves, sq, enemysquare, enemypiece, color,
@@ -411,10 +413,6 @@ static void generatePseudoPawnMoves(BOARD_STATE *board, MOVE *moves, int sq,
                 addMove(board, moves, sq, enemysquare, enemypiece, EMPTY, FALSE,
                         FALSE, FALSE, index);
             }
-        } else if (epMap[enemysquare] && enemysquare == board->enpassant) {
-
-            addMove(board, moves, sq, enemysquare, enemypawn, EMPTY, TRUE,
-                    FALSE, FALSE, index);
         }
     }
 
@@ -436,10 +434,6 @@ static void generatePseudoPresetMoves(BOARD_STATE *board, MOVE *moves, int sq,
         int nextSq120 = SQ64SQ120(nextSq64);
 
         int squareContains = getPieceSq120(nextSq120, board);
-        int type = MOVE_CAPTURE;
-        if (squareContains == EMPTY) {
-            type = MOVE_QUIET;
-        }
         addMove(board, moves, sq, nextSq120, squareContains, EMPTY, FALSE,
                 FALSE, FALSE, index);
 
@@ -458,6 +452,44 @@ static void generatePseudoBishopMoves(BOARD_STATE *board, MOVE *moves, int sq,
                                       int *index) {
     int offsets[4] = {-11, -9, 9, 11};
     generateSlidingMoves(board, moves, sq, index, offsets, 4);
+}
+
+static void generatePseudoEnPassantMoves(BOARD_STATE *board, MOVE *moves,
+                                         int *index) {
+
+    if (!ONBOARD(board->enpassant)) {
+        return;
+    }
+
+    int sq;
+    if (board->turn == WHITE) {
+        sq = board->enpassant + SW;
+        if (getPieceSq120(sq, board) == wP) {
+
+            addMove(board, moves, sq, board->enpassant, bP, EMPTY, TRUE, FALSE,
+                    FALSE, index);
+        }
+
+        sq = board->enpassant + SE;
+        if (getPieceSq120(sq, board) == wP) {
+            addMove(board, moves, sq, board->enpassant, bP, EMPTY, TRUE, FALSE,
+                    FALSE, index);
+        }
+    }
+
+    if (board->turn == BLACK) {
+        sq = board->enpassant + NW;
+        if (getPieceSq120(sq, board) == bP) {
+            addMove(board, moves, sq, board->enpassant, wP, EMPTY, TRUE, FALSE,
+                    FALSE, index);
+        }
+
+        sq = board->enpassant + NE;
+        if (getPieceSq120(sq, board) == bP) {
+            addMove(board, moves, sq, board->enpassant, wP, EMPTY, TRUE, FALSE,
+                    FALSE, index);
+        }
+    }
 }
 
 // generate all legal moves and insert them into the moves list
@@ -502,6 +534,7 @@ int generateMoves(BOARD_STATE *board, MOVE *moves) {
         }
     }
 
+    generatePseudoEnPassantMoves(board, moves, &index);
     generateCastleMoves(board, moves, &index);
 
     return index;
