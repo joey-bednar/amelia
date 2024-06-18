@@ -7,7 +7,7 @@
 #define POSITION 0
 
 ULL perft_rec_bulk(int depth, BOARD_STATE *board) {
-    MOVE move_list[256];
+    MOVE move_list[MAX_LEGAL_MOVES];
     int n_moves, i;
     unsigned int nodes = 0;
 

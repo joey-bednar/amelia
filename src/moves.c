@@ -238,7 +238,8 @@ static void addMove(BOARD_STATE *board, MOVE *moves, int start, int end,
     moves[*index].twopawnmove = twopawnmove;
     moves[*index].castle = castle;
 
-    (*index)++;
+    assert(*index < 500);
+    ++(*index);
 
     // flags:
     // castle
@@ -391,17 +392,17 @@ static void generatePseudoPawnMoves(BOARD_STATE *board, MOVE *moves, int sq,
     int one = sq + offset[0];
     int two = sq + offset[1];
 
-    // up one
-    if (isEmptySquare(one, board)) {
-        if (SQ120R(one) == eighthrank) {
-            addPromotions(board, moves, sq, one, EMPTY, color, index);
-        } else {
-            addMove(board, moves, sq, one, EMPTY, EMPTY, FALSE, FALSE, FALSE,
-                    index);
-        }
-    }
+    // // up one
+    // if (isEmptySquare(one, board) && board->turn == BLACK) {
+    //     if (SQ120R(one) == eighthrank) {
+    //         addPromotions(board, moves, sq, one, EMPTY, color, index);
+    //     } else {
+    //         addMove(board, moves, sq, one, EMPTY, EMPTY, FALSE, FALSE, FALSE,
+    //                 index);
+    //     }
+    // }
 
-    // captures and en passant
+    // captures excluding en passant
     for (int i = 2; i <= 3; i++) {
         int enemysquare = sq + offset[i];
 
@@ -496,12 +497,64 @@ static void generatePseudoEnPassantMoves(BOARD_STATE *board, MOVE *moves,
     }
 }
 
+void generateOnePawnMoves(BOARD_STATE *board, MOVE *moves, int *index) {
+
+    ULL pawns = board->bitboard[board->turn] & board->bitboard[bbPawn];
+    ULL up;
+    int push;
+    ULL promote;
+
+    switch (board->turn) {
+    case WHITE:
+        // white pawns
+        up = (pawns << 1);
+        push = -1;
+        promote = 0x8080808080808080;
+        break;
+
+    case BLACK:
+        // black pawns
+        up = (pawns >> 1);
+        push = 1;
+        promote = 0x0101010101010101;
+        break;
+    }
+
+    ULL upopen = up & ~(board->bitboard[bbWhite] | board->bitboard[bbBlack]);
+
+    ULL bbone = upopen & ~(promote);
+    ULL bbpromote = upopen & promote;
+
+    BITLOOP(bbpromote) {
+
+        int one = bitScanForward(bbpromote);
+
+        int rank = SQ120R(SQ64SQ120(one));
+
+        addPromotions(board, moves, SQ64SQ120(one + push), SQ64SQ120(one),
+                      EMPTY, board->turn, index);
+    }
+
+    BITLOOP(bbone) {
+
+        int one = bitScanForward(bbone);
+
+        int rank = SQ120R(SQ64SQ120(one));
+
+        addMove(board, moves, SQ64SQ120(one + push), SQ64SQ120(one), EMPTY,
+                EMPTY, FALSE, FALSE, FALSE, index);
+    }
+}
+
 // generate all legal moves and insert them into the moves list
 int generateMoves(BOARD_STATE *board, MOVE *moves) {
 
     int index = 0;
 
+    generateOnePawnMoves(board, moves, &index);
+
     ULL pawns = board->bitboard[board->turn] & board->bitboard[bbPawn];
+
     BITLOOP(pawns) {
         int i64 = bitScanForward(pawns);
         generatePseudoPawnMoves(board, moves, SQ64SQ120(i64), &index);
