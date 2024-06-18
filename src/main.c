@@ -17,8 +17,8 @@ int main() {
     BOARD_STATE board;
     init(&board);
 
-    startUCI();
-    // perft(6);
+    // startUCI();
+    perft(6);
     // printBenchmark(6);
 
     return 0;

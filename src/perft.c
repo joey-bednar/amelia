@@ -9,7 +9,7 @@
 ULL perft_rec_bulk(int depth, BOARD_STATE *board) {
     MOVE move_list[256];
     int n_moves, i;
-    ULL nodes = 0;
+    unsigned int nodes = 0;
 
     n_moves = generateMoves(board, move_list);
     int legal = 0;

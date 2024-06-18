@@ -32,7 +32,8 @@ int getGenericPieceSq120(int sq, BOARD_STATE *board) {
 }
 
 int getColorSq120(int sq, BOARD_STATE *board) {
-    ULL any = CHECKBIT(board->bitboard[bbAny], SQ120SQ64(sq));
+    ULL any = CHECKBIT(board->bitboard[bbWhite] | board->bitboard[bbBlack],
+                       SQ120SQ64(sq));
     if (!any) {
         return BOTH;
     }
@@ -52,7 +53,8 @@ int getPieceSq120(int sq, BOARD_STATE *board) {
 
     int sq64 = SQ120SQ64(sq);
 
-    ULL set = CHECKBIT(board->bitboard[bbAny], sq64);
+    ULL set =
+        CHECKBIT(board->bitboard[bbWhite] | board->bitboard[bbBlack], sq64);
 
     if (!set) {
         return EMPTY;

@@ -185,6 +185,8 @@ void unmakeMove(BOARD_STATE *board, MOVE move) {
             offset = N;
         }
 
+        // int offset = -2*board->turn + 1;
+
         // put back captured piece
         unsafePlacePiece(board, move.captured, move.endSquare + offset);
 
@@ -313,8 +315,10 @@ static void generateCastleMoves(BOARD_STATE *board, MOVE *moves, int *index) {
                 isAttacked(board, FR2SQ120(FILE_G, rank), !color);
 
             int blocked =
-                CHECKBIT(board->bitboard[bbAny], FR2SQ64(FILE_F, rank)) ||
-                CHECKBIT(board->bitboard[bbAny], FR2SQ64(FILE_G, rank));
+                CHECKBIT(board->bitboard[bbWhite] | board->bitboard[bbBlack],
+                         FR2SQ64(FILE_F, rank)) ||
+                CHECKBIT(board->bitboard[bbWhite] | board->bitboard[bbBlack],
+                         FR2SQ64(FILE_G, rank));
 
             if (!throughcheck && !blocked) {
                 addMove(board, moves, FR2SQ120(FILE_E, rank),
@@ -331,9 +335,12 @@ static void generateCastleMoves(BOARD_STATE *board, MOVE *moves, int *index) {
                 isAttacked(board, FR2SQ120(FILE_D, rank), !color);
 
             int blocked =
-                CHECKBIT(board->bitboard[bbAny], FR2SQ64(FILE_B, rank)) ||
-                CHECKBIT(board->bitboard[bbAny], FR2SQ64(FILE_C, rank)) ||
-                CHECKBIT(board->bitboard[bbAny], FR2SQ64(FILE_D, rank));
+                CHECKBIT(board->bitboard[bbWhite] | board->bitboard[bbBlack],
+                         FR2SQ64(FILE_B, rank)) ||
+                CHECKBIT(board->bitboard[bbWhite] | board->bitboard[bbBlack],
+                         FR2SQ64(FILE_C, rank)) ||
+                CHECKBIT(board->bitboard[bbWhite] | board->bitboard[bbBlack],
+                         FR2SQ64(FILE_D, rank));
 
             if (!throughcheck && !blocked) {
                 addMove(board, moves, FR2SQ120(FILE_E, rank),
@@ -429,16 +436,13 @@ static void generatePseudoPresetMoves(BOARD_STATE *board, MOVE *moves, int sq,
                                       ULL bitboard, int *index) {
     ULL bb = ~board->bitboard[board->turn] & bitboard;
 
-    while (bb != 0) {
+    BITLOOP(bb) {
         int nextSq64 = bitScanForward(bb);
         int nextSq120 = SQ64SQ120(nextSq64);
 
         int squareContains = getPieceSq120(nextSq120, board);
         addMove(board, moves, sq, nextSq120, squareContains, EMPTY, FALSE,
                 FALSE, FALSE, index);
-
-        ULL mask = (~1ULL << (nextSq64));
-        bb &= mask;
     }
 }
 
@@ -497,41 +501,45 @@ int generateMoves(BOARD_STATE *board, MOVE *moves) {
 
     int index = 0;
 
-    // only calc white/black moves on white/black's turn
-    ULL bb = board->bitboard[board->turn];
+    ULL pawns = board->bitboard[board->turn] & board->bitboard[bbPawn];
+    BITLOOP(pawns) {
+        int i64 = bitScanForward(pawns);
+        generatePseudoPawnMoves(board, moves, SQ64SQ120(i64), &index);
+    }
 
-    while (bb != 0) {
-        int index64 = bitScanForward(bb);
-        int sq = SQ64SQ120(index64);
+    ULL rooks = board->bitboard[board->turn] & board->bitboard[bbRook];
+    BITLOOP(rooks) {
+        int i64 = bitScanForward(rooks);
+        generatePseudoRookMoves(board, moves, SQ64SQ120(i64), &index);
+    }
 
-        int piece = getGenericPieceSq120(sq, board);
+    ULL bishops = board->bitboard[board->turn] & board->bitboard[bbBishop];
+    BITLOOP(bishops) {
+        int i64 = bitScanForward(bishops);
+        generatePseudoBishopMoves(board, moves, SQ64SQ120(i64), &index);
+    }
 
-        ULL mask = (~1ULL << (index64));
-        bb &= mask;
+    ULL knights = board->bitboard[board->turn] & board->bitboard[bbKnight];
+    BITLOOP(knights) {
+        int i64 = bitScanForward(knights);
 
-        switch (piece) {
-        case bbPawn:
-            generatePseudoPawnMoves(board, moves, sq, &index);
-            break;
-        case bbRook:
-            generatePseudoRookMoves(board, moves, sq, &index);
-            break;
-        case bbBishop:
-            generatePseudoBishopMoves(board, moves, sq, &index);
-            break;
-        case bbKnight:
-            generatePseudoPresetMoves(board, moves, sq, KNIGHTBB(SQ120SQ64(sq)),
-                                      &index);
-            break;
-        case bbQueen:
-            generatePseudoRookMoves(board, moves, sq, &index);
-            generatePseudoBishopMoves(board, moves, sq, &index);
-            break;
-        case bbKing:
-            generatePseudoPresetMoves(board, moves, sq, KINGBB(SQ120SQ64(sq)),
-                                      &index);
-            break;
-        }
+        generatePseudoPresetMoves(board, moves, SQ64SQ120(i64), KNIGHTBB(i64),
+                                  &index);
+    }
+
+    ULL kings = board->bitboard[board->turn] & board->bitboard[bbKing];
+    BITLOOP(kings) {
+        int i64 = bitScanForward(kings);
+        generatePseudoPresetMoves(board, moves, SQ64SQ120(i64), KINGBB(i64),
+                                  &index);
+    }
+
+    ULL queens = board->bitboard[board->turn] & board->bitboard[bbQueen];
+    BITLOOP(queens) {
+        int i64 = bitScanForward(queens);
+
+        generatePseudoRookMoves(board, moves, SQ64SQ120(i64), &index);
+        generatePseudoBishopMoves(board, moves, SQ64SQ120(i64), &index);
     }
 
     generatePseudoEnPassantMoves(board, moves, &index);

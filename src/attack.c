@@ -22,7 +22,8 @@ static int isAttackedSliding(BOARD_STATE *board, int sq, const int *offsets,
         int nextSq = sq + offsets[i];
 
         while (ONBOARD(nextSq) &&
-               !CHECKBIT(board->bitboard[(bbAny)], SQ120SQ64(nextSq))) {
+               !CHECKBIT(board->bitboard[bbWhite] | board->bitboard[bbBlack],
+                         SQ120SQ64(nextSq))) {
             nextSq = nextSq + offsets[i];
         }
 
@@ -70,9 +71,6 @@ static int isAttackedPawn(BOARD_STATE *board, int sq, int *offsets,
 // return TRUE if sq(120) is attacked by the enemy color
 int isAttacked(BOARD_STATE *board, int sq, int enemycolor) {
 
-    if (enemycolor == WHITE) {
-        const int pawn[2] = {-9, 11};
-    }
     int pawn[2] = {-9, 11};
     if (enemycolor == WHITE) {
         pawn[0] = 9;

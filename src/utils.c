@@ -37,7 +37,7 @@ int bitScanReverse(ULL bb) {
                              53, 34, 51, 20, 43, 31, 22, 10, 45, 25, 39, 14, 33,
                              19, 30, 9,  24, 13, 18, 8,  12, 7,  6,  5,  63};
     const ULL debruijn64 = 0x03f79d71b4cb0a89;
-    assert(bb != 0);
+    // assert(bb != 0);
     bb |= bb >> 1;
     bb |= bb >> 2;
     bb |= bb >> 4;
