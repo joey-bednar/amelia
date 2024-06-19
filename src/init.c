@@ -260,7 +260,9 @@ void init(BOARD_STATE *board) {
     initPieceGenericMap();
     initJumps();
     initPieceSqMaps();
+    initZobrist();
 
     clearBoard(board);
     initBoard(board);
+    loadZobrist(board);
 }

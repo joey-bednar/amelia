@@ -77,7 +77,9 @@ enum { NO_CASTLE, WK_CASTLE, WQ_CASTLE, BK_CASTLE, BQ_CASTLE };
 typedef unsigned long long ULL;
 
 typedef struct {
-    unsigned long long bitboard[bbLength];
+    ULL bitboard[bbLength];
+
+    ULL hash;
 
     int kings[2];
 
@@ -121,6 +123,15 @@ extern int bishopSqTable[64];
 extern int rookSqTable[64];
 extern int queenSqTable[64];
 extern int kingSqTable[64];
+
+extern ULL zobrist_vals[12][64];
+extern ULL zobristB2M;
+
+// hash.c
+extern void initZobrist();
+extern void loadZobrist(BOARD_STATE *board);
+extern void updateZobrist(int sq64, int piece, BOARD_STATE *board);
+extern void turnZobrist(BOARD_STATE *board);
 
 // init.c
 extern void initBoard(BOARD_STATE *board);

@@ -2,6 +2,21 @@
 #include <assert.h>
 #include <stdio.h>
 
+static void unsafeClearPiece(BOARD_STATE *board, int piece, int sq) {
+    // move piece to target square
+    CLEARBIT(board->bitboard[GENERIC(piece)], SQ120SQ64(sq));
+    CLEARBIT(board->bitboard[COLOR(piece)], SQ120SQ64(sq));
+    CLEARBIT(board->bitboard[bbAny], SQ120SQ64(sq));
+    updateZobrist(SQ120SQ64(sq), piece, board);
+}
+
+static void unsafePlacePiece(BOARD_STATE *board, int piece, int sq) {
+    SETBIT(board->bitboard[GENERIC(piece)], SQ120SQ64(sq));
+    SETBIT(board->bitboard[COLOR(piece)], SQ120SQ64(sq));
+    SETBIT(board->bitboard[bbAny], SQ120SQ64(sq));
+    updateZobrist(SQ120SQ64(sq), piece, board);
+}
+
 static void updateCastling(BOARD_STATE *board, MOVE move) {
 
     int piece = getGenericPieceSq120(move.startSquare, board);
@@ -29,47 +44,42 @@ static void updateCastling(BOARD_STATE *board, MOVE move) {
 
 static void unmakeCastleMove(BOARD_STATE *board, int end) {
     if (end == G1) {
-        CLEARBIT(board->bitboard[bbRook], SQ120SQ64(F1));
-        CLEARBIT(board->bitboard[bbWhite], SQ120SQ64(F1));
-        CLEARBIT(board->bitboard[bbAny], SQ120SQ64(F1));
-        SETBIT(board->bitboard[bbRook], SQ120SQ64(H1));
-        SETBIT(board->bitboard[bbWhite], SQ120SQ64(H1));
-        SETBIT(board->bitboard[bbAny], SQ120SQ64(H1));
+        unsafeClearPiece(board, wR, F1);
+        unsafePlacePiece(board, wR, H1);
+        // CLEARBIT(board->bitboard[bbRook], SQ120SQ64(F1));
+        // CLEARBIT(board->bitboard[bbWhite], SQ120SQ64(F1));
+        // CLEARBIT(board->bitboard[bbAny], SQ120SQ64(F1));
+        // SETBIT(board->bitboard[bbRook], SQ120SQ64(H1));
+        // SETBIT(board->bitboard[bbWhite], SQ120SQ64(H1));
+        // SETBIT(board->bitboard[bbAny], SQ120SQ64(H1));
     } else if (end == C1) {
-        CLEARBIT(board->bitboard[bbRook], SQ120SQ64(D1));
-        CLEARBIT(board->bitboard[bbWhite], SQ120SQ64(D1));
-        CLEARBIT(board->bitboard[bbAny], SQ120SQ64(D1));
-        SETBIT(board->bitboard[bbRook], SQ120SQ64(A1));
-        SETBIT(board->bitboard[bbWhite], SQ120SQ64(A1));
-        SETBIT(board->bitboard[bbAny], SQ120SQ64(A1));
+        unsafeClearPiece(board, wR, D1);
+        unsafePlacePiece(board, wR, A1);
+        // CLEARBIT(board->bitboard[bbRook], SQ120SQ64(D1));
+        // CLEARBIT(board->bitboard[bbWhite], SQ120SQ64(D1));
+        // CLEARBIT(board->bitboard[bbAny], SQ120SQ64(D1));
+        // SETBIT(board->bitboard[bbRook], SQ120SQ64(A1));
+        // SETBIT(board->bitboard[bbWhite], SQ120SQ64(A1));
+        // SETBIT(board->bitboard[bbAny], SQ120SQ64(A1));
     } else if (end == G8) {
-        CLEARBIT(board->bitboard[bbRook], SQ120SQ64(F8));
-        CLEARBIT(board->bitboard[bbBlack], SQ120SQ64(F8));
-        CLEARBIT(board->bitboard[bbAny], SQ120SQ64(F8));
-        SETBIT(board->bitboard[bbRook], SQ120SQ64(H8));
-        SETBIT(board->bitboard[bbBlack], SQ120SQ64(H8));
-        SETBIT(board->bitboard[bbAny], SQ120SQ64(H8));
+        unsafeClearPiece(board, bR, F8);
+        unsafePlacePiece(board, bR, H8);
+        // CLEARBIT(board->bitboard[bbRook], SQ120SQ64(F8));
+        // CLEARBIT(board->bitboard[bbBlack], SQ120SQ64(F8));
+        // CLEARBIT(board->bitboard[bbAny], SQ120SQ64(F8));
+        // SETBIT(board->bitboard[bbRook], SQ120SQ64(H8));
+        // SETBIT(board->bitboard[bbBlack], SQ120SQ64(H8));
+        // SETBIT(board->bitboard[bbAny], SQ120SQ64(H8));
     } else if (end == C8) {
-        CLEARBIT(board->bitboard[bbRook], SQ120SQ64(D8));
-        CLEARBIT(board->bitboard[bbBlack], SQ120SQ64(D8));
-        CLEARBIT(board->bitboard[bbAny], SQ120SQ64(D8));
-        SETBIT(board->bitboard[bbRook], SQ120SQ64(A8));
-        SETBIT(board->bitboard[bbBlack], SQ120SQ64(A8));
-        SETBIT(board->bitboard[bbAny], SQ120SQ64(A8));
+        unsafeClearPiece(board, bR, D8);
+        unsafePlacePiece(board, bR, A8);
+        // CLEARBIT(board->bitboard[bbRook], SQ120SQ64(D8));
+        // CLEARBIT(board->bitboard[bbBlack], SQ120SQ64(D8));
+        // CLEARBIT(board->bitboard[bbAny], SQ120SQ64(D8));
+        // SETBIT(board->bitboard[bbRook], SQ120SQ64(A8));
+        // SETBIT(board->bitboard[bbBlack], SQ120SQ64(A8));
+        // SETBIT(board->bitboard[bbAny], SQ120SQ64(A8));
     }
-}
-
-static void unsafeClearPiece(BOARD_STATE *board, int piece, int sq) {
-    // move piece to target square
-    CLEARBIT(board->bitboard[GENERIC(piece)], SQ120SQ64(sq));
-    CLEARBIT(board->bitboard[COLOR(piece)], SQ120SQ64(sq));
-    CLEARBIT(board->bitboard[bbAny], SQ120SQ64(sq));
-}
-
-static void unsafePlacePiece(BOARD_STATE *board, int piece, int sq) {
-    SETBIT(board->bitboard[GENERIC(piece)], SQ120SQ64(sq));
-    SETBIT(board->bitboard[COLOR(piece)], SQ120SQ64(sq));
-    SETBIT(board->bitboard[bbAny], SQ120SQ64(sq));
 }
 
 static void castleRooks(BOARD_STATE *board, int end) {
@@ -80,31 +90,36 @@ static void castleRooks(BOARD_STATE *board, int end) {
         unsafePlacePiece(board, wR, F1);
         CLEARBIT(board->castle, WK_CASTLE);
         CLEARBIT(board->castle, WQ_CASTLE);
+        // updateZobrist(H1, wR, board);
+        // updateZobrist(F1, wR, board);
     } else if (end == C1) {
 
         board->kings[WHITE] = end;
 
         unsafeClearPiece(board, wR, A1);
         unsafePlacePiece(board, wR, D1);
-
         CLEARBIT(board->castle, WK_CASTLE);
         CLEARBIT(board->castle, WQ_CASTLE);
+        // updateZobrist(A1, wR, board);
+        // updateZobrist(D1, wR, board);
     } else if (end == C8) {
         board->kings[BLACK] = end;
 
         unsafeClearPiece(board, bR, A8);
         unsafePlacePiece(board, bR, D8);
-
         CLEARBIT(board->castle, BK_CASTLE);
         CLEARBIT(board->castle, BQ_CASTLE);
+        // updateZobrist(A8, bR, board);
+        // updateZobrist(D8, bR, board);
     } else if (end == G8) {
         board->kings[BLACK] = end;
 
         unsafeClearPiece(board, bR, H8);
         unsafePlacePiece(board, bR, F8);
-
         CLEARBIT(board->castle, BK_CASTLE);
         CLEARBIT(board->castle, BQ_CASTLE);
+        // updateZobrist(H8, bR, board);
+        // updateZobrist(F8, bR, board);
     }
 }
 
@@ -123,14 +138,13 @@ void makeMove(BOARD_STATE *board, MOVE move) {
         const int offset[2] = {S, N};
         board->enpassant = OFFBOARD;
 
-        for (int i = 0; i <= bbAny; i++) {
-            CLEARBIT(board->bitboard[i],
-                     SQ120SQ64(move.endSquare + offset[board->turn]));
-        }
+        unsafeClearPiece(board, move.captured,
+                         move.endSquare + offset[board->turn]);
     } else if (move.captured != EMPTY) {
         for (int i = 0; i <= bbAny; i++) {
             CLEARBIT(board->bitboard[i], SQ120SQ64(move.endSquare));
         }
+        unsafeClearPiece(board, move.captured, move.endSquare);
     }
 
     // update castling permissions
@@ -158,6 +172,7 @@ void makeMove(BOARD_STATE *board, MOVE move) {
         board->enpassant = OFFBOARD;
     }
 
+    turnZobrist(board);
     board->turn = !(board->turn);
     return;
 }
@@ -193,6 +208,8 @@ void unmakeMove(BOARD_STATE *board, MOVE move) {
         // move pawn back to original square
         unsafeClearPiece(board, piece, move.endSquare);
         unsafePlacePiece(board, piece, move.startSquare);
+
+        turnZobrist(board);
         board->turn = !(board->turn);
         return;
     }

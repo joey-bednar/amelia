@@ -75,6 +75,7 @@ ULL perft(int depth) {
 
 #endif
 
+    printf("Initial board:\n");
     printBoard(&board);
 
     clock_t t = clock();
@@ -101,6 +102,9 @@ ULL perft(int depth) {
     }
 
     printf(" (%fs)\n", time_taken);
+
+    printf("Final board:\n");
+    printBoard(&board);
 
     return num;
 }
