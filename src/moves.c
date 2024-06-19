@@ -93,15 +93,8 @@ static void castleRooks(BOARD_STATE *board, int end) {
 
 // play a move on the board
 void makeMove(BOARD_STATE *board, MOVE move) {
-    board->fullmove++;
     int piece =
         TOCOLOR(board->turn, getGenericPieceSq120(move.startSquare, board));
-
-    if (GENERIC(piece) == bbPawn || move.captured != EMPTY) {
-        board->halfmove = 0;
-    } else {
-        board->halfmove++;
-    }
 
     // move rooks for castling moves
     if (move.castle) {
@@ -147,6 +140,18 @@ void makeMove(BOARD_STATE *board, MOVE move) {
         board->enpassant = OFFBOARD;
     }
 
+    // update half move
+    if (GENERIC(piece) == bbPawn || move.captured != EMPTY) {
+        board->halfmove = 0;
+    } else {
+        board->halfmove++;
+    }
+
+    board->playedmoves[2 * (board->fullmove - 1) + board->turn] = board->hash;
+
+    if (board->turn == BLACK) {
+        board->fullmove++;
+    }
     turnZobrist(board);
     board->turn = !(board->turn);
     return;
@@ -154,7 +159,8 @@ void makeMove(BOARD_STATE *board, MOVE move) {
 
 // undo a move on the board
 void unmakeMove(BOARD_STATE *board, MOVE move) {
-    board->fullmove--;
+
+    board->playedmoves[2 * (board->fullmove - 1) + board->turn - 1] = 0;
 
     // move rooks back
     if (move.castle) {
@@ -186,6 +192,9 @@ void unmakeMove(BOARD_STATE *board, MOVE move) {
         unsafeClearPiece(board, piece, move.endSquare);
         unsafePlacePiece(board, piece, move.startSquare);
 
+        if (board->turn == WHITE) {
+            board->fullmove--;
+        }
         turnZobrist(board);
         board->turn = !(board->turn);
         return;
@@ -212,6 +221,9 @@ void unmakeMove(BOARD_STATE *board, MOVE move) {
 
     board->enpassant = move.priorep;
 
+    if (board->turn == WHITE) {
+        board->fullmove--;
+    }
     board->turn = !(board->turn);
 }
 

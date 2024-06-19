@@ -23,6 +23,7 @@ void initZobrist() {
 
 // constructs hash of position
 void loadZobrist(BOARD_STATE *board) {
+    board->hash = 0;
     if (board->turn == BLACK) {
         board->hash ^= zobristB2M;
     }
@@ -31,6 +32,10 @@ void loadZobrist(BOARD_STATE *board) {
         int sq64 = bitScanForward(bb);
         int piece = getPieceSq120(SQ64SQ120(sq64), board);
         board->hash ^= zobrist_vals[piece - 1][sq64];
+    }
+
+    for (int i = 0; i < 2 * MAX_GAME_LENGTH; i++) {
+        board->playedmoves[i] = 0;
     }
 }
 

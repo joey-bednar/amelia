@@ -85,6 +85,8 @@ typedef struct {
     // TODO: create hash table with previous positions hash and num of
     // occurrences
 
+    ULL playedmoves[MAX_GAME_LENGTH * 2];
+
     int kings[2];
 
     int turn;

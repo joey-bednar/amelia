@@ -55,7 +55,6 @@ int eval(BOARD_STATE *board) {
     // static int count = 0;
     // count++;
     // printf("count: %d\n", count);
-
     ULL mine = board->bitboard[board->turn];
     ULL yours = board->bitboard[!board->turn];
 
@@ -138,7 +137,26 @@ static int alphabeta(BOARD_STATE *board, int depth, int alpha, int beta) {
         return 0;
     }
 
-    // TODO: add repetition check
+    // three fold repetition
+    if (board->halfmove >= 4) {
+        int end = 2 * (board->fullmove - 1) + board->turn;
+        int start = 0; // end - board->halfmove;
+        int count = 0;
+        for (int i = start; i <= end; i++) {
+            if (board->hash == board->playedmoves[i]) {
+                count++;
+            }
+        }
+
+        if (count >= 2) {
+            printf("3fold:\n");
+            for (int i = start; i <= end; i++) {
+                printf("%d: %llu\n", i, board->playedmoves[i]);
+            }
+            return 0;
+        }
+    }
+
     // TODO: add max depth check
 
     MOVE moves[MAX_LEGAL_MOVES];
@@ -151,6 +169,7 @@ static int alphabeta(BOARD_STATE *board, int depth, int alpha, int beta) {
             makeMove(board, moves[i]);
 
             score = -alphabeta(board, depth - 1, -beta, -alpha);
+
             unmakeMove(board, moves[i]);
 
             if (score >= beta) {
@@ -255,7 +274,9 @@ void printBestMove(int depth, BOARD_STATE *board) {
     for (int i = 0; i < n_moves; i++) {
         if (isLegalMove(board, moves[i])) {
             makeMove(board, moves[i]);
+
             int score = -alphabeta(board, depth - 1, -beta, -alpha);
+
             unmakeMove(board, moves[i]);
             if (score >= max) {
                 best = moves[i];
@@ -273,4 +294,8 @@ void printBestMove(int depth, BOARD_STATE *board) {
     printf("bestmove ");
     printMoveText(best);
     printf("\n");
+
+    // for (int i = 0; i <= 20; i++) {
+    //     printf("%d: %llu\n", i, board->playedmoves[i]);
+    // }
 }
