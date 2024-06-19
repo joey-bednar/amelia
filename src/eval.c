@@ -149,10 +149,6 @@ static int alphabeta(BOARD_STATE *board, int depth, int alpha, int beta) {
         }
 
         if (count >= 2) {
-            printf("3fold:\n");
-            for (int i = start; i <= end; i++) {
-                printf("%d: %llu\n", i, board->playedmoves[i]);
-            }
             return 0;
         }
     }

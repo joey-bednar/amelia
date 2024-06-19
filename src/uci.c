@@ -242,12 +242,6 @@ void startUCI() {
             initBoard(&board);
             int i = loadFEN(input, &board, POSFENLEN);
             parseMoves(input, &board, i);
-
-            for (int i = 0; i <= 30; i++) {
-                printf("%d: %llu\n", i, board.playedmoves[i]);
-            }
-            printBoard(&board);
-
         } else if (strncmp("go\n", input, 2) == 0) {
             printBestMove(DEFAULTDEPTH, &board);
         } else if (strcmp("stop\n", input) == 0) {
