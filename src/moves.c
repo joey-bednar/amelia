@@ -46,39 +46,15 @@ static void unmakeCastleMove(BOARD_STATE *board, int end) {
     if (end == G1) {
         unsafeClearPiece(board, wR, F1);
         unsafePlacePiece(board, wR, H1);
-        // CLEARBIT(board->bitboard[bbRook], SQ120SQ64(F1));
-        // CLEARBIT(board->bitboard[bbWhite], SQ120SQ64(F1));
-        // CLEARBIT(board->bitboard[bbAny], SQ120SQ64(F1));
-        // SETBIT(board->bitboard[bbRook], SQ120SQ64(H1));
-        // SETBIT(board->bitboard[bbWhite], SQ120SQ64(H1));
-        // SETBIT(board->bitboard[bbAny], SQ120SQ64(H1));
     } else if (end == C1) {
         unsafeClearPiece(board, wR, D1);
         unsafePlacePiece(board, wR, A1);
-        // CLEARBIT(board->bitboard[bbRook], SQ120SQ64(D1));
-        // CLEARBIT(board->bitboard[bbWhite], SQ120SQ64(D1));
-        // CLEARBIT(board->bitboard[bbAny], SQ120SQ64(D1));
-        // SETBIT(board->bitboard[bbRook], SQ120SQ64(A1));
-        // SETBIT(board->bitboard[bbWhite], SQ120SQ64(A1));
-        // SETBIT(board->bitboard[bbAny], SQ120SQ64(A1));
     } else if (end == G8) {
         unsafeClearPiece(board, bR, F8);
         unsafePlacePiece(board, bR, H8);
-        // CLEARBIT(board->bitboard[bbRook], SQ120SQ64(F8));
-        // CLEARBIT(board->bitboard[bbBlack], SQ120SQ64(F8));
-        // CLEARBIT(board->bitboard[bbAny], SQ120SQ64(F8));
-        // SETBIT(board->bitboard[bbRook], SQ120SQ64(H8));
-        // SETBIT(board->bitboard[bbBlack], SQ120SQ64(H8));
-        // SETBIT(board->bitboard[bbAny], SQ120SQ64(H8));
     } else if (end == C8) {
         unsafeClearPiece(board, bR, D8);
         unsafePlacePiece(board, bR, A8);
-        // CLEARBIT(board->bitboard[bbRook], SQ120SQ64(D8));
-        // CLEARBIT(board->bitboard[bbBlack], SQ120SQ64(D8));
-        // CLEARBIT(board->bitboard[bbAny], SQ120SQ64(D8));
-        // SETBIT(board->bitboard[bbRook], SQ120SQ64(A8));
-        // SETBIT(board->bitboard[bbBlack], SQ120SQ64(A8));
-        // SETBIT(board->bitboard[bbAny], SQ120SQ64(A8));
     }
 }
 
@@ -90,8 +66,6 @@ static void castleRooks(BOARD_STATE *board, int end) {
         unsafePlacePiece(board, wR, F1);
         CLEARBIT(board->castle, WK_CASTLE);
         CLEARBIT(board->castle, WQ_CASTLE);
-        // updateZobrist(H1, wR, board);
-        // updateZobrist(F1, wR, board);
     } else if (end == C1) {
 
         board->kings[WHITE] = end;
@@ -100,8 +74,6 @@ static void castleRooks(BOARD_STATE *board, int end) {
         unsafePlacePiece(board, wR, D1);
         CLEARBIT(board->castle, WK_CASTLE);
         CLEARBIT(board->castle, WQ_CASTLE);
-        // updateZobrist(A1, wR, board);
-        // updateZobrist(D1, wR, board);
     } else if (end == C8) {
         board->kings[BLACK] = end;
 
@@ -109,8 +81,6 @@ static void castleRooks(BOARD_STATE *board, int end) {
         unsafePlacePiece(board, bR, D8);
         CLEARBIT(board->castle, BK_CASTLE);
         CLEARBIT(board->castle, BQ_CASTLE);
-        // updateZobrist(A8, bR, board);
-        // updateZobrist(D8, bR, board);
     } else if (end == G8) {
         board->kings[BLACK] = end;
 
@@ -118,15 +88,20 @@ static void castleRooks(BOARD_STATE *board, int end) {
         unsafePlacePiece(board, bR, F8);
         CLEARBIT(board->castle, BK_CASTLE);
         CLEARBIT(board->castle, BQ_CASTLE);
-        // updateZobrist(H8, bR, board);
-        // updateZobrist(F8, bR, board);
     }
 }
 
 // play a move on the board
 void makeMove(BOARD_STATE *board, MOVE move) {
+    board->fullmove++;
     int piece =
         TOCOLOR(board->turn, getGenericPieceSq120(move.startSquare, board));
+
+    if (GENERIC(piece) == bbPawn || move.captured != EMPTY) {
+        board->halfmove = 0;
+    } else {
+        board->halfmove++;
+    }
 
     // move rooks for castling moves
     if (move.castle) {
@@ -179,6 +154,7 @@ void makeMove(BOARD_STATE *board, MOVE move) {
 
 // undo a move on the board
 void unmakeMove(BOARD_STATE *board, MOVE move) {
+    board->fullmove--;
 
     // move rooks back
     if (move.castle) {
@@ -187,6 +163,7 @@ void unmakeMove(BOARD_STATE *board, MOVE move) {
 
     // reset castling abilities
     board->castle = move.priorcastle;
+    board->halfmove = move.priorhalf;
 
     int piece =
         TOCOLOR(!board->turn, getGenericPieceSq120(move.endSquare, board));
@@ -222,7 +199,6 @@ void unmakeMove(BOARD_STATE *board, MOVE move) {
 
     // undo promotion
     if (move.promotion == EMPTY) {
-        // setPiece120(piece, move.startSquare, board);
         unsafePlacePiece(board, piece, move.startSquare);
     } else {
         int pawn = TOCOLOR(COLOR(piece), bbPawn);
@@ -250,12 +226,12 @@ static void addMove(BOARD_STATE *board, MOVE *moves, int start, int end,
     moves[*index].promotion = promotion;
     moves[*index].priorep = board->enpassant;
     moves[*index].priorcastle = board->castle;
+    moves[*index].priorhalf = board->halfmove;
 
     moves[*index].enpassant = enpassant;
     moves[*index].twopawnmove = twopawnmove;
     moves[*index].castle = castle;
 
-    assert(*index < 500);
     ++(*index);
 
     // flags:

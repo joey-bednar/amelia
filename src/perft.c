@@ -3,8 +3,9 @@
 #include <stdio.h>
 #include <time.h>
 
-#define VERBOSE FALSE
+#define VERBOSE 0
 #define POSITION 0
+#define CUSTOMFEN "8/3k4/3P4/3K4/8/8/8/8 b - - 0 1"
 
 ULL perft_rec_bulk(int depth, BOARD_STATE *board) {
     MOVE move_list[MAX_LEGAL_MOVES];
@@ -12,15 +13,17 @@ ULL perft_rec_bulk(int depth, BOARD_STATE *board) {
     unsigned int nodes = 0;
 
     n_moves = generateMoves(board, move_list);
-    int legal = 0;
-    for (int i = 0; i < n_moves; i++) {
-        if (isLegalMove(board, move_list[i])) {
-            legal++;
-        }
-    }
 
-    if (depth == 1)
+    if (depth == 1) {
+        int legal = 0;
+
+        for (int i = 0; i < n_moves; i++) {
+            if (isLegalMove(board, move_list[i])) {
+                legal++;
+            }
+        }
         return (ULL)legal;
+    }
 
     for (i = 0; i < n_moves; i++) {
 
@@ -72,6 +75,12 @@ ULL perft(int depth) {
 #if POSITION == 3
 
     loadFEN("8/2p5/3p4/KP5r/1R3p1k/8/4P1P1/8 w - - ", &board, 0);
+
+#endif
+
+#if POSITION == 99
+
+    loadFEN(CUSTOMFEN, &board, 0);
 
 #endif
 

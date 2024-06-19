@@ -151,7 +151,7 @@ int loadFEN(char *fen, BOARD_STATE *board, int startIndex) {
     // set castling ability
     board->castle = 0;
     i = i + 2;
-    while (fen[i] != ' ' && fen[i] != '-') {
+    while (fen[i] != ' ') {
         switch (fen[i]) {
         case 'K':
             SETBIT(board->castle, WK_CASTLE);
@@ -174,7 +174,7 @@ int loadFEN(char *fen, BOARD_STATE *board, int startIndex) {
     board->enpassant = OFFBOARD;
     int rank = 0;
     int file = 0;
-    while (fen[i] != ' ' && fen[i] != '-') {
+    while (fen[i] != ' ') {
 
         if (fen[i] >= 'a' && fen[i] <= 'h') {
             file = (int)(fen[i] - 'a');
@@ -185,26 +185,23 @@ int loadFEN(char *fen, BOARD_STATE *board, int startIndex) {
         i++;
     }
 
-    // set full move counter
-    i = i + 2;
+    // set half move counter
+    i++;
     int halfmove = 0;
     while (fen[i] != ' ') {
         if (fen[i] >= '0' && fen[i] <= '9') {
-            // printf("partial halfmove: %d\n",(int)(fen[i]-'0'));
             halfmove = halfmove * 10;
             halfmove = halfmove + (int)(fen[i] - '0');
         }
         i++;
     }
     board->halfmove = halfmove;
-    // printf("half move: %d\n", halfmove);
 
-    // set half move counter
+    // set full move counter
     i = i + 1;
     int fullmove = 0;
     while (fen[i] != ' ' && fen[i] != '\n') {
         if (fen[i] >= '0' && fen[i] <= '9') {
-            // printf("partial fullmove: %d\n",(int)(fen[i]-'0'));
             fullmove = fullmove * 10;
             fullmove = fullmove + (int)(fen[i] - '0');
         }
@@ -250,7 +247,6 @@ void startUCI() {
         } else if (strcmp("quit\n", input) == 0) {
             break;
         }
-        // printBoard(&board);
         fflush(stdout);
     }
 }

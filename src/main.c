@@ -22,7 +22,7 @@ int main() {
     init(&board);
 
     startUCI();
-    // perft(5);
+    // perft(6);
 
     return 0;
 }

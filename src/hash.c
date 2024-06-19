@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+// generates random ULL
 static ULL get64rand() {
     return (((ULL)rand() << 0) & 0x000000000000FFFFull) |
            (((ULL)rand() << 16) & 0x00000000FFFF0000ull) |
@@ -33,10 +34,12 @@ void loadZobrist(BOARD_STATE *board) {
     }
 }
 
+// updates zobrist hash after placing/removing a piece from square
 void updateZobrist(int sq64, int piece, BOARD_STATE *board) {
     board->hash ^= zobrist_vals[piece - 1][sq64];
 }
 
+// updates zobrist hash with new turn
 void turnZobrist(BOARD_STATE *board) {
     board->hash ^= zobristB2M;
 }

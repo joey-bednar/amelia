@@ -28,7 +28,8 @@
 #define KNIGHTBB(sq64) (knightJumps[(sq64)])
 #define KINGBB(sq64) (kingJumps[(sq64)])
 
-#define MAX_LEGAL_MOVES 512
+#define MAX_LEGAL_MOVES 256
+#define MAX_GAME_LENGTH 512
 #define MAX_DEPTH 10
 
 #define CHAR2FILE(c) ((int)((c) - 'a'))
@@ -81,6 +82,9 @@ typedef struct {
 
     ULL hash;
 
+    // TODO: create hash table with previous positions hash and num of
+    // occurrences
+
     int kings[2];
 
     int turn;
@@ -100,6 +104,7 @@ typedef struct {
     int twopawnmove;
 
     int priorep;
+    int priorhalf;
     int priorcastle;
 
 } MOVE;
