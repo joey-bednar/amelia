@@ -547,17 +547,6 @@ void generateOnePawnMoves(BOARD_STATE *board, MOVE *moves, int *index) {
     }
 }
 
-static int compare(const void *a, const void *b) {
-    MOVE *moveA = (MOVE *)a;
-    MOVE *moveB = (MOVE *)b;
-
-    if (moveA->check != moveB->check) {
-        return (moveB->check - moveA->check);
-    }
-
-    return (GENERIC(moveA->captured) - GENERIC(moveB->captured));
-}
-
 // generate all legal moves and insert them into the moves list
 int generateMoves(BOARD_STATE *board, MOVE *moves) {
 
@@ -609,14 +598,6 @@ int generateMoves(BOARD_STATE *board, MOVE *moves) {
 
     generatePseudoEnPassantMoves(board, moves, &index);
     generateCastleMoves(board, moves, &index);
-
-    for (int i = 0; i < index; i++) {
-        if (isCheck(board, moves[i])) {
-            moves[i].check = 1;
-        }
-    }
-
-    qsort(moves, index, sizeof(MOVE), compare);
 
     return index;
 }

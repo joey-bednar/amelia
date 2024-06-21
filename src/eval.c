@@ -1,5 +1,6 @@
 #include "defs.h"
 #include <stdio.h>
+#include <stdlib.h>
 
 #define MATE 50000
 #define MATETHRESHOLD 50
@@ -278,6 +279,14 @@ static void printInfo(int score, int depth) {
     }
 }
 
+static int compare(const void *a, const void *b) {
+    MOVE *moveA = (MOVE *)a;
+    MOVE *moveB = (MOVE *)b;
+
+    return (moveB->check - moveA->check) +
+           (GENERIC(moveA->captured) - GENERIC(moveB->captured));
+}
+
 void printBestMove(int depth, BOARD_STATE *board) {
     MOVE best;
 
@@ -287,6 +296,14 @@ void printBestMove(int depth, BOARD_STATE *board) {
 
     MOVE moves[MAX_LEGAL_MOVES];
     int n_moves = generateMoves(board, moves);
+
+    for (int i = 0; i < n_moves; i++) {
+        if (isCheck(board, moves[i])) {
+            moves[i].check = 1;
+        }
+    }
+
+    // qsort(moves, n_moves, sizeof(MOVE), compare);
 
     for (int i = 0; i < n_moves; i++) {
         if (isLegalMove(board, moves[i])) {
@@ -311,8 +328,4 @@ void printBestMove(int depth, BOARD_STATE *board) {
     printf("bestmove ");
     printMoveText(best);
     printf("\n");
-
-    // for (int i = 0; i <= 20; i++) {
-    //     printf("%d: %llu\n", i, board->playedmoves[i]);
-    // }
 }
