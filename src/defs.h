@@ -30,8 +30,8 @@
 #define MAX_GAME_LENGTH 512
 
 #define MAX_DEPTH 10
-#define DEFAULTDEPTH 5
-#define QMAXDEPTH 0
+#define DEFAULTDEPTH 4
+#define QMAXDEPTH 2
 
 #define CHAR2FILE(c) ((int)((c) - 'a'))
 #define CHAR2RANK(c) ((int)((c) - '1'))
@@ -79,25 +79,6 @@ enum { NO_CASTLE, WK_CASTLE, WQ_CASTLE, BK_CASTLE, BQ_CASTLE };
 typedef unsigned long long ULL;
 
 typedef struct {
-    ULL bitboard[bbLength];
-
-    ULL hash;
-
-    // TODO: create hash table with previous positions hash and num of
-    // occurrences
-
-    ULL playedmoves[MAX_GAME_LENGTH * 2];
-
-    int kings[2];
-
-    int turn;
-    int halfmove;
-    int fullmove;
-    int castle;
-    int enpassant;
-} BOARD_STATE;
-
-typedef struct {
     int startSquare;
     int endSquare;
     int captured;
@@ -113,6 +94,28 @@ typedef struct {
     int check;
 
 } MOVE;
+
+typedef struct {
+    ULL bitboard[bbLength];
+
+    ULL hash;
+
+    // TODO: create hash table with previous positions hash and num of
+    // occurrences
+
+    ULL playedmoves[MAX_GAME_LENGTH * 2];
+
+    MOVE line[MAX_GAME_LENGTH * 2];
+    int ply;
+
+    int kings[2];
+
+    int turn;
+    int halfmove;
+    int fullmove;
+    int castle;
+    int enpassant;
+} BOARD_STATE;
 
 extern int epMap[120];
 extern int sq120sq64Map[120];
@@ -201,5 +204,7 @@ extern MOVE makeBestMove(int depth, BOARD_STATE *board);
 // uci.c
 extern int loadFEN(char *fen, BOARD_STATE *board, int startIndex);
 extern void startUCI();
+
+extern void printMoveText(MOVE move);
 
 #endif

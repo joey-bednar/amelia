@@ -242,6 +242,7 @@ void startUCI() {
             parseMoves(input, &board, i);
         } else if (strncmp("go\n", input, 2) == 0) {
             printBestMove(DEFAULTDEPTH, &board);
+
         } else if (strcmp("stop\n", input) == 0) {
             // printf("stop\n");
         } else if (strcmp("quit\n", input) == 0) {

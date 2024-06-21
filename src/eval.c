@@ -6,6 +6,21 @@
 #define MATETHRESHOLD 50
 #define INF 99999
 
+static void printInfo(int score, int depth) {
+    if (score + MATETHRESHOLD >= MATE && score - MATETHRESHOLD <= MATE) {
+        int dist = (MATE - score) + depth;
+        int mate = (dist + 1) / 2;
+        printf("info score mate %d\n", mate);
+    } else if (score + MATETHRESHOLD >= -MATE &&
+               score - MATETHRESHOLD <= -MATE) {
+        int dist = (-MATE - score) + depth;
+        int mate = (dist + 1) / 2;
+        printf("info score mate -%d\n", mate);
+    } else {
+        printf("info score cp %d\n", score);
+    }
+}
+
 // return the value of all pieces of a given color using piece values and square
 // tables
 static int computePieceTotals(ULL bb, int color, BOARD_STATE *board) {
@@ -195,6 +210,11 @@ static int alphabeta(BOARD_STATE *board, int depth, int alpha, int beta) {
             }
             if (score > alpha) {
                 alpha = score;
+
+                // add best move to variation
+                // board->line[2 * (board->fullmove - 1) + board->turn] =
+                // moves[i]; printInfo(score, DEFAULTDEPTH - depth);
+                board->line[(DEFAULTDEPTH - depth)] = moves[i];
             }
         }
     }
@@ -239,7 +259,7 @@ int negaMax(BOARD_STATE *board, int depth) {
     return max;
 }
 
-static void printMoveText(MOVE move) {
+void printMoveText(MOVE move) {
 
     char startFile = SQ120F(move.startSquare) + 'a';
     char startRank = SQ120R(move.startSquare) + '1';
@@ -264,21 +284,6 @@ static void printMoveText(MOVE move) {
     }
 }
 
-static void printInfo(int score, int depth) {
-    if (score + MATETHRESHOLD >= MATE && score - MATETHRESHOLD <= MATE) {
-        int dist = (MATE - score) + depth;
-        int mate = (dist + 1) / 2;
-        printf("info score mate %d\n", mate);
-    } else if (score + MATETHRESHOLD >= -MATE &&
-               score - MATETHRESHOLD <= -MATE) {
-        int dist = (-MATE - score) + depth;
-        int mate = (dist + 1) / 2;
-        printf("info score mate -%d\n", mate);
-    } else {
-        printf("info score cp %d\n", score);
-    }
-}
-
 static int compare(const void *a, const void *b) {
     MOVE *moveA = (MOVE *)a;
     MOVE *moveB = (MOVE *)b;
@@ -288,8 +293,6 @@ static int compare(const void *a, const void *b) {
 }
 
 void printBestMove(int depth, BOARD_STATE *board) {
-    MOVE best;
-
     int max = -INF;
     int alpha = -INF;
     int beta = INF;
@@ -297,35 +300,28 @@ void printBestMove(int depth, BOARD_STATE *board) {
     MOVE moves[MAX_LEGAL_MOVES];
     int n_moves = generateMoves(board, moves);
 
+    // look at checks/captures first only for initial ply
     for (int i = 0; i < n_moves; i++) {
         if (isCheck(board, moves[i])) {
             moves[i].check = 1;
         }
     }
+    qsort(moves, n_moves, sizeof(MOVE), compare);
 
-    // qsort(moves, n_moves, sizeof(MOVE), compare);
+    int score = alphabeta(board, DEFAULTDEPTH, alpha, beta);
 
-    for (int i = 0; i < n_moves; i++) {
-        if (isLegalMove(board, moves[i])) {
-            makeMove(board, moves[i]);
+    MOVE bestmove = board->line[0];
 
-            int score = -alphabeta(board, depth - 1, -beta, -alpha);
-
-            unmakeMove(board, moves[i]);
-            if (score >= max) {
-                best = moves[i];
-                max = score;
-
-                printInfo(score, depth);
-
-                printf("info currmove ");
-                printMoveText(best);
-                printf("\n");
-            }
-        }
-    }
+    printInfo(score, DEFAULTDEPTH);
 
     printf("bestmove ");
-    printMoveText(best);
+    printMoveText(bestmove);
     printf("\n");
+
+    // for (int i = 0; i < DEFAULTDEPTH; i++) {
+    //     printf("%d. ",board->fullmove+i);
+    //     printMoveText(board->line[i]);
+    //     printf(" \n");
+    // }
+    // printBoardIndex();
 }
