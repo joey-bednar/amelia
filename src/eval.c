@@ -66,63 +66,83 @@ int eval(BOARD_STATE *board) {
     return total;
 }
 
-// static int quiesce(BOARD_STATE *board, int alpha, int beta) {
-//     int stand_pat = eval(board);
-//     if (stand_pat >= beta) {
-//         return beta;
-//     }
-//     if (alpha < stand_pat) {
-//         alpha = stand_pat;
-//     }
-//
-//     if (board->halfmove >= 100) {
-//         return 0;
-//     }
-//
-//     // TODO: add repetition check
-//     // TODO: add max depth check
-//
-//     MOVE moves[MAX_LEGAL_MOVES];
-//     int n_moves = generateMoves(board, moves);
-//
-//     int legal = 0;
-//
-//     for (int i = 0; i < n_moves; i++) {
-//         if (isLegalMove(board, moves[i])) {
-//             legal++;
-//
-//             if (moves[i].type > MOVE_QUEENCASTLE &&
-//                 isLegalMove(board, moves[i])) {
-//
-//                 legal++;
-//                 makeMove(board, moves[i]);
-//
-//                 int score = -quiesce(board, -beta, -alpha);
-//                 // int score = eval(board);
-//                 unmakeMove(board, moves[i]);
-//
-//                 if (score >= beta) {
-//                     return beta;
-//                 }
-//                 if (score > alpha) {
-//                     alpha = score;
-//                 }
-//             }
-//         }
-//     }
-//
-//     if (legal == 0) {
-//         if (isAttacked(board, board->kings[board->turn], !board->turn)) {
-//             // checkmate
-//             return -MATE; // - depth;
-//         } else {
-//             // stalemate
-//             return 0;
-//         }
-//     }
-//
-//     return alpha;
-// }
+static int quiesce(BOARD_STATE *board, int alpha, int beta, int depth) {
+
+    int stand_pat = eval(board);
+
+    if (depth == 0) {
+        return stand_pat;
+    }
+
+    if (stand_pat >= beta) {
+        return beta;
+    }
+    if (alpha < stand_pat) {
+        alpha = stand_pat;
+    }
+
+    if (board->halfmove >= 100) {
+        return 0;
+    }
+
+    // three fold repetition
+    if (board->halfmove >= 4) {
+        int end = 2 * (board->fullmove - 1) + board->turn;
+        int start = 0; // end - board->halfmove;
+        int count = 0;
+        for (int i = start; i <= end; i++) {
+            if (board->hash == board->playedmoves[i]) {
+                count++;
+            }
+        }
+
+        if (count >= 2) {
+            return 0;
+        }
+    }
+
+    MOVE moves[MAX_LEGAL_MOVES];
+    int n_moves = generateMoves(board, moves);
+
+    int legal = 0;
+
+    for (int i = 0; i < n_moves; i++) {
+        int isLegal = isLegalMove(board, moves[i]);
+        if (isLegal) {
+            legal++;
+
+            if ((moves[i].check == 1 || moves[i].captured != EMPTY) &&
+                isLegal) {
+
+                legal++;
+                makeMove(board, moves[i]);
+
+                int score = -quiesce(board, -beta, -alpha, depth - 1);
+                // int score = eval(board);
+                unmakeMove(board, moves[i]);
+
+                if (score >= beta) {
+                    return beta;
+                }
+                if (score > alpha) {
+                    alpha = score;
+                }
+            }
+        }
+    }
+
+    if (legal == 0) {
+        if (isAttacked(board, board->kings[board->turn], !board->turn)) {
+            // checkmate
+            return -MATE; // - depth;
+        } else {
+            // stalemate
+            return 0;
+        }
+    }
+
+    return alpha;
+}
 
 static int alphabeta(BOARD_STATE *board, int depth, int alpha, int beta) {
     int score = -INF;
@@ -130,7 +150,8 @@ static int alphabeta(BOARD_STATE *board, int depth, int alpha, int beta) {
     int legal = 0;
 
     if (depth == 0) {
-        return eval(board);
+        return quiesce(board, alpha, beta, QMAXDEPTH);
+        // return eval(board);
     }
 
     if (board->halfmove >= 100) {

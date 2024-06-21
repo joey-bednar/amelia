@@ -98,3 +98,12 @@ int isLegalMove(BOARD_STATE *board, MOVE move) {
     unmakeMove(board, move);
     return !check;
 }
+
+// return TRUE if move is a check
+int isCheck(BOARD_STATE *board, MOVE move) {
+    makeMove(board, move);
+    int kingsq = board->kings[board->turn];
+    int check = isAttacked(board, kingsq, !board->turn);
+    unmakeMove(board, move);
+    return check;
+}

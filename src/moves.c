@@ -1,6 +1,7 @@
 #include "defs.h"
 #include <assert.h>
 #include <stdio.h>
+#include <stdlib.h>
 
 static void unsafeClearPiece(BOARD_STATE *board, int piece, int sq) {
     // move piece to target square
@@ -147,11 +148,14 @@ void makeMove(BOARD_STATE *board, MOVE move) {
         board->halfmove++;
     }
 
+    // add hash to played moves
     board->playedmoves[2 * (board->fullmove - 1) + board->turn] = board->hash;
 
+    // update full move
     if (board->turn == BLACK) {
         board->fullmove++;
     }
+
     turnZobrist(board);
     board->turn = !(board->turn);
     return;
@@ -243,6 +247,8 @@ static void addMove(BOARD_STATE *board, MOVE *moves, int start, int end,
     moves[*index].enpassant = enpassant;
     moves[*index].twopawnmove = twopawnmove;
     moves[*index].castle = castle;
+
+    moves[*index].check = 0;
 
     ++(*index);
 
@@ -397,16 +403,6 @@ static void generatePseudoPawnMoves(BOARD_STATE *board, MOVE *moves, int sq,
     int one = sq + offset[0];
     int two = sq + offset[1];
 
-    // // up one
-    // if (isEmptySquare(one, board) && board->turn == BLACK) {
-    //     if (SQ120R(one) == eighthrank) {
-    //         addPromotions(board, moves, sq, one, EMPTY, color, index);
-    //     } else {
-    //         addMove(board, moves, sq, one, EMPTY, EMPTY, FALSE, FALSE, FALSE,
-    //                 index);
-    //     }
-    // }
-
     // captures excluding en passant
     for (int i = 2; i <= 3; i++) {
         int enemysquare = sq + offset[i];
@@ -551,6 +547,17 @@ void generateOnePawnMoves(BOARD_STATE *board, MOVE *moves, int *index) {
     }
 }
 
+static int compare(const void *a, const void *b) {
+    MOVE *moveA = (MOVE *)a;
+    MOVE *moveB = (MOVE *)b;
+
+    if (moveA->check != moveB->check) {
+        return (moveB->check - moveA->check);
+    }
+
+    return (GENERIC(moveA->captured) - GENERIC(moveB->captured));
+}
+
 // generate all legal moves and insert them into the moves list
 int generateMoves(BOARD_STATE *board, MOVE *moves) {
 
@@ -602,6 +609,14 @@ int generateMoves(BOARD_STATE *board, MOVE *moves) {
 
     generatePseudoEnPassantMoves(board, moves, &index);
     generateCastleMoves(board, moves, &index);
+
+    for (int i = 0; i < index; i++) {
+        if (isCheck(board, moves[i])) {
+            moves[i].check = 1;
+        }
+    }
+
+    qsort(moves, index, sizeof(MOVE), compare);
 
     return index;
 }

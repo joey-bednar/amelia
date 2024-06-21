@@ -14,8 +14,6 @@
 #define NOTCOLOR(p) (notcolorMap[(p)])
 
 #define GENERIC(p) (genericMap[(p)])
-// #define TOWHITE(p) (toWhite[(p)])
-// #define TOBLACK(p) (toBlack[(p)])
 #define TOWHITE(p) (toColor[WHITE][(p)])
 #define TOBLACK(p) (toColor[BLACK][(p)])
 #define TOCOLOR(c, p) (toColor[c][(p)])
@@ -30,7 +28,10 @@
 
 #define MAX_LEGAL_MOVES 256
 #define MAX_GAME_LENGTH 512
+
 #define MAX_DEPTH 10
+#define DEFAULTDEPTH 5
+#define QMAXDEPTH 0
 
 #define CHAR2FILE(c) ((int)((c) - 'a'))
 #define CHAR2RANK(c) ((int)((c) - '1'))
@@ -109,6 +110,8 @@ typedef struct {
     int priorhalf;
     int priorcastle;
 
+    int check;
+
 } MOVE;
 
 extern int epMap[120];
@@ -164,8 +167,11 @@ extern int getColorSq120(int sq, BOARD_STATE *board);
 extern int generateMoves(BOARD_STATE *board, MOVE *move);
 extern void makeMove(BOARD_STATE *board, MOVE move);
 extern void unmakeMove(BOARD_STATE *board, MOVE move);
+
+// attack.c
 extern int isAttacked(BOARD_STATE *board, int sq, int enemycolor);
 extern int isLegalMove(BOARD_STATE *board, MOVE move);
+extern int isCheck(BOARD_STATE *board, MOVE move);
 
 // utils.c
 extern void printBits(unsigned long long num);

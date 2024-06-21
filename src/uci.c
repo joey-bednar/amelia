@@ -3,11 +3,9 @@
 #include <stdio.h>
 #include <string.h>
 
-#define INPUTLEN 1000
+#define INPUTLEN 10000
 #define POSSTARTLEN 17
 #define POSFENLEN 13
-
-#define DEFAULTDEPTH 5
 
 static void playUCIMove(BOARD_STATE *board, int start, int end, char promo) {
     int piece;
