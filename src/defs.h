@@ -30,8 +30,8 @@
 #define MAX_GAME_LENGTH 512
 
 #define MAX_DEPTH 10
-#define DEFAULTDEPTH 4
-#define QMAXDEPTH 2
+#define DEFAULTDEPTH 7
+#define QMAXDEPTH 0
 
 #define CHAR2FILE(c) ((int)((c) - 'a'))
 #define CHAR2RANK(c) ((int)((c) - '1'))
@@ -107,6 +107,8 @@ typedef struct {
 
     MOVE line[MAX_GAME_LENGTH * 2];
     int ply;
+
+    int nodes;
 
     int kings[2];
 

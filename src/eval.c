@@ -1,6 +1,7 @@
 #include "defs.h"
 #include <stdio.h>
 #include <stdlib.h>
+#include <time.h>
 
 #define MATE 50000
 #define MATETHRESHOLD 50
@@ -84,6 +85,8 @@ int eval(BOARD_STATE *board) {
 
 static int quiesce(BOARD_STATE *board, int alpha, int beta, int depth) {
 
+    board->nodes++;
+
     int stand_pat = eval(board);
 
     if (depth == 0) {
@@ -161,6 +164,8 @@ static int quiesce(BOARD_STATE *board, int alpha, int beta, int depth) {
 }
 
 static int alphabeta(BOARD_STATE *board, int depth, int alpha, int beta) {
+    board->nodes++;
+
     int score = -INF;
 
     int legal = 0;
@@ -308,7 +313,14 @@ void printBestMove(int depth, BOARD_STATE *board) {
     }
     qsort(moves, n_moves, sizeof(MOVE), compare);
 
+    board->nodes = 0;
+
+    clock_t t = clock();
+
     int score = alphabeta(board, DEFAULTDEPTH, alpha, beta);
+
+    t = clock() - t;
+    double time_taken = ((double)t) / CLOCKS_PER_SEC; // in seconds
 
     MOVE bestmove = board->line[0];
 
@@ -317,6 +329,9 @@ void printBestMove(int depth, BOARD_STATE *board) {
     printf("bestmove ");
     printMoveText(bestmove);
     printf("\n");
+
+    // printf("%d nodes %fnps\n",board->nodes,board->nodes/time_taken);
+    board->nodes = 0;
 
     // for (int i = 0; i < DEFAULTDEPTH; i++) {
     //     printf("%d. ",board->fullmove+i);
