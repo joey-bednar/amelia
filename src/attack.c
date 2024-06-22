@@ -18,7 +18,7 @@ static int isAttackedPreset(BOARD_STATE *board, int sq, int enemycolor,
 // given by the offset directions
 static int isAttackedSliding(BOARD_STATE *board, int sq, const int *offsets,
                              const int sizeoffset, int enemycolor, int RB) {
-    for (int i = 0; i < sizeoffset; i++) {
+    for (int i = 0; i < sizeoffset; ++i) {
         int nextSq = sq + offsets[i];
 
         while (ONBOARD(nextSq) &&

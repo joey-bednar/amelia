@@ -17,15 +17,15 @@ ULL perft_rec_bulk(int depth, BOARD_STATE *board) {
     if (depth == 1) {
         int legal = 0;
 
-        for (int i = 0; i < n_moves; i++) {
+        for (int i = 0; i < n_moves; ++i) {
             if (isLegalMove(board, move_list[i])) {
-                legal++;
+                ++legal;
             }
         }
         return (ULL)legal;
     }
 
-    for (i = 0; i < n_moves; i++) {
+    for (i = 0; i < n_moves; ++i) {
 
 #if VERBOSE == 1
         printf("depth %d:\n", depth);

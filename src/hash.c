@@ -13,8 +13,8 @@ static ULL get64rand() {
 
 // init random zobrist values
 void initZobrist() {
-    for (int piece = wP; piece <= bK; piece++) {
-        for (int sq = 0; sq < 64; sq++) {
+    for (int piece = wP; piece <= bK; ++piece) {
+        for (int sq = 0; sq < 64; ++sq) {
             zobrist_vals[piece - 1][sq] = get64rand();
         }
     }
@@ -34,7 +34,7 @@ void loadZobrist(BOARD_STATE *board) {
         board->hash ^= zobrist_vals[piece - 1][sq64];
     }
 
-    for (int i = 0; i < 2 * MAX_GAME_LENGTH; i++) {
+    for (int i = 0; i < 2 * MAX_GAME_LENGTH; ++i) {
         board->playedmoves[i] = 0;
     }
 }

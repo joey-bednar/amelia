@@ -52,8 +52,8 @@ void printBoard(BOARD_STATE *board) {
     // int to represent a piece in FEN notation
     const int piece2char[] = {'.', 'P', 'N', 'B', 'R', 'Q', 'K',
                               'p', 'n', 'b', 'r', 'q', 'k'};
-    for (int rank = RANK_8; rank >= RANK_1; rank--) {
-        for (int file = FILE_A; file <= FILE_H; file++) {
+    for (int rank = RANK_8; rank >= RANK_1; --rank) {
+        for (int file = FILE_A; file <= FILE_H; ++file) {
             int sq = FR2SQ120(file, rank);
             int display = piece2char[getPieceSq120(sq, board)];
             printf("%c ", display);
@@ -75,8 +75,8 @@ void printBoard(BOARD_STATE *board) {
 void printBoardIndex() {
     printf("\n");
     // int to represent a piece in FEN notation
-    for (int rank = RANK_8; rank >= RANK_1; rank--) {
-        for (int file = FILE_A; file <= FILE_H; file++) {
+    for (int rank = RANK_8; rank >= RANK_1; --rank) {
+        for (int file = FILE_A; file <= FILE_H; ++file) {
             int sq = FR2SQ120(file, rank);
             printf("%d ", sq);
         }
@@ -142,7 +142,7 @@ void printBitboardIndex120() {
 
 int countBits(ULL b) {
     int r;
-    for (r = 0; b; r++, b &= b - 1)
+    for (r = 0; b; ++r, b &= b - 1)
         ;
     return r;
 }

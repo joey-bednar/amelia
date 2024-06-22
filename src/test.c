@@ -20,8 +20,8 @@ static void printAllBoards() {
     printf("\n");
 
     // sq to file
-    for (int rank = RANK_8; rank >= RANK_1; rank--) {
-        for (int file = FILE_A; file <= FILE_H; file++) {
+    for (int rank = RANK_8; rank >= RANK_1; --rank) {
+        for (int file = FILE_A; file <= FILE_H; ++file) {
             int sq = FR2SQ120(file, rank);
             printf("%d%d ", SQ120F(sq), file);
         }
@@ -30,8 +30,8 @@ static void printAllBoards() {
     printf("\n");
 
     // sq to rank
-    for (int rank = RANK_8; rank >= RANK_1; rank--) {
-        for (int file = FILE_A; file <= FILE_H; file++) {
+    for (int rank = RANK_8; rank >= RANK_1; --rank) {
+        for (int file = FILE_A; file <= FILE_H; ++file) {
             int sq = FR2SQ120(file, rank);
             printf("%d%d ", SQ120R(sq), rank);
         }
@@ -43,13 +43,13 @@ static void testScan() {
     BOARD_STATE board;
     // init legal moves array
     MOVE moves[MAX_LEGAL_MOVES];
-    for (int i = 0; i < MAX_LEGAL_MOVES; i++) {
+    for (int i = 0; i < MAX_LEGAL_MOVES; ++i) {
         moves[i].startSquare = OFFBOARD;
         moves[i].endSquare = OFFBOARD;
     }
 
-    for (int rank = RANK_8; rank >= RANK_1; rank--) {
-        for (int file = FILE_A; file <= FILE_H; file++) {
+    for (int rank = RANK_8; rank >= RANK_1; --rank) {
+        for (int file = FILE_A; file <= FILE_H; ++file) {
             int sq = FR2SQ120(file, rank);
             clearBoard(&board);
             setPiece120(wK, sq, &board);

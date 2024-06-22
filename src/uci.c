@@ -32,7 +32,7 @@ static void playUCIMove(BOARD_STATE *board, int start, int end, char promo) {
     MOVE moves[MAX_LEGAL_MOVES];
     int n_moves = generateMoves(board, moves);
 
-    for (int i = 0; i < n_moves; i++) {
+    for (int i = 0; i < n_moves; ++i) {
         if (moves[i].startSquare == start && moves[i].endSquare == end &&
             isLegalMove(board, moves[i])) {
             if (promo == ' ' || promo == '\n') {
@@ -53,7 +53,7 @@ static void parseMoves(char *string, BOARD_STATE *board, int startIndex) {
 
     while (string[i] != '\n' && string[i] != '\0') {
         if (string[i] == ' ') {
-            i++;
+            ++i;
         } else {
 
             // printf("string[%d]: %c\n",i,string[i]);
@@ -133,13 +133,13 @@ int loadFEN(char *fen, BOARD_STATE *board, int startIndex) {
                 setPiece120(wK, sq, board);
                 break;
             }
-            index++;
+            ++index;
         }
-        i++;
+        ++i;
     }
 
     // set turn
-    i++;
+    ++i;
     if (fen[i] == 'w') {
         board->turn = WHITE;
     } else if (fen[i] == 'b') {
@@ -164,11 +164,11 @@ int loadFEN(char *fen, BOARD_STATE *board, int startIndex) {
             SETBIT(board->castle, BQ_CASTLE);
             break;
         }
-        i++;
+        ++i;
     }
 
     // set en passant
-    i++;
+    ++i;
     board->enpassant = OFFBOARD;
     int rank = 0;
     int file = 0;
@@ -180,18 +180,18 @@ int loadFEN(char *fen, BOARD_STATE *board, int startIndex) {
             rank = (int)(fen[i] - '1');
             board->enpassant = FR2SQ120(file, rank);
         }
-        i++;
+        ++i;
     }
 
     // set half move counter
-    i++;
+    ++i;
     int halfmove = 0;
     while (fen[i] != ' ') {
         if (fen[i] >= '0' && fen[i] <= '9') {
             halfmove = halfmove * 10;
             halfmove = halfmove + (int)(fen[i] - '0');
         }
-        i++;
+        ++i;
     }
     board->halfmove = halfmove;
 
@@ -203,7 +203,7 @@ int loadFEN(char *fen, BOARD_STATE *board, int startIndex) {
             fullmove = fullmove * 10;
             fullmove = fullmove + (int)(fen[i] - '0');
         }
-        i++;
+        ++i;
     }
     board->fullmove = fullmove;
 
@@ -218,7 +218,7 @@ void startUCI() {
 
     while (TRUE) {
         char input[INPUTLEN];
-        for (int i = 0; i < INPUTLEN; i++) {
+        for (int i = 0; i < INPUTLEN; ++i) {
             input[i] = '\0';
         }
         fgets(input, INPUTLEN, stdin);

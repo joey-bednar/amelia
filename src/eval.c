@@ -85,7 +85,7 @@ int eval(BOARD_STATE *board) {
 
 static int quiesce(BOARD_STATE *board, int alpha, int beta, int depth) {
 
-    board->nodes++;
+    ++board->nodes;
 
     int stand_pat = eval(board);
 
@@ -109,9 +109,9 @@ static int quiesce(BOARD_STATE *board, int alpha, int beta, int depth) {
         int end = 2 * (board->fullmove - 1) + board->turn;
         int start = 0; // end - board->halfmove;
         int count = 0;
-        for (int i = start; i <= end; i++) {
+        for (int i = start; i <= end; ++i) {
             if (board->hash == board->playedmoves[i]) {
-                count++;
+                ++count;
             }
         }
 
@@ -125,15 +125,15 @@ static int quiesce(BOARD_STATE *board, int alpha, int beta, int depth) {
 
     int legal = 0;
 
-    for (int i = 0; i < n_moves; i++) {
+    for (int i = 0; i < n_moves; ++i) {
         int isLegal = isLegalMove(board, moves[i]);
         if (isLegal) {
-            legal++;
+            ++legal;
 
             if ((moves[i].check == 1 || moves[i].captured != EMPTY) &&
                 isLegal) {
 
-                legal++;
+                ++legal;
                 makeMove(board, moves[i]);
 
                 int score = -quiesce(board, -beta, -alpha, depth - 1);
@@ -164,7 +164,7 @@ static int quiesce(BOARD_STATE *board, int alpha, int beta, int depth) {
 }
 
 static int alphabeta(BOARD_STATE *board, int depth, int alpha, int beta) {
-    board->nodes++;
+    ++board->nodes;
 
     int score = -INF;
 
@@ -184,9 +184,9 @@ static int alphabeta(BOARD_STATE *board, int depth, int alpha, int beta) {
         int end = 2 * (board->fullmove - 1) + board->turn;
         int start = 0; // end - board->halfmove;
         int count = 0;
-        for (int i = start; i <= end; i++) {
+        for (int i = start; i <= end; ++i) {
             if (board->hash == board->playedmoves[i]) {
-                count++;
+                ++count;
             }
         }
 
@@ -200,10 +200,10 @@ static int alphabeta(BOARD_STATE *board, int depth, int alpha, int beta) {
     MOVE moves[MAX_LEGAL_MOVES];
     int n_moves = generateMoves(board, moves);
 
-    for (int i = 0; i < n_moves; i++) {
+    for (int i = 0; i < n_moves; ++i) {
         if (isLegalMove(board, moves[i])) {
 
-            legal++;
+            ++legal;
             makeMove(board, moves[i]);
 
             score = -alphabeta(board, depth - 1, -beta, -alpha);
@@ -246,7 +246,7 @@ int negaMax(BOARD_STATE *board, int depth) {
     MOVE moves[MAX_LEGAL_MOVES];
     int n_moves = generateMoves(board, moves);
 
-    for (int i = 0; i < n_moves; i++) {
+    for (int i = 0; i < n_moves; ++i) {
         if (isLegalMove(board, moves[i])) {
 
             makeMove(board, moves[i]);
@@ -306,7 +306,7 @@ void printBestMove(int depth, BOARD_STATE *board) {
     int n_moves = generateMoves(board, moves);
 
     // look at checks/captures first only for initial ply
-    for (int i = 0; i < n_moves; i++) {
+    for (int i = 0; i < n_moves; ++i) {
         if (isCheck(board, moves[i])) {
             moves[i].check = 1;
         }

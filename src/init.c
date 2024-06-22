@@ -73,7 +73,7 @@ static void initPieceSqMaps() {
     // clang-format on
 
     // rotate piece maps to match bitboard indices
-    for (int i = 0; i < 64; i++) {
+    for (int i = 0; i < 64; ++i) {
         pawnSqTable[(((i >> 3) | (i << 3)) & 63) ^ 7] = pawn[i];
         knightSqTable[(((i >> 3) | (i << 3)) & 63) ^ 7] = knight[i];
         bishopSqTable[(((i >> 3) | (i << 3)) & 63) ^ 7] = bishop[i];
@@ -85,11 +85,11 @@ static void initPieceSqMaps() {
 
 // array map for possible en passant squares
 static void initEnpassantMap() {
-    for (int i = 0; i < 120; i++) {
+    for (int i = 0; i < 120; ++i) {
         epMap[i] = FALSE;
     }
 
-    for (int file = FILE_A; file <= FILE_H; file++) {
+    for (int file = FILE_A; file <= FILE_H; ++file) {
         epMap[FR2SQ120(file, RANK_3)] = TRUE;
         epMap[FR2SQ120(file, RANK_6)] = TRUE;
     }
@@ -97,7 +97,7 @@ static void initEnpassantMap() {
 
 // convertion arrays for piece->color, and piece->opposite color
 static void initColorMap() {
-    for (int i = EMPTY; i <= OFFBOARD; i++) {
+    for (int i = EMPTY; i <= OFFBOARD; ++i) {
         if (i >= wP && i <= wK) {
             colorMap[i] = WHITE;
             notcolorMap[i] = BLACK;
@@ -114,20 +114,20 @@ static void initColorMap() {
 // conversion array from 120->64
 static void initSqMap() {
     // junk value for squares not on 64sq board
-    for (int i = 0; i < 120; i++) {
+    for (int i = 0; i < 120; ++i) {
         sq120sq64Map[i] = 69;
     }
 
-    for (int i = 0; i < 64; i++) {
+    for (int i = 0; i < 64; ++i) {
         sq64sq120Map[i] = OFFBOARD;
     }
 
-    for (int i = 0; i < 120; i++) {
+    for (int i = 0; i < 120; ++i) {
         onboardMap[i] = FALSE;
     }
 
-    for (int rank = RANK_8; rank >= RANK_1; rank--) {
-        for (int file = FILE_A; file <= FILE_H; file++) {
+    for (int rank = RANK_8; rank >= RANK_1; --rank) {
+        for (int file = FILE_A; file <= FILE_H; ++file) {
             int sq120 = FR2SQ120(file, rank);
             int sq64 = FR2SQ64(file, rank);
             sq120sq64Map[sq120] = sq64;
@@ -177,14 +177,14 @@ static void initPieceGenericMap() {
 static void initJumps() {
     int offsetsKnight[8] = {-21, 21, 19, -19, 8, -8, -12, 12};
     int offsetsKing[8] = {9, 10, 11, 1, -9, -10, -11, -1};
-    for (int rank = RANK_8; rank >= RANK_1; rank--) {
-        for (int file = FILE_A; file <= FILE_H; file++) {
+    for (int rank = RANK_8; rank >= RANK_1; --rank) {
+        for (int file = FILE_A; file <= FILE_H; ++file) {
             int sq120 = FR2SQ120(file, rank);
             int sq64 = FR2SQ64(file, rank);
 
             ULL bitboardKnight = 0;
             ULL bitboardKing = 0;
-            for (int i = 0; i < 8; i++) {
+            for (int i = 0; i < 8; ++i) {
                 int nextSqKnight = sq120 + offsetsKnight[i];
                 int nextSqKing = sq120 + offsetsKing[i];
                 if (ONBOARD(nextSqKnight)) {
@@ -207,7 +207,7 @@ void clearBoard(BOARD_STATE *board) {
     board->kings[WHITE] = OFFBOARD;
     board->kings[BLACK] = OFFBOARD;
 
-    for (int i = 0; i < bbLength; i++) {
+    for (int i = 0; i < bbLength; ++i) {
         board->bitboard[i] = 0;
     }
 
@@ -247,7 +247,7 @@ void initBoard(BOARD_STATE *board) {
     setPiece(bR, FILE_H, RANK_8, board);
 
     // add pawns
-    for (int file = FILE_A; file <= FILE_H; file++) {
+    for (int file = FILE_A; file <= FILE_H; ++file) {
         setPiece(wP, file, RANK_2, board);
         setPiece(bP, file, RANK_7, board);
     }

@@ -110,7 +110,7 @@ void makeMove(BOARD_STATE *board, MOVE move) {
         unsafeClearPiece(board, move.captured,
                          move.endSquare + offset[board->turn]);
     } else if (move.captured != EMPTY) {
-        for (int i = 0; i <= bbAny; i++) {
+        for (int i = 0; i <= bbAny; ++i) {
             CLEARBIT(board->bitboard[i], SQ120SQ64(move.endSquare));
         }
         unsafeClearPiece(board, move.captured, move.endSquare);
@@ -145,7 +145,7 @@ void makeMove(BOARD_STATE *board, MOVE move) {
     if (GENERIC(piece) == bbPawn || move.captured != EMPTY) {
         board->halfmove = 0;
     } else {
-        board->halfmove++;
+        ++board->halfmove;
     }
 
     // add hash to played moves
@@ -153,7 +153,7 @@ void makeMove(BOARD_STATE *board, MOVE move) {
 
     // update full move
     if (board->turn == BLACK) {
-        board->fullmove++;
+        ++board->fullmove;
     }
 
     turnZobrist(board);
@@ -197,7 +197,7 @@ void unmakeMove(BOARD_STATE *board, MOVE move) {
         unsafePlacePiece(board, piece, move.startSquare);
 
         if (board->turn == WHITE) {
-            board->fullmove--;
+            --board->fullmove;
         }
         turnZobrist(board);
         board->turn = !(board->turn);
@@ -226,7 +226,7 @@ void unmakeMove(BOARD_STATE *board, MOVE move) {
     board->enpassant = move.priorep;
 
     if (board->turn == WHITE) {
-        board->fullmove--;
+        --board->fullmove;
     }
     board->turn = !(board->turn);
 }
@@ -275,7 +275,7 @@ static void addMove(BOARD_STATE *board, MOVE *moves, int start, int end,
 static void generateSlidingMoves(BOARD_STATE *board, MOVE *moves, int sq,
                                  int *index, int *offsets, int offsetssize) {
 
-    for (int i = 0; i < offsetssize; i++) {
+    for (int i = 0; i < offsetssize; ++i) {
         int nextSq = sq + offsets[i];
 
         // if square is empty or can capture enemy piece, it is a pseudolegal
@@ -375,7 +375,7 @@ static void addPromotions(BOARD_STATE *board, MOVE *moves, int start, int end,
         promoteTo[2] = bR;
         promoteTo[3] = bB;
     }
-    for (int i = 0; i < 4; i++) {
+    for (int i = 0; i < 4; ++i) {
         addMove(board, moves, start, end, captured, promoteTo[i], FALSE, FALSE,
                 FALSE, index);
     }
@@ -404,7 +404,7 @@ static void generatePseudoPawnMoves(BOARD_STATE *board, MOVE *moves, int sq,
     int two = sq + offset[1];
 
     // captures excluding en passant
-    for (int i = 2; i <= 3; i++) {
+    for (int i = 2; i <= 3; ++i) {
         int enemysquare = sq + offset[i];
 
         if (!ONBOARD(enemysquare)) {

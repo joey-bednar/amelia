@@ -23,7 +23,7 @@ int hasEnemyPiece120(int sq, BOARD_STATE *board) {
 
 int getGenericPieceSq120(int sq, BOARD_STATE *board) {
     int sq64 = SQ120SQ64(sq);
-    for (int i = bbPawn; i < bbAny; i++) {
+    for (int i = bbPawn; i < bbAny; ++i) {
         if (CHECKBIT(board->bitboard[i], sq64)) {
             return i;
         };
@@ -60,7 +60,7 @@ int getPieceSq120(int sq, BOARD_STATE *board) {
         return EMPTY;
     }
 
-    for (int i = bbPawn; i < bbAny; i++) {
+    for (int i = bbPawn; i < bbAny; ++i) {
 
         ULL val = CHECKBIT(board->bitboard[i], sq64);
         if (val) {
@@ -85,7 +85,7 @@ void setPiece120(int piece, int sq, BOARD_STATE *board) {
 
     int sq64 = SQ120SQ64(sq);
 
-    for (int i = 0; i < bbLength; i++) {
+    for (int i = 0; i < bbLength; ++i) {
         CLEARBIT(board->bitboard[i], sq64);
     }
 
