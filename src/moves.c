@@ -12,6 +12,7 @@ static void unsafeClearPiece(BOARD_STATE *board, int piece, int sq) {
 }
 
 static void unsafePlacePiece(BOARD_STATE *board, int piece, int sq) {
+
     SETBIT(board->bitboard[GENERIC(piece)], SQ120SQ64(sq));
     SETBIT(board->bitboard[COLOR(piece)], SQ120SQ64(sq));
     SETBIT(board->bitboard[bbAny], SQ120SQ64(sq));
@@ -117,9 +118,6 @@ void makeMove(BOARD_STATE *board, MOVE move) {
         unsafeClearPiece(board, move.captured,
                          move.endSquare + offset[board->turn]);
     } else if (move.captured != EMPTY) {
-        for (int i = 0; i <= bbAny; ++i) {
-            CLEARBIT(board->bitboard[i], SQ120SQ64(move.endSquare));
-        }
         unsafeClearPiece(board, move.captured, move.endSquare);
     }
 
@@ -230,6 +228,8 @@ void unmakeMove(BOARD_STATE *board, MOVE move) {
     if (board->turn == WHITE) {
         --board->fullmove;
     }
+
+    turnZobrist(board);
     board->turn = !(board->turn);
 }
 

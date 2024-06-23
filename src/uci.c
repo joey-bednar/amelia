@@ -183,8 +183,11 @@ int loadFEN(char *fen, BOARD_STATE *board, int startIndex) {
         ++i;
     }
 
+    while (fen[i] == ' ') {
+        ++i;
+    }
+
     // set half move counter
-    ++i;
     int halfmove = 0;
     while (fen[i] != ' ') {
         if (fen[i] >= '0' && fen[i] <= '9') {
@@ -195,8 +198,11 @@ int loadFEN(char *fen, BOARD_STATE *board, int startIndex) {
     }
     board->halfmove = halfmove;
 
+    while (fen[i] == ' ') {
+        ++i;
+    }
+
     // set full move counter
-    i = i + 1;
     int fullmove = 0;
     while (fen[i] != ' ' && fen[i] != '\n') {
         if (fen[i] >= '0' && fen[i] <= '9') {

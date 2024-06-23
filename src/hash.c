@@ -23,7 +23,7 @@ void initZobrist() {
 
 // constructs hash of position
 void loadZobrist(BOARD_STATE *board) {
-    board->hash = 0;
+    board->hash = 0ULL;
     if (board->turn == BLACK) {
         board->hash ^= zobristB2M;
     }

@@ -23,9 +23,8 @@ int main() {
     BOARD_STATE board;
     init(&board);
 
-    // startUCI();
-    perft(6);
-    // printBoard(&board);
+    startUCI();
+    // perft(4);
 
     return 0;
 }

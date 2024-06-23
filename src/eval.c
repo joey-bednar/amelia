@@ -7,6 +7,25 @@
 #define MATETHRESHOLD 50
 #define INF 99999
 
+static int isThreeFold(BOARD_STATE *board) {
+    if (board->halfmove >= 4) {
+        int end = 2 * (board->fullmove - 1) + board->turn;
+        int start = 0; // end - board->halfmove;
+        int count = 0;
+        for (int i = start; i <= end; ++i) {
+            if (board->hash == board->playedmoves[i]) {
+                ++count;
+            }
+        }
+
+        if (count >= 2) {
+            return TRUE;
+        }
+    }
+
+    return FALSE;
+}
+
 static void printInfo(int score, int depth) {
     if (score + MATETHRESHOLD >= MATE && score - MATETHRESHOLD <= MATE) {
         int dist = (MATE - score) + depth;
@@ -83,9 +102,12 @@ int eval(BOARD_STATE *board) {
     return total;
 }
 
-static int quiesce(BOARD_STATE *board, int alpha, int beta, int depth) {
-
+static int quiesce(BOARD_STATE *board, int depth, int alpha, int beta) {
     ++board->nodes;
+
+    int score = -INF;
+
+    int legal = 0;
 
     int stand_pat = eval(board);
 
@@ -104,56 +126,45 @@ static int quiesce(BOARD_STATE *board, int alpha, int beta, int depth) {
         return 0;
     }
 
-    // three fold repetition
-    if (board->halfmove >= 4) {
-        int end = 2 * (board->fullmove - 1) + board->turn;
-        int start = 0; // end - board->halfmove;
-        int count = 0;
-        for (int i = start; i <= end; ++i) {
-            if (board->hash == board->playedmoves[i]) {
-                ++count;
-            }
-        }
-
-        if (count >= 2) {
-            return 0;
-        }
+    if (isThreeFold(board)) {
+        return 0;
     }
+
+    // TODO: add max depth check
 
     MOVE moves[MAX_LEGAL_MOVES];
     int n_moves = generateMoves(board, moves);
 
-    int legal = 0;
-
     for (int i = 0; i < n_moves; ++i) {
-        int isLegal = isLegalMove(board, moves[i]);
-        if (isLegal) {
+
+        makeMove(board, moves[i]);
+
+        if (!isAttacked(board, board->kings[!board->turn], board->turn)) {
             ++legal;
 
-            if ((moves[i].check == 1 || moves[i].captured != EMPTY) &&
-                isLegal) {
-
-                ++legal;
-                makeMove(board, moves[i]);
-
-                int score = -quiesce(board, -beta, -alpha, depth - 1);
-                // int score = eval(board);
-                unmakeMove(board, moves[i]);
-
-                if (score >= beta) {
-                    return beta;
-                }
-                if (score > alpha) {
-                    alpha = score;
-                }
+            if (moves[i].captured != EMPTY) {
+                score = -quiesce(board, depth - 1, -beta, -alpha);
             }
+        }
+
+        unmakeMove(board, moves[i]);
+
+        if (score >= beta) {
+            return beta;
+        }
+        if (score > alpha) {
+            alpha = score;
+            // printMoveText(moves[i]);
+            // printf(": %d\n",alpha);
+            // TODO: add best move to variation
+            // board->line[(DEFAULTDEPTH + QMAXDEPTH - depth)] = moves[i];
         }
     }
 
     if (legal == 0) {
         if (isAttacked(board, board->kings[board->turn], !board->turn)) {
             // checkmate
-            return -MATE; // - depth;
+            return -MATE - depth;
         } else {
             // stalemate
             return 0;
@@ -171,7 +182,7 @@ static int alphabeta(BOARD_STATE *board, int depth, int alpha, int beta) {
     int legal = 0;
 
     if (depth == 0) {
-        return quiesce(board, alpha, beta, QMAXDEPTH);
+        return quiesce(board, QMAXDEPTH, alpha, beta);
         // return eval(board);
     }
 
@@ -179,20 +190,8 @@ static int alphabeta(BOARD_STATE *board, int depth, int alpha, int beta) {
         return 0;
     }
 
-    // three fold repetition
-    if (board->halfmove >= 4) {
-        int end = 2 * (board->fullmove - 1) + board->turn;
-        int start = 0; // end - board->halfmove;
-        int count = 0;
-        for (int i = start; i <= end; ++i) {
-            if (board->hash == board->playedmoves[i]) {
-                ++count;
-            }
-        }
-
-        if (count >= 2) {
-            return 0;
-        }
+    if (isThreeFold(board)) {
+        return 0;
     }
 
     // TODO: add max depth check
@@ -201,26 +200,26 @@ static int alphabeta(BOARD_STATE *board, int depth, int alpha, int beta) {
     int n_moves = generateMoves(board, moves);
 
     for (int i = 0; i < n_moves; ++i) {
-        if (isLegalMove(board, moves[i])) {
 
+        makeMove(board, moves[i]);
+
+        if (!isAttacked(board, board->kings[!board->turn], board->turn)) {
             ++legal;
-            makeMove(board, moves[i]);
-
             score = -alphabeta(board, depth - 1, -beta, -alpha);
+        }
 
-            unmakeMove(board, moves[i]);
+        unmakeMove(board, moves[i]);
 
-            if (score >= beta) {
-                return beta;
-            }
-            if (score > alpha) {
-                alpha = score;
+        if (score >= beta) {
+            return beta;
+        }
+        if (score > alpha) {
+            alpha = score;
 
-                // add best move to variation
-                // board->line[2 * (board->fullmove - 1) + board->turn] =
-                // moves[i]; printInfo(score, DEFAULTDEPTH - depth);
-                board->line[(DEFAULTDEPTH - depth)] = moves[i];
-            }
+            // add best move to variation
+            // board->line[2 * (board->fullmove - 1) + board->turn] =
+            // moves[i]; printInfo(score, DEFAULTDEPTH - depth);
+            board->line[(DEFAULTDEPTH - depth)] = moves[i];
         }
     }
 

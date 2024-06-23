@@ -4,7 +4,7 @@
 #include <time.h>
 
 #define VERBOSE 0
-#define POSITION 0
+#define POSITION 2
 #define CUSTOMFEN "8/3k4/3P4/3K4/8/8/8/8 b - - 0 1"
 
 ULL perft_rec_bulk(int depth, BOARD_STATE *board) {
@@ -33,6 +33,7 @@ ULL perft_rec_bulk(int depth, BOARD_STATE *board) {
         printf("\n");
 #endif
 
+        // printBoard(board);
         makeMove(board, move_list[i]);
 
 #if VERBOSE == 1
@@ -47,7 +48,10 @@ ULL perft_rec_bulk(int depth, BOARD_STATE *board) {
             nodes += perft_rec_bulk(depth - 1, board);
         }
 
+        // printBoard(board);
         unmakeMove(board, move_list[i]);
+        // printBoard(board);
+        // assert(hash==board->hash);
     }
     return nodes;
 }
@@ -67,14 +71,15 @@ ULL perft(int depth) {
 
 #if POSITION == 2
 
-    loadFEN("r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq -",
-            &board, 0);
+    loadFEN(
+        "r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - 0 1",
+        &board, 0);
 
 #endif
 
 #if POSITION == 3
 
-    loadFEN("8/2p5/3p4/KP5r/1R3p1k/8/4P1P1/8 w - - ", &board, 0);
+    loadFEN("8/2p5/3p4/KP5r/1R3p1k/8/4P1P1/8 w - 0 1", &board, 0);
 
 #endif
 
@@ -116,16 +121,4 @@ ULL perft(int depth) {
     printBoard(&board);
 
     return num;
-}
-
-void printBenchmark(int depth) {
-    // double times[] = {0.00002, 0.00003, 0.0005, 0.00736, 0.109, 2.79, 65.34};
-    double times[] = {0.00002, 0.00003, 0.0002, 0.002, 0.05, 1.24, 31.78, 902};
-
-    int length = sizeof(times) / sizeof(times[0]);
-    if (depth >= length || depth < 0) {
-        printf("Invalid depth.");
-        return;
-    }
-    printf("Laptop benchmark for depth %d: (%fs)\n", depth, times[depth]);
 }
