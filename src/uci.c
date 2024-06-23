@@ -242,6 +242,7 @@ void startUCI() {
         } else if (strncmp("position startpos \n", input, POSSTARTLEN) == 0) {
             initBoard(&board);
             parseMoves(input, &board, POSSTARTLEN);
+            printBoard(&board);
         } else if (strncmp("position fen ", input, POSFENLEN) == 0) {
             initBoard(&board);
             int i = loadFEN(input, &board, POSFENLEN);

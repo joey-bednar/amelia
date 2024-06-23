@@ -31,7 +31,7 @@
 
 #define MAX_DEPTH 10
 #define DEFAULTDEPTH 5
-#define QMAXDEPTH 2
+#define QMAXDEPTH 0
 
 #define CHAR2FILE(c) ((int)((c) - 'a'))
 #define CHAR2RANK(c) ((int)((c) - '1'))

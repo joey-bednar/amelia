@@ -1,4 +1,5 @@
 #include "defs.h"
+#include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
@@ -18,7 +19,7 @@ static int isThreeFold(BOARD_STATE *board) {
             }
         }
 
-        if (count >= 2) {
+        if (count >= 3) {
             return TRUE;
         }
     }
@@ -141,6 +142,8 @@ static int quiesce(BOARD_STATE *board, int depth, int alpha, int beta) {
 
         if (!isAttacked(board, board->kings[!board->turn], board->turn)) {
             ++legal;
+
+            assert(isLegalMove(board, moves[i]));
 
             if (moves[i].captured != EMPTY) {
                 score = -quiesce(board, depth - 1, -beta, -alpha);
