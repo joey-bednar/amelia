@@ -1,15 +1,15 @@
 # Thanks to Job Vranish (https://spin.atomicobject.com/2016/08/26/makefile-c-projects/)
 TARGET_EXEC := annie
 
-BUILD_DIR := build
-SRC_DIRS := src
+CC := gcc
+BUILD_DIR := ./build
+SRC_DIRS := ./src
 
 # Find all C and header files to run clang-format on
 FORMAT_SRCS := $(shell find $(SRC_DIRS) -name '*.c' -or -name '*.h')
 
-# Find all the C and C++ files we want to compile
-# Note the single quotes around the * expressions. The shell will incorrectly expand these otherwise, but we want to send the * directly to the find command.
-SRCS := $(shell find $(SRC_DIRS) -name '*.c' -or -name '*.s')
+# Find all the C files we want to compile
+SRCS := $(shell find $(SRC_DIRS) -name '*.c')
 
 # Prepends BUILD_DIR and appends .o to every src file
 # As an example, ./your_dir/hello.cpp turns into ./build/./your_dir/hello.cpp.o
@@ -26,17 +26,16 @@ INC_FLAGS := $(addprefix -I,$(INC_DIRS))
 
 # The -MMD and -MP flags together generate Makefiles for us!
 # These files will have .d instead of .o as the output.
-CPPFLAGS := $(INC_FLAGS) -MMD -MP -Wall -Wextra
-# -Wall -Wextra
+CFLAGS := $(INC_FLAGS) -MMD -MP -Wall -Wextra -O3
 
 # The final build step.
 $(BUILD_DIR)/$(TARGET_EXEC): $(OBJS)
-	$(CXX) $(OBJS) -o $@ $(LDFLAGS)
+	$(CC) $(OBJS) -o $@ $(LDFLAGS)
 
 # Build step for C source
 $(BUILD_DIR)/%.c.o: %.c
 	mkdir -p $(dir $@)
-	$(CC) $(CPPFLAGS) $(CFLAGS) -c $< -o $@
+	$(CC) $(CFLAGS) -c $< -o $@
 
 .PHONY: format
 format:
