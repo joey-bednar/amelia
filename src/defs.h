@@ -39,6 +39,8 @@
 
 #define BITLOOP(bb) for (; (bb); (bb) &= ((bb) - 1))
 
+#define PAWNOFFSET(c, i) (pawnOffset[(c)][(i)])
+
 // clang-format off
 enum { EMPTY, wP, wN, wB, wR, wQ, wK, bP, bN, bB, bR, bQ, bK, OFFBOARD };
 enum { bbWhite, bbBlack, bbPawn, bbKnight, bbBishop, bbRook, bbQueen, bbKing, bbAny, bbLength };
@@ -141,6 +143,8 @@ extern int kingSqTable[64];
 
 extern ULL zobrist_vals[12][64];
 extern ULL zobristB2M;
+
+extern int pawnOffset[2][4];
 
 // hash.c
 extern void initZobrist();

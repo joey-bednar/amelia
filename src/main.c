@@ -17,6 +17,8 @@ ULL kingJumps[64];
 ULL zobrist_vals[12][64];
 ULL zobristB2M;
 
+int pawnOffset[2][4] = {{N, 2 * N, NW, NE}, {S, 2 * S, SW, SE}};
+
 int main() {
     BOARD_STATE board;
     init(&board);

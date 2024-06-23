@@ -44,51 +44,58 @@ static void updateCastling(BOARD_STATE *board, MOVE move) {
 }
 
 static void unmakeCastleMove(BOARD_STATE *board, int end) {
-    if (end == G1) {
+
+    switch (end) {
+    case G1:
         unsafeClearPiece(board, wR, F1);
         unsafePlacePiece(board, wR, H1);
-    } else if (end == C1) {
+        break;
+    case C1:
         unsafeClearPiece(board, wR, D1);
         unsafePlacePiece(board, wR, A1);
-    } else if (end == G8) {
+        break;
+    case G8:
         unsafeClearPiece(board, bR, F8);
         unsafePlacePiece(board, bR, H8);
-    } else if (end == C8) {
+        break;
+    case C8:
         unsafeClearPiece(board, bR, D8);
         unsafePlacePiece(board, bR, A8);
+        break;
     }
 }
 
 static void castleRooks(BOARD_STATE *board, int end) {
-    if (end == G1) {
-        board->kings[WHITE] = end;
 
+    switch (end) {
+    case G1:
+        board->kings[WHITE] = end;
         unsafeClearPiece(board, wR, H1);
         unsafePlacePiece(board, wR, F1);
         CLEARBIT(board->castle, WK_CASTLE);
         CLEARBIT(board->castle, WQ_CASTLE);
-    } else if (end == C1) {
-
-        board->kings[WHITE] = end;
-
+        break;
+    case C1:
         unsafeClearPiece(board, wR, A1);
         unsafePlacePiece(board, wR, D1);
         CLEARBIT(board->castle, WK_CASTLE);
         CLEARBIT(board->castle, WQ_CASTLE);
-    } else if (end == C8) {
+        board->kings[WHITE] = end;
+        break;
+    case G8:
         board->kings[BLACK] = end;
-
-        unsafeClearPiece(board, bR, A8);
-        unsafePlacePiece(board, bR, D8);
-        CLEARBIT(board->castle, BK_CASTLE);
-        CLEARBIT(board->castle, BQ_CASTLE);
-    } else if (end == G8) {
-        board->kings[BLACK] = end;
-
         unsafeClearPiece(board, bR, H8);
         unsafePlacePiece(board, bR, F8);
         CLEARBIT(board->castle, BK_CASTLE);
         CLEARBIT(board->castle, BQ_CASTLE);
+        break;
+    case C8:
+        board->kings[BLACK] = end;
+        unsafeClearPiece(board, bR, A8);
+        unsafePlacePiece(board, bR, D8);
+        CLEARBIT(board->castle, BK_CASTLE);
+        CLEARBIT(board->castle, BQ_CASTLE);
+        break;
     }
 }
 
@@ -135,8 +142,8 @@ void makeMove(BOARD_STATE *board, MOVE move) {
 
     // update en passant square
     if (move.twopawnmove) {
-        const int offset[2] = {S, N};
-        board->enpassant = move.endSquare + offset[board->turn];
+        const int offset = PAWNOFFSET(!board->turn, 0);
+        board->enpassant = move.endSquare + offset;
     } else {
         board->enpassant = OFFBOARD;
     }
@@ -182,12 +189,7 @@ void unmakeMove(BOARD_STATE *board, MOVE move) {
     if (move.enpassant) {
         board->enpassant = move.endSquare;
 
-        int offset = S;
-        if (board->turn == WHITE) {
-            offset = N;
-        }
-
-        // int offset = -2*board->turn + 1;
+        const int offset = PAWNOFFSET(board->turn, 0);
 
         // put back captured piece
         unsafePlacePiece(board, move.captured, move.endSquare + offset);
@@ -367,17 +369,11 @@ static void generateCastleMoves(BOARD_STATE *board, MOVE *moves, int *index) {
 // moves list.
 static void addPromotions(BOARD_STATE *board, MOVE *moves, int start, int end,
                           int captured, int color, int *index) {
-    int promoteTo[4] = {wQ, wN, wR, wB};
+    int promoteTo[4] = {bbQueen, bbKnight, bbRook, bbBishop};
 
-    if (color == BLACK) {
-        promoteTo[0] = bQ;
-        promoteTo[1] = bN;
-        promoteTo[2] = bR;
-        promoteTo[3] = bB;
-    }
     for (int i = 0; i < 4; ++i) {
-        addMove(board, moves, start, end, captured, promoteTo[i], FALSE, FALSE,
-                FALSE, index);
+        addMove(board, moves, start, end, captured,
+                TOCOLOR(board->turn, promoteTo[i]), FALSE, FALSE, FALSE, index);
     }
 }
 
@@ -386,26 +382,16 @@ static void generatePseudoPawnMoves(BOARD_STATE *board, MOVE *moves, int sq,
                                     int *index) {
     int color = board->turn;
 
-    int secondrank = RANK_2;
-    int eighthrank = RANK_8;
-    int offset[4] = {1, 2, -9, 11};
-    int enemypawn = bP;
-    if (color == BLACK) {
-        offset[0] = -1;
-        offset[1] = -2;
-        offset[2] = 9;
-        offset[3] = -11;
-        secondrank = RANK_7;
-        eighthrank = RANK_1;
-        enemypawn = wP;
-    }
+    int secondrank = RANK_2 + board->turn * 5;
+    int eighthrank = RANK_8 - board->turn * 7;
+    int enemypawn = TOCOLOR(!board->turn, bbPawn);
 
-    int one = sq + offset[0];
-    int two = sq + offset[1];
+    int one = sq + PAWNOFFSET(board->turn, 0);
+    int two = sq + PAWNOFFSET(board->turn, 1);
 
     // captures excluding en passant
     for (int i = 2; i <= 3; ++i) {
-        int enemysquare = sq + offset[i];
+        int enemysquare = sq + PAWNOFFSET(board->turn, i);
 
         if (!ONBOARD(enemysquare)) {
             continue;
@@ -463,37 +449,24 @@ static void generatePseudoBishopMoves(BOARD_STATE *board, MOVE *moves, int sq,
 static void generatePseudoEnPassantMoves(BOARD_STATE *board, MOVE *moves,
                                          int *index) {
 
+    // en passant not possible if square is offboard
     if (!ONBOARD(board->enpassant)) {
         return;
     }
 
-    int sq;
-    if (board->turn == WHITE) {
-        sq = board->enpassant + SW;
-        if (getPieceSq120(sq, board) == wP) {
+    ULL bb = board->bitboard[board->turn] & board->bitboard[bbPawn];
 
-            addMove(board, moves, sq, board->enpassant, bP, EMPTY, TRUE, FALSE,
-                    FALSE, index);
-        }
+    for (int i = 2; i <= 3; ++i) {
 
-        sq = board->enpassant + SE;
-        if (getPieceSq120(sq, board) == wP) {
-            addMove(board, moves, sq, board->enpassant, bP, EMPTY, TRUE, FALSE,
-                    FALSE, index);
-        }
-    }
+        int sq = board->enpassant + PAWNOFFSET(!board->turn, i);
 
-    if (board->turn == BLACK) {
-        sq = board->enpassant + NW;
-        if (getPieceSq120(sq, board) == bP) {
-            addMove(board, moves, sq, board->enpassant, wP, EMPTY, TRUE, FALSE,
-                    FALSE, index);
-        }
+        // check all squares that could capture en passant for
+        // same color pawns
+        if (ONBOARD(sq) && CHECKBIT(bb, SQ120SQ64(sq))) {
 
-        sq = board->enpassant + NE;
-        if (getPieceSq120(sq, board) == bP) {
-            addMove(board, moves, sq, board->enpassant, wP, EMPTY, TRUE, FALSE,
-                    FALSE, index);
+            addMove(board, moves, sq, board->enpassant,
+                    TOCOLOR(!board->turn, bbPawn), EMPTY, TRUE, FALSE, FALSE,
+                    index);
         }
     }
 }
