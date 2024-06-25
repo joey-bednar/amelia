@@ -1,5 +1,22 @@
 # Changelog
 
+## [v0.4](https://github.com/joey-bednar/annie/tree/v0.4) (6/24/24)
+
+Engine avoids threefold repetitions to push for wins when better and plays
+significantly faster.
+
+- Added Zobrist hashing and records positions to check for threefold repetition.
+- Added fullmove/halfmove counter to check for fifty-move rule.
+- Fixed illegal moves after loading 100+ move position in UCI
+- Compiled with O3 optimization flag.
+- Run search using alpha-beta at root node to prune more branches.
+- Look at checks/captures first in initial search call.
+- Increased efficiency of make/unmake functions.
+
+**v0.4 vs v0.3:** 42 wins, 35 draws, 23 losses (0.595)
+
+**Elo increase:** 66.8 +/- 55.8
+
 ## [v0.3](https://github.com/joey-bednar/annie/tree/v0.3) (5/15/24)
 
 Engine can search to greater depth using alpha-beta pruning and does not resign.
