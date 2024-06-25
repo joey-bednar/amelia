@@ -13,27 +13,14 @@ You can also [spectate active games](https://lichess.org/@/AnnieEdison/tv).
 
 ## Technical Features
 
-### Board Representation and Move Generation
-
-- Bitboards
-    - Precomputed King/Knight/Pawn attack maps
-    - Attack maps using shifting bitboards
-    - De Bruijn bitscan
-- Bulk Perft testing
-
-### Search
-
-- Negamax
-- Alpha-Beta Pruning
-
-### Evaluation
-
-- Bitscan material count
-- Piece square tables
-
-### Protocol
-
-- Universal Chess Interface
+- [Bitboards](https://www.chessprogramming.org/Bitboards)
+- [Alpha-beta pruning](https://en.wikipedia.org/wiki/Alpha%E2%80%93beta_pruning)
+- [Zobrist hashing](https://en.wikipedia.org/wiki/Zobrist_hashing)
+- [Piece square tables](https://www.chessprogramming.org/Piece-Square_Tables)
+- [Negamax](https://en.wikipedia.org/wiki/Negamax) search
+- [De Bruijn bitscan](https://en.wikipedia.org/wiki/De_Bruijn_sequence)
+- Bulk [perft](https://www.chessprogramming.org/Perft) testing
+- [UCI](https://en.wikipedia.org/wiki/Universal_Chess_Interface) compatible
 
 ## Build
 
