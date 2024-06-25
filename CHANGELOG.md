@@ -10,7 +10,6 @@ significantly faster.
 - Fixed illegal moves after loading 100+ move position in UCI
 - Compiled with O3 optimization flag.
 - Run search using alpha-beta at root node to prune more branches.
-- Look at checks/captures first in initial search call.
 - Increased efficiency of make/unmake functions.
 
 **v0.4 vs v0.3:** 42 wins, 35 draws, 23 losses (0.595)

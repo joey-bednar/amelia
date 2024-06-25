@@ -317,7 +317,7 @@ static int compare(const void *a, const void *b) {
     MOVE *moveB = (MOVE *)b;
 
     return (moveB->check - moveA->check) +
-           (GENERIC(moveA->captured) - GENERIC(moveB->captured));
+           (GENERIC(moveB->captured) - GENERIC(moveA->captured));
 }
 
 void printBestMove(int depth, BOARD_STATE *board) {
