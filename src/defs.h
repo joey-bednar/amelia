@@ -29,6 +29,8 @@
 #define MAX_LEGAL_MOVES 256
 #define MAX_GAME_LENGTH 512
 
+#define PVSIZE 20000
+
 #define MAX_DEPTH 10
 #define DEFAULTDEPTH 5
 #define QMAXDEPTH 0
@@ -98,12 +100,17 @@ typedef struct {
 } MOVE;
 
 typedef struct {
+    ULL next;
+    MOVE move;
+    int depth;
+} PVENTRY;
+
+typedef struct {
     ULL bitboard[bbLength];
 
     ULL hash;
 
-    // TODO: create hash table with previous positions hash and num of
-    // occurrences
+    PVENTRY pvtable[PVSIZE];
 
     ULL playedmoves[MAX_GAME_LENGTH * 2];
 

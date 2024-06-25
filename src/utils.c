@@ -21,7 +21,6 @@ int bitScanForward(ULL bb) {
     return index64[((bb ^ (bb - 1)) * debruijn64) >> 58];
 }
 
-// TODO: test
 /**
  * bitScanReverse
  * @authors Kim Walisch, Mark Dickinson
@@ -146,5 +145,3 @@ int countBits(ULL b) {
         ;
     return r;
 }
-
-// TODO: add FEN->board, board->FEN

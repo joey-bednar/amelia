@@ -1,5 +1,6 @@
 #include "defs.h"
 #include <assert.h>
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
@@ -27,19 +28,43 @@ static int isThreeFold(BOARD_STATE *board) {
     return FALSE;
 }
 
-static void printInfo(int score, int depth) {
+static void printEval(int score, int depth) {
     if (score + MATETHRESHOLD >= MATE && score - MATETHRESHOLD <= MATE) {
         int dist = (MATE - score) + depth;
         int mate = (dist + 1) / 2;
-        printf("info score mate %d\n", mate);
+        printf("score mate %d ", mate);
     } else if (score + MATETHRESHOLD >= -MATE &&
                score - MATETHRESHOLD <= -MATE) {
         int dist = (-MATE - score) + depth;
         int mate = (dist + 1) / 2;
-        printf("info score mate -%d\n", mate);
+        printf("score mate -%d ", mate);
     } else {
-        printf("info score cp %d\n", score);
+        printf("score cp %d ", score);
     }
+}
+
+static void printInfo(BOARD_STATE *board, double time, int score, int depth) {
+
+    // print search info
+    long nps = (long)floor((double)(board->nodes / time));
+    long time_d = (long)time;
+
+    printf("info ");
+    printf("depth %d ", DEFAULTDEPTH);
+    printEval(score, DEFAULTDEPTH);
+    printf("nodes %ld ", (long)board->nodes);
+    printf("nps %ld ", nps);
+    printf("time %ld ", time_d);
+
+    printf("pv ");
+    ULL key = board->hash % PVSIZE;
+    for (int i = 0; i < DEFAULTDEPTH; ++i) {
+        PVENTRY pv = board->pvtable[key];
+        printMoveText(pv.move);
+        printf(" ");
+        key = pv.next;
+    }
+    printf("\n");
 }
 
 // return the value of all pieces of a given color using piece values and square
@@ -131,8 +156,6 @@ static int quiesce(BOARD_STATE *board, int depth, int alpha, int beta) {
         return 0;
     }
 
-    // TODO: add max depth check
-
     MOVE moves[MAX_LEGAL_MOVES];
     int n_moves = generateMoves(board, moves);
 
@@ -157,10 +180,6 @@ static int quiesce(BOARD_STATE *board, int depth, int alpha, int beta) {
         }
         if (score > alpha) {
             alpha = score;
-            // printMoveText(moves[i]);
-            // printf(": %d\n",alpha);
-            // TODO: add best move to variation
-            // board->line[(DEFAULTDEPTH + QMAXDEPTH - depth)] = moves[i];
         }
     }
 
@@ -197,8 +216,6 @@ static int alphabeta(BOARD_STATE *board, int depth, int alpha, int beta) {
         return 0;
     }
 
-    // TODO: add max depth check
-
     MOVE moves[MAX_LEGAL_MOVES];
     int n_moves = generateMoves(board, moves);
 
@@ -211,6 +228,8 @@ static int alphabeta(BOARD_STATE *board, int depth, int alpha, int beta) {
             score = -alphabeta(board, depth - 1, -beta, -alpha);
         }
 
+        ULL nextHash = board->hash;
+
         unmakeMove(board, moves[i]);
 
         if (score >= beta) {
@@ -219,10 +238,12 @@ static int alphabeta(BOARD_STATE *board, int depth, int alpha, int beta) {
         if (score > alpha) {
             alpha = score;
 
-            // add best move to variation
-            // board->line[2 * (board->fullmove - 1) + board->turn] =
-            // moves[i]; printInfo(score, DEFAULTDEPTH - depth);
             board->line[(DEFAULTDEPTH - depth)] = moves[i];
+
+            // add best move to pvtable
+            board->pvtable[board->hash % PVSIZE].next = nextHash % PVSIZE;
+            board->pvtable[board->hash % PVSIZE].move = moves[i];
+            board->pvtable[board->hash % PVSIZE].depth = depth;
         }
     }
 
@@ -315,30 +336,33 @@ void printBestMove(int depth, BOARD_STATE *board) {
     }
     qsort(moves, n_moves, sizeof(MOVE), compare);
 
+    // reset nodes searched
     board->nodes = 0;
 
+    // begin timer
     clock_t t = clock();
 
     int score = alphabeta(board, DEFAULTDEPTH, alpha, beta);
 
+    // compute time taken to search nodes
     t = clock() - t;
     double time_taken = ((double)t) / CLOCKS_PER_SEC; // in seconds
 
-    MOVE bestmove = board->line[0];
+    // print search info
+    printInfo(board, time_taken, score, DEFAULTDEPTH);
 
-    printInfo(score, DEFAULTDEPTH);
+    board->nodes = 0;
 
+    // PVENTRY best = board->pvtable[board->hash % PVSIZE];
+    // MOVE bestmove = board->pvtable[board->hash % PVSIZE].move;
+
+    // use line variable until pvtable collisions fixed
+    MOVE bestmove = board->line[(DEFAULTDEPTH - depth)];
+
+    // print best move
     printf("bestmove ");
     printMoveText(bestmove);
     printf("\n");
 
-    // printf("%d nodes %fnps\n",board->nodes,board->nodes/time_taken);
-    board->nodes = 0;
-
-    // for (int i = 0; i < DEFAULTDEPTH; i++) {
-    //     printf("%d. ",board->fullmove+i);
-    //     printMoveText(board->line[i]);
-    //     printf(" \n");
-    // }
-    // printBoardIndex();
+    // printf("%d\n",best.depth);
 }
