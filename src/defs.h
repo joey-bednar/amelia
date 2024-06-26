@@ -112,9 +112,10 @@ typedef struct {
 
     PVENTRY pvtable[PVSIZE];
 
+    MOVE pvarray[MAX_DEPTH][MAX_DEPTH];
+
     ULL playedmoves[MAX_GAME_LENGTH * 2];
 
-    MOVE line[MAX_GAME_LENGTH * 2];
     int ply;
 
     int nodes;

@@ -9,6 +9,7 @@
 #define MATETHRESHOLD 50
 #define INF 99999
 
+// returns true if position has been repeated three times
 static int isThreeFold(BOARD_STATE *board) {
     if (board->halfmove >= 4) {
         int end = 2 * (board->fullmove - 1) + board->turn;
@@ -28,21 +29,28 @@ static int isThreeFold(BOARD_STATE *board) {
     return FALSE;
 }
 
-static void printEval(int score, int depth) {
+// prints uci centipawn/mate search info
+// if forced mate, return distance to mate
+// otherwise return max depth
+static int printEval(int score, int depth) {
     if (score + MATETHRESHOLD >= MATE && score - MATETHRESHOLD <= MATE) {
         int dist = (MATE - score) + depth;
         int mate = (dist + 1) / 2;
         printf("score mate %d ", mate);
+        return dist;
     } else if (score + MATETHRESHOLD >= -MATE &&
                score - MATETHRESHOLD <= -MATE) {
-        int dist = (-MATE - score) + depth;
-        int mate = (dist + 1) / 2;
+        int dist = (MATE + score) + depth;
+        int mate = (dist) / 2;
         printf("score mate -%d ", mate);
+        return dist;
     } else {
         printf("score cp %d ", score);
+        return MAX_DEPTH;
     }
 }
 
+// prints uci search info
 static void printInfo(BOARD_STATE *board, double time, int score, int depth) {
 
     // print search info
@@ -51,18 +59,19 @@ static void printInfo(BOARD_STATE *board, double time, int score, int depth) {
 
     printf("info ");
     printf("depth %d ", DEFAULTDEPTH);
-    printEval(score, DEFAULTDEPTH);
+    int dist = printEval(score, DEFAULTDEPTH);
     printf("nodes %ld ", (long)board->nodes);
     printf("nps %ld ", nps);
     printf("time %ld ", time_d);
 
     printf("pv ");
-    ULL key = board->hash % PVSIZE;
-    for (int i = 0; i < DEFAULTDEPTH; ++i) {
-        PVENTRY pv = board->pvtable[key];
-        printMoveText(pv.move);
+
+    int i = 0;
+    while (i < dist && board->pvarray[0][i].startSquare != 0 &&
+           board->pvarray[0][i].endSquare != 0) {
+        printMoveText(board->pvarray[0][i]);
         printf(" ");
-        key = pv.next;
+        i++;
     }
     printf("\n");
 }
@@ -113,6 +122,7 @@ static int computePieceTotals(ULL bb, int color, BOARD_STATE *board) {
     return total;
 }
 
+// returns centipawn evaluation of current position
 int eval(BOARD_STATE *board) {
     ULL mine = board->bitboard[board->turn];
     ULL yours = board->bitboard[!board->turn];
@@ -235,12 +245,17 @@ static int alphabeta(BOARD_STATE *board, int depth, int alpha, int beta) {
         if (score > alpha) {
             alpha = score;
 
-            board->line[(DEFAULTDEPTH - depth)] = moves[i];
-
             // add best move to pvtable
-            board->pvtable[board->hash % PVSIZE].next = nextHash % PVSIZE;
-            board->pvtable[board->hash % PVSIZE].move = moves[i];
-            board->pvtable[board->hash % PVSIZE].depth = depth;
+            // board->pvtable[board->hash % PVSIZE].next = nextHash % PVSIZE;
+            // board->pvtable[board->hash % PVSIZE].move = moves[i];
+            // board->pvtable[board->hash % PVSIZE].depth = depth;
+
+            // add moves to pvarray
+            int ply = DEFAULTDEPTH - depth;
+            board->pvarray[ply][ply] = moves[i];
+            for (int j = ply + 1; j < MAX_DEPTH; ++j) {
+                board->pvarray[ply][j] = board->pvarray[ply + 1][j];
+            }
         }
     }
 
@@ -321,18 +336,11 @@ void printBestMove(int depth, BOARD_STATE *board) {
     // print search info
     printInfo(board, time_taken, score, DEFAULTDEPTH);
 
-    board->nodes = 0;
-
-    // PVENTRY best = board->pvtable[board->hash % PVSIZE];
-    // MOVE bestmove = board->pvtable[board->hash % PVSIZE].move;
-
-    // use line variable until pvtable collisions fixed
-    MOVE bestmove = board->line[(DEFAULTDEPTH - depth)];
+    // get best move from pv
+    MOVE bestmove = board->pvarray[0][0];
 
     // print best move
     printf("bestmove ");
     printMoveText(bestmove);
     printf("\n");
-
-    // printf("%d\n",best.depth);
 }
