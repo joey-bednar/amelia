@@ -73,9 +73,10 @@ static void printInfo(BOARD_STATE *board, double time, int score, int depth) {
 
     printf("pv ");
 
+    // pv length is always less than the search depth
+    // pv length is cut short when mate is within depth
     int i = 0;
-    while (i < dist && board->pvarray[0][i].startSquare != 0 &&
-           board->pvarray[0][i].endSquare != 0) {
+    while (i < dist && i < searchDepth) {
         printMoveText(board->pvarray[0][i]);
         printf(" ");
         i++;
@@ -331,9 +332,26 @@ void printBestMove(BOARD_STATE *board) {
     // begin timer
     clock_t t = clock();
 
+    // adjust search depth
+    int timeAdjustedDepth;
+    if (inputTime[board->turn] != DEFAULT_TIME) {
+
+        // adjust depth based on time remaining
+        if (inputTime[board->turn] < 1000 * 60 * 1) {
+            timeAdjustedDepth = 4;
+        } else if (inputTime[board->turn] < 1000 * 60 * 3) {
+            timeAdjustedDepth = 5;
+        } else {
+            timeAdjustedDepth = 6;
+        }
+        // if no times given, run user specified depth or default
+    } else {
+        timeAdjustedDepth = inputDepth;
+    }
+
     // iterative deepening
     MOVE bestmove;
-    for (searchDepth = 0; searchDepth <= 5; searchDepth++) {
+    for (searchDepth = 0; searchDepth <= timeAdjustedDepth; searchDepth++) {
         int score = alphabeta(board, searchDepth, alpha, beta);
 
         // compute time taken to search nodes

@@ -48,15 +48,21 @@ static void playUCIMove(BOARD_STATE *board, int start, int end, char promo) {
     }
 }
 
-static void parseMoves(char *string, BOARD_STATE *board, int startIndex) {
-    int i = startIndex;
+static void parseMoves(char *string, BOARD_STATE *board) {
+
+    // find and shift to "moves" occurrence in input
+    int i = 7;
+    char *ret = strstr(string, " moves ");
+    if (ret == NULL) {
+        return;
+    }
+    string = ret;
 
     while (string[i] != '\n' && string[i] != '\0') {
         if (string[i] == ' ') {
             ++i;
         } else {
 
-            // printf("string[%d]: %c\n",i,string[i]);
             int startSq = CHAR2SQ120(string[i], string[i + 1]);
             int endSq = CHAR2SQ120(string[i + 2], string[i + 3]);
 
@@ -218,6 +224,70 @@ int loadFEN(char *fen, BOARD_STATE *board, int startIndex) {
     return i;
 }
 
+// loads wtime/btime/depth from UCI input
+static void parseGo(char *string) {
+
+    // find and shift to "moves" occurrence in input
+    char *depthStr = strstr(string, " depth ");
+    if (depthStr != NULL) {
+        int i = 7;
+        int val = 0;
+        while (depthStr[i] >= '0' && depthStr[i] <= '9') {
+            val = val * 10 + (int)(depthStr[i] - '0');
+            i++;
+        }
+        inputDepth = val;
+    }
+
+    // find and shift to "wtime" occurrence in input
+    char *wtimeStr = strstr(string, " wtime ");
+    if (wtimeStr != NULL) {
+        int i = 7;
+        int val = 0;
+        while (wtimeStr[i] >= '0' && wtimeStr[i] <= '9') {
+            val = val * 10 + (int)(wtimeStr[i] - '0');
+            i++;
+        }
+        inputTime[WHITE] = val;
+    }
+
+    // find and shift to "wtime" occurrence in input
+    char *btimeStr = strstr(string, " btime ");
+    if (btimeStr != NULL) {
+        int i = 7;
+        int val = 0;
+        while (btimeStr[i] >= '0' && btimeStr[i] <= '9') {
+            val = val * 10 + (int)(btimeStr[i] - '0');
+            i++;
+        }
+        inputTime[BLACK] = val;
+    }
+
+    // find and shift to "winc" occurrence in input
+    char *wincStr = strstr(string, " winc ");
+    if (wincStr != NULL) {
+        int i = 6;
+        int val = 0;
+        while (wincStr[i] >= '0' && wincStr[i] <= '9') {
+            val = val * 10 + (int)(wincStr[i] - '0');
+            i++;
+        }
+        inputInc[WHITE] = val;
+    }
+
+    // find and shift to "binc" occurrence in input
+    char *bincStr = strstr(string, " binc ");
+    if (bincStr != NULL) {
+        int i = 6;
+        int val = 0;
+        while (bincStr[i] >= '0' && bincStr[i] <= '9') {
+            val = val * 10 + (int)(bincStr[i] - '0');
+            i++;
+        }
+        inputInc[BLACK] = val;
+    }
+}
+
 void startUCI() {
     BOARD_STATE board;
     initBoard(&board);
@@ -229,9 +299,6 @@ void startUCI() {
         }
         fgets(input, INPUTLEN, stdin);
 
-        // char *ret = strstr(input, "wtime");
-        // printf("wtime: %s\n",ret);
-
         if (strcmp("ucinewgame", input) == 0) {
             printf("readyok\n");
             initBoard(&board);
@@ -241,16 +308,20 @@ void startUCI() {
             printf("uciok\n");
         } else if (strcmp("isready\n", input) == 0) {
             printf("readyok\n");
-        } else if (strcmp("position startpos\n", input) == 0) {
+        } else if (strncmp("position startpos", input, 17) == 0) {
             initBoard(&board);
-        } else if (strncmp("position startpos \n", input, POSSTARTLEN) == 0) {
+            parseMoves(input, &board);
+        } else if (strncmp("position fen", input, 13) == 0) {
             initBoard(&board);
-            parseMoves(input, &board, POSSTARTLEN);
-        } else if (strncmp("position fen ", input, POSFENLEN) == 0) {
-            initBoard(&board);
-            int i = loadFEN(input, &board, POSFENLEN);
-            parseMoves(input, &board, i);
+            loadFEN(input, &board, 13);
+            parseMoves(input, &board);
         } else if (strncmp("go\n", input, 2) == 0) {
+            inputDepth = DEFAULTDEPTH;
+            inputInc[WHITE] = DEFAULT_INC;
+            inputInc[BLACK] = DEFAULT_INC;
+            inputTime[WHITE] = DEFAULT_TIME;
+            inputTime[BLACK] = DEFAULT_TIME;
+            parseGo(input);
             printBestMove(&board);
 
         } else if (strcmp("stop\n", input) == 0) {

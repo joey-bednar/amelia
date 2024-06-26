@@ -34,6 +34,8 @@
 #define MAX_DEPTH 10
 #define DEFAULTDEPTH 5
 #define QMAXDEPTH 0
+#define DEFAULT_TIME 1000 * 60 * 60
+#define DEFAULT_INC 0
 
 #define CHAR2FILE(c) ((int)((c) - 'a'))
 #define CHAR2RANK(c) ((int)((c) - '1'))
@@ -128,6 +130,10 @@ typedef struct {
     int castle;
     int enpassant;
 } BOARD_STATE;
+
+extern int inputDepth;
+extern int inputTime[2];
+extern int inputInc[2];
 
 extern int epMap[120];
 extern int sq120sq64Map[120];

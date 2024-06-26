@@ -19,6 +19,10 @@ ULL zobristB2M;
 
 int pawnOffset[2][4] = {{N, 2 * N, NW, NE}, {S, 2 * S, SW, SE}};
 
+int inputDepth;
+int inputTime[2];
+int inputInc[2];
+
 int main() {
     BOARD_STATE board;
     init(&board);
