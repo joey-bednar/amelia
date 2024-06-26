@@ -228,6 +228,10 @@ void startUCI() {
             input[i] = '\0';
         }
         fgets(input, INPUTLEN, stdin);
+
+        // char *ret = strstr(input, "wtime");
+        // printf("wtime: %s\n",ret);
+
         if (strcmp("ucinewgame", input) == 0) {
             printf("readyok\n");
             initBoard(&board);
@@ -247,7 +251,7 @@ void startUCI() {
             int i = loadFEN(input, &board, POSFENLEN);
             parseMoves(input, &board, i);
         } else if (strncmp("go\n", input, 2) == 0) {
-            printBestMove(DEFAULTDEPTH, &board);
+            printBestMove(&board);
 
         } else if (strcmp("stop\n", input) == 0) {
             // printf("stop\n");

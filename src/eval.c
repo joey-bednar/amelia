@@ -9,6 +9,8 @@
 #define MATETHRESHOLD 50
 #define INF 99999
 
+int searchDepth;
+
 // returns true if position has been repeated three times
 static int isThreeFold(BOARD_STATE *board) {
     if (board->halfmove >= 4) {
@@ -58,11 +60,16 @@ static void printInfo(BOARD_STATE *board, double time, int score, int depth) {
     long time_d = (long)time;
 
     printf("info ");
-    printf("depth %d ", DEFAULTDEPTH);
-    int dist = printEval(score, DEFAULTDEPTH);
+    printf("depth %d ", depth);
+    int dist = printEval(score, depth);
     printf("nodes %ld ", (long)board->nodes);
     printf("nps %ld ", nps);
     printf("time %ld ", time_d);
+
+    if (searchDepth == 0) {
+        printf("\n");
+        return;
+    }
 
     printf("pv ");
 
@@ -173,8 +180,6 @@ static int quiesce(BOARD_STATE *board, int depth, int alpha, int beta) {
         if (!isAttacked(board, board->kings[!board->turn], board->turn)) {
             ++legal;
 
-            assert(isLegalMove(board, moves[i]));
-
             if (moves[i].captured != EMPTY) {
                 score = -quiesce(board, depth - 1, -beta, -alpha);
             }
@@ -251,7 +256,7 @@ static int alphabeta(BOARD_STATE *board, int depth, int alpha, int beta) {
             // board->pvtable[board->hash % PVSIZE].depth = depth;
 
             // add moves to pvarray
-            int ply = DEFAULTDEPTH - depth;
+            int ply = searchDepth - depth;
             board->pvarray[ply][ply] = moves[i];
             for (int j = ply + 1; j < MAX_DEPTH; ++j) {
                 board->pvarray[ply][j] = board->pvarray[ply + 1][j];
@@ -305,8 +310,7 @@ static int compare(const void *a, const void *b) {
            (GENERIC(moveB->captured) - GENERIC(moveA->captured));
 }
 
-void printBestMove(int depth, BOARD_STATE *board) {
-    int max = -INF;
+void printBestMove(BOARD_STATE *board) {
     int alpha = -INF;
     int beta = INF;
 
@@ -327,17 +331,21 @@ void printBestMove(int depth, BOARD_STATE *board) {
     // begin timer
     clock_t t = clock();
 
-    int score = alphabeta(board, DEFAULTDEPTH, alpha, beta);
+    // iterative deepening
+    MOVE bestmove;
+    for (searchDepth = 0; searchDepth <= 5; searchDepth++) {
+        int score = alphabeta(board, searchDepth, alpha, beta);
 
-    // compute time taken to search nodes
-    t = clock() - t;
-    double time_taken = ((double)t) / CLOCKS_PER_SEC; // in seconds
+        // compute time taken to search nodes
+        clock_t new_t = clock() - t;
+        double time_taken_ms = 1000 * ((double)new_t) / CLOCKS_PER_SEC;
 
-    // print search info
-    printInfo(board, time_taken, score, DEFAULTDEPTH);
+        // print search info
+        printInfo(board, time_taken_ms, score, searchDepth);
 
-    // get best move from pv
-    MOVE bestmove = board->pvarray[0][0];
+        // get best move from pv
+        bestmove = board->pvarray[0][0];
+    }
 
     // print best move
     printf("bestmove ");

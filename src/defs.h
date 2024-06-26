@@ -108,6 +108,8 @@ typedef struct {
 typedef struct {
     ULL bitboard[bbLength];
 
+    int ply;
+
     ULL hash;
 
     PVENTRY pvtable[PVSIZE];
@@ -115,8 +117,6 @@ typedef struct {
     MOVE pvarray[MAX_DEPTH][MAX_DEPTH];
 
     ULL playedmoves[MAX_GAME_LENGTH * 2];
-
-    int ply;
 
     int nodes;
 
@@ -211,7 +211,7 @@ extern void printBenchmark(int depth);
 
 // eval.c
 extern int eval(BOARD_STATE *board);
-extern void printBestMove(int depth, BOARD_STATE *board);
+extern void printBestMove(BOARD_STATE *board);
 extern MOVE makeBestMove(int depth, BOARD_STATE *board);
 
 // uci.c
