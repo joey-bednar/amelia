@@ -114,9 +114,6 @@ static int computePieceTotals(ULL bb, int color, BOARD_STATE *board) {
 }
 
 int eval(BOARD_STATE *board) {
-    // static int count = 0;
-    // count++;
-    // printf("count: %d\n", count);
     ULL mine = board->bitboard[board->turn];
     ULL yours = board->bitboard[!board->turn];
 
@@ -260,33 +257,6 @@ static int alphabeta(BOARD_STATE *board, int depth, int alpha, int beta) {
     return alpha;
 }
 
-int negaMax(BOARD_STATE *board, int depth) {
-    if (depth == 0) {
-        return eval(board);
-    }
-    int max = -INF;
-
-    MOVE moves[MAX_LEGAL_MOVES];
-    int n_moves = generateMoves(board, moves);
-
-    for (int i = 0; i < n_moves; ++i) {
-        if (isLegalMove(board, moves[i])) {
-
-            makeMove(board, moves[i]);
-
-            int score = -negaMax(board, depth - 1);
-
-            if (score > max) {
-                max = score;
-            }
-
-            unmakeMove(board, moves[i]);
-        }
-    }
-
-    return max;
-}
-
 void printMoveText(MOVE move) {
 
     char startFile = SQ120F(move.startSquare) + 'a';
@@ -302,7 +272,7 @@ void printMoveText(MOVE move) {
     } else if (GENERIC(move.promotion) == bbBishop) {
         promote = 'b';
     } else if (GENERIC(move.promotion) == bbKnight) {
-        promote = 'k';
+        promote = 'n';
     }
 
     if (promote != '\0') {

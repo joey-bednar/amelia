@@ -18,7 +18,7 @@ void initZobrist() {
             zobrist_vals[piece - 1][sq] = get64rand();
         }
     }
-    ULL zobristB2M = get64rand();
+    zobristB2M = get64rand();
 }
 
 // constructs hash of position
