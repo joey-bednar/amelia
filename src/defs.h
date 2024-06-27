@@ -32,7 +32,7 @@
 #define PVSIZE 200
 
 #define MAX_DEPTH 10
-#define DEFAULTDEPTH 5
+#define DEFAULTDEPTH 6
 #define QMAXDEPTH 100
 #define DEFAULT_TIME 1000 * 60 * 60
 #define DEFAULT_INC 0
@@ -225,7 +225,7 @@ extern int isThreeFold(BOARD_STATE *board);
 // search.c
 extern void printMoveText(MOVE move);
 extern int compareMoves(const void *a, const void *b);
-extern void printBestMove(BOARD_STATE *board);
+extern void search(BOARD_STATE *board);
 
 // uci.c
 extern int loadFEN(char *fen, BOARD_STATE *board, int startIndex);

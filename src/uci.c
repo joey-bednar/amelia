@@ -323,7 +323,7 @@ void startUCI() {
             inputTime[WHITE] = DEFAULT_TIME;
             inputTime[BLACK] = DEFAULT_TIME;
             parseGo(input);
-            printBestMove(&board);
+            search(&board);
 
         } else if (strcmp("stop\n", input) == 0) {
             // printf("stop\n");

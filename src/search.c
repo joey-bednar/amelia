@@ -7,6 +7,11 @@
 
 int searchDepth;
 
+static int isMateEval(int score) {
+    return ((score + MATETHRESHOLD >= MATE && score - MATETHRESHOLD <= MATE) ||
+            (score + MATETHRESHOLD >= -MATE && score - MATETHRESHOLD <= -MATE));
+}
+
 // prints uci centipawn/mate search info
 // if forced mate, return distance to mate
 // otherwise return max depth
@@ -232,10 +237,26 @@ int compareMoves(const void *a, const void *b) {
            (GENERIC(moveB->captured) - GENERIC(moveA->captured));
 }
 
-void printBestMove(BOARD_STATE *board) {
-    int alpha = -INF;
-    int beta = INF;
+static int getAdjustedDepth(BOARD_STATE *board) {
 
+    // adjust search depth
+    if (inputTime[board->turn] != DEFAULT_TIME) {
+
+        // adjust depth based on time remaining
+        if (inputTime[board->turn] < 1000 * 60 * 1) {
+            return 4;
+        } else if (inputTime[board->turn] < 1000 * 60 * 3) {
+            return 5;
+        }
+    }
+
+    // if no times given, run user specified depth or default
+    return inputDepth;
+}
+
+void search(BOARD_STATE *board) {
+
+    // generate pseudolegal moves
     MOVE moves[MAX_LEGAL_MOVES];
     int n_moves = generateMoves(board, moves);
 
@@ -253,27 +274,13 @@ void printBestMove(BOARD_STATE *board) {
     // begin timer
     clock_t t = clock();
 
-    // adjust search depth
-    int timeAdjustedDepth;
-    if (inputTime[board->turn] != DEFAULT_TIME) {
-
-        // adjust depth based on time remaining
-        if (inputTime[board->turn] < 1000 * 60 * 1) {
-            timeAdjustedDepth = 4;
-        } else if (inputTime[board->turn] < 1000 * 60 * 3) {
-            timeAdjustedDepth = 5;
-        } else {
-            timeAdjustedDepth = 6;
-        }
-        // if no times given, run user specified depth or default
-    } else {
-        timeAdjustedDepth = inputDepth;
-    }
+    // adjust search depth for timed games
+    int timeAdjustedDepth = getAdjustedDepth(board);
 
     // iterative deepening
     MOVE bestmove;
     for (searchDepth = 0; searchDepth <= timeAdjustedDepth; searchDepth++) {
-        int score = alphabeta(board, searchDepth, alpha, beta);
+        int score = alphabeta(board, searchDepth, -INF, INF);
 
         // compute time taken to search nodes
         clock_t new_t = clock() - t;
@@ -284,6 +291,16 @@ void printBestMove(BOARD_STATE *board) {
 
         // get best move from pv
         bestmove = board->pvarray[0][0];
+
+        // end searches in timed games if mate is found
+        if (isMateEval(score) && inputTime[board->turn] != DEFAULT_TIME) {
+            break;
+        }
+
+        // cutoff length of searches
+        if (time_taken_ms > 1000 * 7) {
+            break;
+        }
     }
 
     // print best move
