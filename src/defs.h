@@ -37,6 +37,10 @@
 #define DEFAULT_TIME 1000 * 60 * 60
 #define DEFAULT_INC 0
 
+#define MATE 50000
+#define MATETHRESHOLD 50
+#define INF 99999
+
 #define CHAR2FILE(c) ((int)((c) - 'a'))
 #define CHAR2RANK(c) ((int)((c) - '1'))
 #define CHAR2SQ120(f, r) (FR2SQ120((CHAR2FILE((f))), (CHAR2RANK((r)))))
@@ -176,15 +180,15 @@ extern void init(BOARD_STATE *board);
 extern void setPiece(int piece, int file, int rank, BOARD_STATE *board);
 extern void setPiece120(int piece, int sq, BOARD_STATE *board);
 
-extern int getPieceFR(int file, int rank, BOARD_STATE *board);
 extern int getPieceSq120(int sq, BOARD_STATE *board);
 
-extern int hasEmptyEnemyPiece120(int sq, int color, BOARD_STATE *board);
-extern int hasEnemyPiece120(int sq, BOARD_STATE *board);
 extern int isEmptySquare(int sq, BOARD_STATE *board);
 
-extern int getGenericPieceSq120(int sq, BOARD_STATE *board);
 extern int getColorSq120(int sq, BOARD_STATE *board);
+
+extern void clearPiece(BOARD_STATE *board, int piece, int sq);
+extern void placePiece(BOARD_STATE *board, int piece, int sq);
+extern void updateCastling(BOARD_STATE *board, MOVE move);
 
 // moves.c
 extern int generateMoves(BOARD_STATE *board, MOVE *move);
@@ -211,20 +215,20 @@ extern void test();
 
 // perft.c
 extern ULL perft(int depth);
-extern ULL perft_rec(int depth, BOARD_STATE *board);
 extern ULL perft_rec_bulk(int depth, BOARD_STATE *board);
-extern void printBenchmark(int depth);
 
 // eval.c
 extern int eval(BOARD_STATE *board);
-extern void printBestMove(BOARD_STATE *board);
 extern MOVE makeBestMove(int depth, BOARD_STATE *board);
+extern int isThreeFold(BOARD_STATE *board);
+
+// search.c
+extern void printMoveText(MOVE move);
 extern int compareMoves(const void *a, const void *b);
+extern void printBestMove(BOARD_STATE *board);
 
 // uci.c
 extern int loadFEN(char *fen, BOARD_STATE *board, int startIndex);
 extern void startUCI();
-
-extern void printMoveText(MOVE move);
 
 #endif

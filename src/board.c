@@ -2,23 +2,52 @@
 #include <assert.h>
 #include <stdio.h>
 
+void clearPiece(BOARD_STATE *board, int piece, int sq) {
+    // move piece to target square
+    CLEARBIT(board->bitboard[GENERIC(piece)], SQ120SQ64(sq));
+    CLEARBIT(board->bitboard[COLOR(piece)], SQ120SQ64(sq));
+    CLEARBIT(board->bitboard[bbAny], SQ120SQ64(sq));
+    updateZobrist(SQ120SQ64(sq), piece, board);
+}
+
+void placePiece(BOARD_STATE *board, int piece, int sq) {
+
+    SETBIT(board->bitboard[GENERIC(piece)], SQ120SQ64(sq));
+    SETBIT(board->bitboard[COLOR(piece)], SQ120SQ64(sq));
+    SETBIT(board->bitboard[bbAny], SQ120SQ64(sq));
+    updateZobrist(SQ120SQ64(sq), piece, board);
+}
+
+void updateCastling(BOARD_STATE *board, MOVE move) {
+
+    int piece = getGenericPieceSq120(move.startSquare, board);
+
+    if (piece == bbRook) {
+        if (move.startSquare == H1) {
+            CLEARBIT(board->castle, WK_CASTLE);
+        } else if (move.startSquare == A1) {
+            CLEARBIT(board->castle, WQ_CASTLE);
+        } else if (move.startSquare == H8) {
+            CLEARBIT(board->castle, BK_CASTLE);
+        } else if (move.startSquare == A8) {
+            CLEARBIT(board->castle, BQ_CASTLE);
+        }
+    } else if (piece == bbKing) {
+        if (move.startSquare == E1) {
+            CLEARBIT(board->castle, WK_CASTLE);
+            CLEARBIT(board->castle, WQ_CASTLE);
+        } else if (move.endSquare == E8) {
+            CLEARBIT(board->castle, BK_CASTLE);
+            CLEARBIT(board->castle, BQ_CASTLE);
+        }
+    }
+}
+
 int isEmptySquare(int sq, BOARD_STATE *board) {
     ULL bb = (board->bitboard[bbWhite] | board->bitboard[bbBlack]);
     ULL val = CHECKBIT(bb, SQ120SQ64(sq));
 
     return (ONBOARD(sq) && !val);
-}
-
-// TODO: fix
-int hasEmptyEnemyPiece120(int sq, int color, BOARD_STATE *board) {
-    ULL set = CHECKBIT(board->bitboard[color], SQ120SQ64(sq));
-    return (ONBOARD(sq) && (!set));
-}
-
-// TODO: fix
-int hasEnemyPiece120(int sq, BOARD_STATE *board) {
-    ULL set = CHECKBIT(board->bitboard[NOTCOLOR(board->turn)], SQ120SQ64(sq));
-    return (ONBOARD(sq) && set);
 }
 
 int getGenericPieceSq120(int sq, BOARD_STATE *board) {
@@ -29,19 +58,6 @@ int getGenericPieceSq120(int sq, BOARD_STATE *board) {
         };
     }
     return -1;
-}
-
-int getColorSq120(int sq, BOARD_STATE *board) {
-    ULL any = CHECKBIT(board->bitboard[bbWhite] | board->bitboard[bbBlack],
-                       SQ120SQ64(sq));
-    if (!any) {
-        return BOTH;
-    }
-    ULL white = CHECKBIT(board->bitboard[bbWhite], SQ120SQ64(sq));
-    if (white) {
-        return WHITE;
-    }
-    return BLACK;
 }
 
 // return piece on square given by 120 index
@@ -70,12 +86,6 @@ int getPieceSq120(int sq, BOARD_STATE *board) {
             return TOBLACK(i);
         }
     }
-}
-
-// return piece on given square by file/rank
-int getPieceFR(int file, int rank, BOARD_STATE *board) {
-    int sq = FR2SQ120(file, rank);
-    return getPieceSq120(sq, board);
 }
 
 void setPiece120(int piece, int sq, BOARD_STATE *board) {

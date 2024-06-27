@@ -3,65 +3,24 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-static void unsafeClearPiece(BOARD_STATE *board, int piece, int sq) {
-    // move piece to target square
-    CLEARBIT(board->bitboard[GENERIC(piece)], SQ120SQ64(sq));
-    CLEARBIT(board->bitboard[COLOR(piece)], SQ120SQ64(sq));
-    CLEARBIT(board->bitboard[bbAny], SQ120SQ64(sq));
-    updateZobrist(SQ120SQ64(sq), piece, board);
-}
-
-static void unsafePlacePiece(BOARD_STATE *board, int piece, int sq) {
-
-    SETBIT(board->bitboard[GENERIC(piece)], SQ120SQ64(sq));
-    SETBIT(board->bitboard[COLOR(piece)], SQ120SQ64(sq));
-    SETBIT(board->bitboard[bbAny], SQ120SQ64(sq));
-    updateZobrist(SQ120SQ64(sq), piece, board);
-}
-
-static void updateCastling(BOARD_STATE *board, MOVE move) {
-
-    int piece = getGenericPieceSq120(move.startSquare, board);
-
-    if (piece == bbRook) {
-        if (move.startSquare == H1) {
-            CLEARBIT(board->castle, WK_CASTLE);
-        } else if (move.startSquare == A1) {
-            CLEARBIT(board->castle, WQ_CASTLE);
-        } else if (move.startSquare == H8) {
-            CLEARBIT(board->castle, BK_CASTLE);
-        } else if (move.startSquare == A8) {
-            CLEARBIT(board->castle, BQ_CASTLE);
-        }
-    } else if (piece == bbKing) {
-        if (move.startSquare == E1) {
-            CLEARBIT(board->castle, WK_CASTLE);
-            CLEARBIT(board->castle, WQ_CASTLE);
-        } else if (move.endSquare == E8) {
-            CLEARBIT(board->castle, BK_CASTLE);
-            CLEARBIT(board->castle, BQ_CASTLE);
-        }
-    }
-}
-
 static void unmakeCastleMove(BOARD_STATE *board, int end) {
 
     switch (end) {
     case G1:
-        unsafeClearPiece(board, wR, F1);
-        unsafePlacePiece(board, wR, H1);
+        clearPiece(board, wR, F1);
+        placePiece(board, wR, H1);
         break;
     case C1:
-        unsafeClearPiece(board, wR, D1);
-        unsafePlacePiece(board, wR, A1);
+        clearPiece(board, wR, D1);
+        placePiece(board, wR, A1);
         break;
     case G8:
-        unsafeClearPiece(board, bR, F8);
-        unsafePlacePiece(board, bR, H8);
+        clearPiece(board, bR, F8);
+        placePiece(board, bR, H8);
         break;
     case C8:
-        unsafeClearPiece(board, bR, D8);
-        unsafePlacePiece(board, bR, A8);
+        clearPiece(board, bR, D8);
+        placePiece(board, bR, A8);
         break;
     }
 }
@@ -71,29 +30,29 @@ static void castleRooks(BOARD_STATE *board, int end) {
     switch (end) {
     case G1:
         board->kings[WHITE] = end;
-        unsafeClearPiece(board, wR, H1);
-        unsafePlacePiece(board, wR, F1);
+        clearPiece(board, wR, H1);
+        placePiece(board, wR, F1);
         CLEARBIT(board->castle, WK_CASTLE);
         CLEARBIT(board->castle, WQ_CASTLE);
         break;
     case C1:
-        unsafeClearPiece(board, wR, A1);
-        unsafePlacePiece(board, wR, D1);
+        clearPiece(board, wR, A1);
+        placePiece(board, wR, D1);
         CLEARBIT(board->castle, WK_CASTLE);
         CLEARBIT(board->castle, WQ_CASTLE);
         board->kings[WHITE] = end;
         break;
     case G8:
         board->kings[BLACK] = end;
-        unsafeClearPiece(board, bR, H8);
-        unsafePlacePiece(board, bR, F8);
+        clearPiece(board, bR, H8);
+        placePiece(board, bR, F8);
         CLEARBIT(board->castle, BK_CASTLE);
         CLEARBIT(board->castle, BQ_CASTLE);
         break;
     case C8:
         board->kings[BLACK] = end;
-        unsafeClearPiece(board, bR, A8);
-        unsafePlacePiece(board, bR, D8);
+        clearPiece(board, bR, A8);
+        placePiece(board, bR, D8);
         CLEARBIT(board->castle, BK_CASTLE);
         CLEARBIT(board->castle, BQ_CASTLE);
         break;
@@ -115,22 +74,21 @@ void makeMove(BOARD_STATE *board, MOVE move) {
         const int offset[2] = {S, N};
         board->enpassant = OFFBOARD;
 
-        unsafeClearPiece(board, move.captured,
-                         move.endSquare + offset[board->turn]);
+        clearPiece(board, move.captured, move.endSquare + offset[board->turn]);
     } else if (move.captured != EMPTY) {
-        unsafeClearPiece(board, move.captured, move.endSquare);
+        clearPiece(board, move.captured, move.endSquare);
     }
 
     // update castling permissions
     updateCastling(board, move);
 
     // move piece to target square
-    unsafeClearPiece(board, piece, move.startSquare);
+    clearPiece(board, piece, move.startSquare);
 
     if (move.promotion) {
-        unsafePlacePiece(board, move.promotion, move.endSquare);
+        placePiece(board, move.promotion, move.endSquare);
     } else {
-        unsafePlacePiece(board, piece, move.endSquare);
+        placePiece(board, piece, move.endSquare);
     }
 
     // update king position
@@ -190,11 +148,11 @@ void unmakeMove(BOARD_STATE *board, MOVE move) {
         const int offset = PAWNOFFSET(board->turn, 0);
 
         // put back captured piece
-        unsafePlacePiece(board, move.captured, move.endSquare + offset);
+        placePiece(board, move.captured, move.endSquare + offset);
 
         // move pawn back to original square
-        unsafeClearPiece(board, piece, move.endSquare);
-        unsafePlacePiece(board, piece, move.startSquare);
+        clearPiece(board, piece, move.endSquare);
+        placePiece(board, piece, move.startSquare);
 
         if (board->turn == WHITE) {
             --board->fullmove;
@@ -205,17 +163,17 @@ void unmakeMove(BOARD_STATE *board, MOVE move) {
     }
 
     // remove piece from end square and replace with captured piece if possible
-    unsafeClearPiece(board, piece, move.endSquare);
+    clearPiece(board, piece, move.endSquare);
     if (move.captured != EMPTY) {
-        unsafePlacePiece(board, move.captured, move.endSquare);
+        placePiece(board, move.captured, move.endSquare);
     }
 
     // undo promotion
     if (move.promotion == EMPTY) {
-        unsafePlacePiece(board, piece, move.startSquare);
+        placePiece(board, piece, move.startSquare);
     } else {
         int pawn = TOCOLOR(COLOR(piece), bbPawn);
-        unsafePlacePiece(board, pawn, move.startSquare);
+        placePiece(board, pawn, move.startSquare);
     }
 
     // update king position

@@ -4,7 +4,7 @@
 #include <time.h>
 
 #define VERBOSE 0
-#define POSITION 2
+#define POSITION 0
 #define CUSTOMFEN "8/3k4/3P4/3K4/8/8/8/8 b - - 0 1"
 
 ULL perft_rec_bulk(int depth, BOARD_STATE *board) {
