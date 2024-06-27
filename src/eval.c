@@ -174,6 +174,8 @@ static int quiesce(BOARD_STATE *board, int depth, int alpha, int beta) {
     MOVE moves[MAX_LEGAL_MOVES];
     int n_moves = generateMoves(board, moves);
 
+    qsort(moves, n_moves, sizeof(MOVE), compareMoves);
+
     for (int i = 0; i < n_moves; ++i) {
 
         makeMove(board, moves[i]);
@@ -231,6 +233,8 @@ static int alphabeta(BOARD_STATE *board, int depth, int alpha, int beta) {
 
     MOVE moves[MAX_LEGAL_MOVES];
     int n_moves = generateMoves(board, moves);
+
+    qsort(moves, n_moves, sizeof(MOVE), compareMoves);
 
     for (int i = 0; i < n_moves; ++i) {
 
@@ -303,7 +307,7 @@ void printMoveText(MOVE move) {
     }
 }
 
-static int compare(const void *a, const void *b) {
+int compareMoves(const void *a, const void *b) {
     MOVE *moveA = (MOVE *)a;
     MOVE *moveB = (MOVE *)b;
 
@@ -324,7 +328,7 @@ void printBestMove(BOARD_STATE *board) {
             moves[i].check = 1;
         }
     }
-    qsort(moves, n_moves, sizeof(MOVE), compare);
+    qsort(moves, n_moves, sizeof(MOVE), compareMoves);
 
     // reset nodes searched
     board->nodes = 0;

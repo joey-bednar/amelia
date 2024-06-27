@@ -29,11 +29,11 @@
 #define MAX_LEGAL_MOVES 256
 #define MAX_GAME_LENGTH 512
 
-#define PVSIZE 20000
+#define PVSIZE 200
 
 #define MAX_DEPTH 10
 #define DEFAULTDEPTH 5
-#define QMAXDEPTH 0
+#define QMAXDEPTH 100
 #define DEFAULT_TIME 1000 * 60 * 60
 #define DEFAULT_INC 0
 
@@ -219,6 +219,7 @@ extern void printBenchmark(int depth);
 extern int eval(BOARD_STATE *board);
 extern void printBestMove(BOARD_STATE *board);
 extern MOVE makeBestMove(int depth, BOARD_STATE *board);
+extern int compareMoves(const void *a, const void *b);
 
 // uci.c
 extern int loadFEN(char *fen, BOARD_STATE *board, int startIndex);

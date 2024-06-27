@@ -91,6 +91,7 @@ int loadFEN(char *fen, BOARD_STATE *board, int startIndex) {
 
     // load all pieces
     int i = startIndex;
+
     int index = 0;
     while (fen[i] != ' ') {
         if (fen[i] >= '0' && fen[i] <= '8') {
@@ -311,7 +312,7 @@ void startUCI() {
         } else if (strncmp("position startpos", input, 17) == 0) {
             initBoard(&board);
             parseMoves(input, &board);
-        } else if (strncmp("position fen", input, 13) == 0) {
+        } else if (strncmp("position fen ", input, 13) == 0) {
             initBoard(&board);
             loadFEN(input, &board, 13);
             parseMoves(input, &board);
