@@ -23,9 +23,13 @@ int inputDepth;
 int inputTime[2];
 int inputInc[2];
 
+PVENTRY hashtable[PVSIZE];
+
 int main() {
     BOARD_STATE board;
     init(&board);
+
+    PVENTRY *hashtable = (PVENTRY *)calloc(PVSIZE, sizeof(PVENTRY));
 
     startUCI();
     // perft(6);

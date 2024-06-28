@@ -29,7 +29,7 @@
 #define MAX_LEGAL_MOVES 256
 #define MAX_GAME_LENGTH 512
 
-#define PVSIZE 200
+#define PVSIZE 20000
 
 #define MAX_DEPTH 10
 #define DEFAULTDEPTH 6
@@ -68,23 +68,6 @@ enum {
 enum {NW=-9, N=1, NE=11, E=10, SE=9, S=-1, SW=-11, W=-10};
 // clang-format on
 
-enum {
-    MOVE_QUIET = 0,
-    MOVE_DOUBLEPAWN,
-    MOVE_KINGCASTLE,
-    MOVE_QUEENCASTLE,
-    MOVE_CAPTURE,
-    MOVE_EPCAPTURE,
-    MOVE_KNIGHTPROMOTE = 8,
-    MOVE_BISHOPPROMOTE,
-    MOVE_ROOKPROMOTE,
-    MOVE_QUEENPROMOTE,
-    MOVE_KNIGHTPROMOTECAPTURE,
-    MOVE_BISHOPPROMOTECAPTURE,
-    MOVE_ROOKPROMOTECAPTURE,
-    MOVE_QUEENPROMOTECAPTURE
-};
-
 enum { NO_CASTLE, WK_CASTLE, WQ_CASTLE, BK_CASTLE, BQ_CASTLE };
 typedef unsigned long long ULL;
 
@@ -106,9 +89,10 @@ typedef struct {
 } MOVE;
 
 typedef struct {
-    ULL next;
+    ULL pos;
     MOVE move;
     int depth;
+    int score;
 } PVENTRY;
 
 typedef struct {
@@ -134,6 +118,9 @@ typedef struct {
     int castle;
     int enpassant;
 } BOARD_STATE;
+
+// extern PVENTRY *hashtable;
+extern PVENTRY hashtable[PVSIZE];
 
 extern int inputDepth;
 extern int inputTime[2];

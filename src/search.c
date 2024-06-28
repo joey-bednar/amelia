@@ -7,6 +7,41 @@
 
 int searchDepth;
 
+int compareMoves(const void *a, const void *b) {
+    MOVE *moveA = (MOVE *)a;
+    MOVE *moveB = (MOVE *)b;
+
+    return (moveB->check - moveA->check) +
+           (GENERIC(moveB->captured) - GENERIC(moveA->captured));
+}
+
+static void sortMoves(BOARD_STATE *board, MOVE *moves, int n_moves) {
+
+    if (n_moves <= 1) {
+        return;
+    }
+
+    MOVE pvmove;
+    if (hashtable[board->hash % PVSIZE].pos == board->hash) {
+        pvmove = hashtable[board->hash % PVSIZE].move;
+        for (int i = 0; i < n_moves; i++) {
+            if (moves[i].startSquare == pvmove.startSquare &&
+                moves[i].endSquare == pvmove.endSquare &&
+                moves[i].promotion == pvmove.promotion) {
+                MOVE temp = moves[i];
+                moves[i] = moves[0];
+                moves[0] = temp;
+                // printf("pv used: ");
+                // printMoveText(moves[0]);
+                // printf("in %llu \n",board->hash);
+            }
+        }
+        qsort(moves + 1, n_moves - 1, sizeof(MOVE), compareMoves);
+        return;
+    }
+    qsort(moves, n_moves, sizeof(MOVE), compareMoves);
+}
+
 static int isMateEval(int score) {
     return ((score + MATETHRESHOLD >= MATE && score - MATETHRESHOLD <= MATE) ||
             (score + MATETHRESHOLD >= -MATE && score - MATETHRESHOLD <= -MATE));
@@ -96,6 +131,7 @@ static int quiesce(BOARD_STATE *board, int depth, int alpha, int beta) {
     MOVE moves[MAX_LEGAL_MOVES];
     int n_moves = generateMoves(board, moves);
 
+    // sortMoves(board, moves, n_moves);
     qsort(moves, n_moves, sizeof(MOVE), compareMoves);
 
     for (int i = 0; i < n_moves; ++i) {
@@ -142,7 +178,6 @@ static int alphabeta(BOARD_STATE *board, int depth, int alpha, int beta) {
 
     if (depth == 0) {
         return quiesce(board, QMAXDEPTH, alpha, beta);
-        // return eval(board);
     }
 
     if (board->halfmove >= 100) {
@@ -156,7 +191,8 @@ static int alphabeta(BOARD_STATE *board, int depth, int alpha, int beta) {
     MOVE moves[MAX_LEGAL_MOVES];
     int n_moves = generateMoves(board, moves);
 
-    qsort(moves, n_moves, sizeof(MOVE), compareMoves);
+    // qsort(moves, n_moves, sizeof(MOVE), compareMoves);
+    sortMoves(board, moves, n_moves);
 
     for (int i = 0; i < n_moves; ++i) {
 
@@ -167,8 +203,6 @@ static int alphabeta(BOARD_STATE *board, int depth, int alpha, int beta) {
             score = -alphabeta(board, depth - 1, -beta, -alpha);
         }
 
-        ULL nextHash = board->hash;
-
         unmakeMove(board, moves[i]);
 
         if (score >= beta) {
@@ -176,11 +210,6 @@ static int alphabeta(BOARD_STATE *board, int depth, int alpha, int beta) {
         }
         if (score > alpha) {
             alpha = score;
-
-            // add best move to pvtable
-            // board->pvtable[board->hash % PVSIZE].next = nextHash % PVSIZE;
-            // board->pvtable[board->hash % PVSIZE].move = moves[i];
-            // board->pvtable[board->hash % PVSIZE].depth = depth;
 
             // add moves to pvarray
             int ply = searchDepth - depth;
@@ -229,14 +258,6 @@ void printMoveText(MOVE move) {
     }
 }
 
-int compareMoves(const void *a, const void *b) {
-    MOVE *moveA = (MOVE *)a;
-    MOVE *moveB = (MOVE *)b;
-
-    return (moveB->check - moveA->check) +
-           (GENERIC(moveB->captured) - GENERIC(moveA->captured));
-}
-
 static int getAdjustedDepth(BOARD_STATE *board) {
 
     // adjust search depth
@@ -254,19 +275,29 @@ static int getAdjustedDepth(BOARD_STATE *board) {
     return inputDepth;
 }
 
-void search(BOARD_STATE *board) {
-
-    // generate pseudolegal moves
-    MOVE moves[MAX_LEGAL_MOVES];
-    int n_moves = generateMoves(board, moves);
-
-    // look at checks/captures first only for initial ply
-    for (int i = 0; i < n_moves; ++i) {
-        if (isCheck(board, moves[i])) {
-            moves[i].check = 1;
-        }
+static void copyPVtoTable(BOARD_STATE *board, int depth) {
+    for (int i = 0; i < depth; i++) {
+        ULL hash = board->hash;
+        PVENTRY pv = hashtable[hash % PVSIZE];
+        hashtable[hash % PVSIZE].pos = hash;
+        hashtable[hash % PVSIZE].move = board->pvarray[0][i];
+        // printf("stored ");
+        // printMoveText(hashtable[hash % PVSIZE].move);
+        // printf(" at %llu\n",board->hash);
+        makeMove(board, hashtable[hash % PVSIZE].move);
+        // printMoveText(pv.move);
     }
-    qsort(moves, n_moves, sizeof(MOVE), compareMoves);
+
+    for (int i = depth - 1; i >= 0; i--) {
+        MOVE move = board->pvarray[0][i];
+        // printMoveText(move);
+        // printBoard(board);
+        unmakeMove(board, move);
+    }
+    // printBoard(board);
+}
+
+void search(BOARD_STATE *board) {
 
     // reset nodes searched
     board->nodes = 0;
@@ -279,6 +310,7 @@ void search(BOARD_STATE *board) {
 
     // iterative deepening
     MOVE bestmove;
+    MOVE ponder;
     for (searchDepth = 0; searchDepth <= timeAdjustedDepth; searchDepth++) {
         int score = alphabeta(board, searchDepth, -INF, INF);
 
@@ -289,8 +321,11 @@ void search(BOARD_STATE *board) {
         // print search info
         printInfo(board, time_taken_ms, score, searchDepth);
 
-        // get best move from pv
+        // get bestmove/ponder from pv
         bestmove = board->pvarray[0][0];
+        ponder = board->pvarray[0][1];
+
+        copyPVtoTable(board, searchDepth);
 
         // end searches in timed games if mate is found
         if (isMateEval(score) && inputTime[board->turn] != DEFAULT_TIME) {
@@ -303,8 +338,35 @@ void search(BOARD_STATE *board) {
         }
     }
 
+    // printf("\n");
+    // MOVE moves[MAX_LEGAL_MOVES];
+    // int n_moves = generateMoves(board, moves);
+    // for(int i=0;i<n_moves;i++) {
+    //     printMoveText(moves[i]);
+    //     printf(" ");
+    // }
+    // printf("\n");
+    // printf("\n");
+    //
+    // sortMoves(board, moves, n_moves);
+    // for(int i=0;i<n_moves;i++) {
+    //     printMoveText(moves[i]);
+    //     printf(" ");
+    // }
+    // printf("\n");
+
+    // printBoard(board);
+    // PVENTRY pv = hashtable[board->hash % PVSIZE];
+    // while (hashtable[board->hash % PVSIZE].pos == board->hash) {
+    //     printMoveText(hashtable[board->hash % PVSIZE].move);
+    //     printf(" ");
+    //     makeMove(board, hashtable[board->hash % PVSIZE].move);
+    // }
+
     // print best move
     printf("bestmove ");
     printMoveText(bestmove);
+    // printf(" ponder ");
+    // printMoveText(ponder);
     printf("\n");
 }

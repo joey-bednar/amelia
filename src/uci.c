@@ -291,7 +291,7 @@ static void parseGo(char *string) {
 
 void startUCI() {
     BOARD_STATE board;
-    initBoard(&board);
+    init(&board);
 
     while (TRUE) {
         char input[INPUTLEN];

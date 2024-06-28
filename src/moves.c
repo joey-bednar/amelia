@@ -483,14 +483,7 @@ int generateMoves(BOARD_STATE *board, MOVE *moves) {
 
     int index = 0;
 
-    generateOnePawnMoves(board, moves, &index);
-
-    ULL pawns = board->bitboard[board->turn] & board->bitboard[bbPawn];
-
-    BITLOOP(pawns) {
-        int i64 = bitScanForward(pawns);
-        generatePseudoPawnMoves(board, moves, SQ64SQ120(i64), &index);
-    }
+    generatePseudoEnPassantMoves(board, moves, &index);
 
     ULL rooks = board->bitboard[board->turn] & board->bitboard[bbRook];
     BITLOOP(rooks) {
@@ -527,7 +520,15 @@ int generateMoves(BOARD_STATE *board, MOVE *moves) {
         generatePseudoBishopMoves(board, moves, SQ64SQ120(i64), &index);
     }
 
-    generatePseudoEnPassantMoves(board, moves, &index);
+    generateOnePawnMoves(board, moves, &index);
+
+    ULL pawns = board->bitboard[board->turn] & board->bitboard[bbPawn];
+
+    BITLOOP(pawns) {
+        int i64 = bitScanForward(pawns);
+        generatePseudoPawnMoves(board, moves, SQ64SQ120(i64), &index);
+    }
+
     generateCastleMoves(board, moves, &index);
 
     return index;
