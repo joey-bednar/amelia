@@ -37,7 +37,7 @@ static int printEval(int score, int depth) {
 static void printInfo(BOARD_STATE *board, double time, int score, int depth) {
 
     // print search info
-    long nps = (long)floor((double)(board->nodes / time));
+    long nps = (long)floor(((double)1000 * board->nodes / time));
     long time_d = (long)time;
 
     printf("info ");

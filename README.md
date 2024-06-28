@@ -17,6 +17,7 @@ You can also [spectate active games](https://lichess.org/@/AnnieEdison/tv).
 - [Alpha-beta pruning](https://en.wikipedia.org/wiki/Alpha%E2%80%93beta_pruning)
 - [Zobrist hashing](https://en.wikipedia.org/wiki/Zobrist_hashing)
 - [Quiescence search](https://en.wikipedia.org/wiki/Quiescence_search)
+- [Iterative Deepening](https://www.chessprogramming.org/Iterative_Deepening)
 - [Piece square tables](https://www.chessprogramming.org/Piece-Square_Tables)
 - [Negamax](https://en.wikipedia.org/wiki/Negamax) search
 - [De Bruijn bitscan](https://en.wikipedia.org/wiki/De_Bruijn_sequence)

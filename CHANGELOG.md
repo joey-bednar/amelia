@@ -1,5 +1,22 @@
 # Changelog
 
+
+## [v0.5](https://github.com/joey-bednar/annie/tree/v0.5) (6/27/24)
+
+Engine evaluates all captures in the position at horizon nodes and uses
+iterative deepening to display search info/manage time.
+
+- Fixed illegal move promoting to knight
+- Added search info showing depth, eval, nodes, time, nps, and pv
+- Search captures first for all plys
+- Added Quiescence search
+- Added basic logic for time management
+- Added ending search early if found mate
+
+**v0.5 vs v0.4:** 78 wins, 21 draws, 1 losses (0.885)
+
+**Elo increase:** 354.5 +/- 77.6
+
 ## [v0.4](https://github.com/joey-bednar/annie/tree/v0.4) (6/24/24)
 
 Engine avoids threefold repetitions to push for wins when better and plays
