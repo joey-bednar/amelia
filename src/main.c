@@ -34,5 +34,7 @@ int main() {
     startUCI();
     // perft(6);
 
+    free(hashtable);
+
     return 0;
 }

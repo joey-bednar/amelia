@@ -317,7 +317,7 @@ void startUCI() {
             loadFEN(input, &board, 13);
             parseMoves(input, &board);
         } else if (strncmp("go\n", input, 2) == 0) {
-            inputDepth = DEFAULTDEPTH;
+            inputDepth = MAX_DEPTH;
             inputInc[WHITE] = DEFAULT_INC;
             inputInc[BLACK] = DEFAULT_INC;
             inputTime[WHITE] = DEFAULT_TIME;

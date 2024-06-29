@@ -31,7 +31,7 @@
 
 #define PVSIZE 20000
 
-#define MAX_DEPTH 10
+#define MAX_DEPTH 20
 #define DEFAULTDEPTH 6
 #define QMAXDEPTH 100
 #define DEFAULT_TIME 1000 * 60 * 60

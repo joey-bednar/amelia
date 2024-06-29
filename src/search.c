@@ -258,23 +258,6 @@ void printMoveText(MOVE move) {
     }
 }
 
-static int getAdjustedDepth(BOARD_STATE *board) {
-
-    // adjust search depth
-    if (inputTime[board->turn] != DEFAULT_TIME) {
-
-        // adjust depth based on time remaining
-        if (inputTime[board->turn] < 1000 * 60 * 1) {
-            return 4;
-        } else if (inputTime[board->turn] < 1000 * 60 * 3) {
-            return 5;
-        }
-    }
-
-    // if no times given, run user specified depth or default
-    return inputDepth;
-}
-
 static void copyPVtoTable(BOARD_STATE *board, int depth) {
     for (int i = 0; i < depth; i++) {
         ULL hash = board->hash;
@@ -297,6 +280,18 @@ static void copyPVtoTable(BOARD_STATE *board, int depth) {
     // printBoard(board);
 }
 
+static int searchCutoff(BOARD_STATE *board, double time_ms) {
+    // bullet time control
+    if (inputTime[board->turn] < 1000 * 1 && time_ms > 250) {
+        return TRUE;
+    }
+    // other time controls
+    else if (inputTime[board->turn] != DEFAULT_TIME && time_ms > 1000 * 1) {
+        return TRUE;
+    }
+    return FALSE;
+}
+
 void search(BOARD_STATE *board) {
 
     // reset nodes searched
@@ -305,13 +300,10 @@ void search(BOARD_STATE *board) {
     // begin timer
     clock_t t = clock();
 
-    // adjust search depth for timed games
-    int timeAdjustedDepth = getAdjustedDepth(board);
-
     // iterative deepening
     MOVE bestmove;
     MOVE ponder;
-    for (searchDepth = 0; searchDepth <= timeAdjustedDepth; searchDepth++) {
+    for (searchDepth = 0; searchDepth <= inputDepth; searchDepth++) {
         int score = alphabeta(board, searchDepth, -INF, INF);
 
         // compute time taken to search nodes
@@ -332,36 +324,11 @@ void search(BOARD_STATE *board) {
             break;
         }
 
-        // cutoff length of searches
-        if (time_taken_ms > 1000 * 7) {
+        // cutoff length of searches in timed games
+        if (searchCutoff(board, time_taken_ms)) {
             break;
         }
     }
-
-    // printf("\n");
-    // MOVE moves[MAX_LEGAL_MOVES];
-    // int n_moves = generateMoves(board, moves);
-    // for(int i=0;i<n_moves;i++) {
-    //     printMoveText(moves[i]);
-    //     printf(" ");
-    // }
-    // printf("\n");
-    // printf("\n");
-    //
-    // sortMoves(board, moves, n_moves);
-    // for(int i=0;i<n_moves;i++) {
-    //     printMoveText(moves[i]);
-    //     printf(" ");
-    // }
-    // printf("\n");
-
-    // printBoard(board);
-    // PVENTRY pv = hashtable[board->hash % PVSIZE];
-    // while (hashtable[board->hash % PVSIZE].pos == board->hash) {
-    //     printMoveText(hashtable[board->hash % PVSIZE].move);
-    //     printf(" ");
-    //     makeMove(board, hashtable[board->hash % PVSIZE].move);
-    // }
 
     // print best move
     printf("bestmove ");
