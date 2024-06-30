@@ -109,7 +109,7 @@ ULL perft(int depth) {
     // ULL correct[] = {14,       191,        2812,        43238,       674624,
     //                  11030083, 178633661, 3009794393};
 
-    if (depth < sizeof(correct) / sizeof(correct[0])) {
+    if (depth < (int)(sizeof(correct) / sizeof(correct[0]))) {
         printf("/%lld nodes ", correct[depth]);
     } else {
         printf("nodes ");

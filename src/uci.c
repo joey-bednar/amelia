@@ -24,7 +24,7 @@ static void playUCIMove(BOARD_STATE *board, int start, int end, char promo) {
         piece = bbKnight;
         break;
     default:
-        break;
+        return;
     }
 
     // printf("playUCIMove %d %d\n",start,end);

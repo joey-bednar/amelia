@@ -41,13 +41,12 @@ static int isAttackedSliding(BOARD_STATE *board, int sq, const int *offsets,
 }
 
 // return TRUE if sq(120) is attacked by an enemy pawn
-static int isAttackedPawn(BOARD_STATE *board, int sq, int *offsets,
-                          int sizeoffset, int enemycolor) {
+static int isAttackedPawn(BOARD_STATE *board, int sq, int enemycolor) {
 
     ULL pawns = board->bitboard[bbPawn] & board->bitboard[enemycolor];
 
-    ULL right;
-    ULL left;
+    ULL right = 0ULL;
+    ULL left = 0ULL;
 
     switch (enemycolor) {
     case WHITE:
@@ -71,12 +70,6 @@ static int isAttackedPawn(BOARD_STATE *board, int sq, int *offsets,
 // return TRUE if sq(120) is attacked by the enemy color
 int isAttacked(BOARD_STATE *board, int sq, int enemycolor) {
 
-    int pawn[2] = {-9, 11};
-    if (enemycolor == WHITE) {
-        pawn[0] = 9;
-        pawn[1] = -11;
-    }
-
     const int rook[4] = {-10, -1, 10, 1};
     const int bishop[4] = {-11, -9, 9, 11};
 
@@ -84,7 +77,7 @@ int isAttacked(BOARD_STATE *board, int sq, int enemycolor) {
                             bbKing) ||
            isAttackedPreset(board, sq, enemycolor, KNIGHTBB(SQ120SQ64(sq)),
                             bbKnight) ||
-           isAttackedPawn(board, sq, pawn, 2, enemycolor) ||
+           isAttackedPawn(board, sq, enemycolor) ||
            isAttackedSliding(board, sq, rook, 4, enemycolor, bbRook) ||
            isAttackedSliding(board, sq, bishop, 4, enemycolor, bbBishop);
 }

@@ -21,9 +21,7 @@ static void sortMoves(BOARD_STATE *board, MOVE *moves, int n_moves) {
         return;
     }
 
-    MOVE pvmove;
     if (hashtable[board->hash % PVSIZE].pos == board->hash) {
-        pvmove = hashtable[board->hash % PVSIZE].move;
         for (int i = 0; i < n_moves; i++) {
             if (moves[i].startSquare ==
                     hashtable[board->hash % PVSIZE].move.startSquare &&
@@ -80,7 +78,7 @@ static void printInfo(BOARD_STATE *board, double time, int score, int depth) {
 
     printf("info ");
     printf("depth %d ", depth);
-    int dist = printEval(score, depth);
+    printEval(score, depth);
     printf("nodes %ld ", (long)board->nodes);
     printf("nps %ld ", nps);
     printf("time %ld ", time_d);
@@ -268,7 +266,6 @@ void printMoveText(MOVE move) {
 static void copyPVtoTable(BOARD_STATE *board, int depth) {
     for (int i = 0; i < depth; i++) {
         ULL hash = board->hash;
-        PVENTRY pv = hashtable[hash % PVSIZE];
         hashtable[hash % PVSIZE].pos = hash;
         hashtable[hash % PVSIZE].move = board->pvarray[0][i];
         // printf("stored ");
@@ -314,7 +311,6 @@ void search(BOARD_STATE *board) {
 
     // iterative deepening
     MOVE bestmove;
-    MOVE ponder;
     for (searchDepth = 0; searchDepth <= inputDepth; searchDepth++) {
 
         int score = alphabeta(board, searchDepth, -INF, INF);
@@ -328,7 +324,6 @@ void search(BOARD_STATE *board) {
 
         // get bestmove/ponder from pv
         bestmove = board->pvarray[0][0];
-        ponder = board->pvarray[0][1];
 
         copyPVtoTable(board, board->pvlength[0]);
 
@@ -346,7 +341,5 @@ void search(BOARD_STATE *board) {
     // print best move
     printf("bestmove ");
     printMoveText(bestmove);
-    // printf(" ponder ");
-    // printMoveText(ponder);
     printf("\n");
 }

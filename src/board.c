@@ -86,6 +86,9 @@ int getPieceSq120(int sq, BOARD_STATE *board) {
             return TOBLACK(i);
         }
     }
+
+    // shouldn't get here
+    return OFFBOARD;
 }
 
 void setPiece120(int piece, int sq, BOARD_STATE *board) {

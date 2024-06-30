@@ -169,6 +169,7 @@ extern void setPiece(int piece, int file, int rank, BOARD_STATE *board);
 extern void setPiece120(int piece, int sq, BOARD_STATE *board);
 
 extern int getPieceSq120(int sq, BOARD_STATE *board);
+extern int getGenericPieceSq120(int sq, BOARD_STATE *board);
 
 extern int isEmptySquare(int sq, BOARD_STATE *board);
 
