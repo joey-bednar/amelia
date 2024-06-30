@@ -1,5 +1,21 @@
 # Changelog
 
+## [v0.6](https://github.com/joey-bednar/annie/tree/v0.6) (6/30/24)
+
+Engine first searches the principal variation determined by the previous
+search. This is allows the search to prune more branches and reach higher
+depths faster.
+
+- Added PV-table to retrieve PV moves
+- Updated move ordering to prioritize PV moves first
+- Fixed threefold repetition detection
+- Added perft to UCI input
+- Adjust time management settings
+- Fixed rare illegal PV move shown
+
+**v0.6 vs v0.5:** 105 wins, 83 draws, 12 losses (0.733)
+
+**Elo increase:** 175.0 +/- 37.5
 
 ## [v0.5](https://github.com/joey-bednar/annie/tree/v0.5) (6/27/24)
 

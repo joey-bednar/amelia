@@ -18,6 +18,8 @@ You can also [spectate active games](https://lichess.org/@/AnnieEdison/tv).
 - [Zobrist hashing](https://en.wikipedia.org/wiki/Zobrist_hashing)
 - [Quiescence search](https://en.wikipedia.org/wiki/Quiescence_search)
 - [Iterative Deepening](https://www.chessprogramming.org/Iterative_Deepening)
+- [Triangular PV-table](https://www.chessprogramming.org/Triangular_PV-Table)
+- Move Ordering ([Principal variation](https://www.chessprogramming.org/Principal_Variation), all captures)
 - [Piece square tables](https://www.chessprogramming.org/Piece-Square_Tables)
 - [Negamax](https://en.wikipedia.org/wiki/Negamax) search
 - [De Bruijn bitscan](https://en.wikipedia.org/wiki/De_Bruijn_sequence)
