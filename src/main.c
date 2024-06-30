@@ -32,7 +32,6 @@ int main() {
     PVENTRY *hashtable = (PVENTRY *)calloc(PVSIZE, sizeof(PVENTRY));
 
     startUCI();
-    // perft(6);
 
     free(hashtable);
 

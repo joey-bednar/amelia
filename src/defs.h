@@ -199,12 +199,8 @@ extern void printBoard(BOARD_STATE *board);
 extern void printBoardIndex();
 extern int bitScanForward(ULL bb);
 
-// test.c
-extern void test();
-
 // perft.c
-extern ULL perft(int depth);
-extern ULL perft_rec_bulk(int depth, BOARD_STATE *board);
+extern void perft(int depth, BOARD_STATE *board);
 
 // eval.c
 extern int eval(BOARD_STATE *board);

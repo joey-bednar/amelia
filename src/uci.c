@@ -4,8 +4,21 @@
 #include <string.h>
 
 #define INPUTLEN 10000
-#define POSSTARTLEN 17
-#define POSFENLEN 13
+
+static int parseUCINumber(char *string, const char *leader,
+                          const int defaultReturn) {
+    char *depthStr = strstr(string, leader);
+    if (depthStr != NULL) {
+        int i = strlen(leader);
+        int val = 0;
+        while (depthStr[i] >= '0' && depthStr[i] <= '9') {
+            val = val * 10 + (int)(depthStr[i] - '0');
+            i++;
+        }
+        return val;
+    }
+    return defaultReturn;
+}
 
 static void playUCIMove(BOARD_STATE *board, int start, int end, char promo) {
     int piece;
@@ -24,7 +37,7 @@ static void playUCIMove(BOARD_STATE *board, int start, int end, char promo) {
         piece = bbKnight;
         break;
     default:
-        return;
+        piece = '\0';
     }
 
     // printf("playUCIMove %d %d\n",start,end);
@@ -37,10 +50,12 @@ static void playUCIMove(BOARD_STATE *board, int start, int end, char promo) {
             isLegalMove(board, moves[i])) {
             if (promo == ' ' || promo == '\n') {
                 makeMove(board, moves[i]);
+                // printMoveText(moves[i]);
                 // printf("move no promote\n");
                 return;
             } else if (GENERIC(moves[i].promotion) == piece) {
                 makeMove(board, moves[i]);
+                // printMoveText(moves[i]);
                 // printf("move promote type %d\n",moves[i].type);
                 return;
             }
@@ -225,83 +240,6 @@ int loadFEN(char *fen, BOARD_STATE *board, int startIndex) {
     return i;
 }
 
-// loads wtime/btime/depth from UCI input
-static void parseGo(char *string) {
-
-    // find and shift to "moves" occurrence in input
-    char *depthStr = strstr(string, " depth ");
-    if (depthStr != NULL) {
-        int i = 7;
-        int val = 0;
-        while (depthStr[i] >= '0' && depthStr[i] <= '9') {
-            val = val * 10 + (int)(depthStr[i] - '0');
-            i++;
-        }
-        inputDepth = val;
-    }
-
-    // find and shift to "wtime" occurrence in input
-    char *movetimeStr = strstr(string, " movetime ");
-    if (movetimeStr != NULL) {
-        int i = 10;
-        int val = 0;
-        while (movetimeStr[i] >= '0' && movetimeStr[i] <= '9') {
-            val = val * 10 + (int)(movetimeStr[i] - '0');
-            i++;
-        }
-        inputTime[WHITE] = val;
-        inputTime[BLACK] = val;
-    }
-
-    // find and shift to "wtime" occurrence in input
-    char *wtimeStr = strstr(string, " wtime ");
-    if (wtimeStr != NULL) {
-        int i = 7;
-        int val = 0;
-        while (wtimeStr[i] >= '0' && wtimeStr[i] <= '9') {
-            val = val * 10 + (int)(wtimeStr[i] - '0');
-            i++;
-        }
-        inputTime[WHITE] = val;
-    }
-
-    // find and shift to "wtime" occurrence in input
-    char *btimeStr = strstr(string, " btime ");
-    if (btimeStr != NULL) {
-        int i = 7;
-        int val = 0;
-        while (btimeStr[i] >= '0' && btimeStr[i] <= '9') {
-            val = val * 10 + (int)(btimeStr[i] - '0');
-            i++;
-        }
-        inputTime[BLACK] = val;
-    }
-
-    // find and shift to "winc" occurrence in input
-    char *wincStr = strstr(string, " winc ");
-    if (wincStr != NULL) {
-        int i = 6;
-        int val = 0;
-        while (wincStr[i] >= '0' && wincStr[i] <= '9') {
-            val = val * 10 + (int)(wincStr[i] - '0');
-            i++;
-        }
-        inputInc[WHITE] = val;
-    }
-
-    // find and shift to "binc" occurrence in input
-    char *bincStr = strstr(string, " binc ");
-    if (bincStr != NULL) {
-        int i = 6;
-        int val = 0;
-        while (bincStr[i] >= '0' && bincStr[i] <= '9') {
-            val = val * 10 + (int)(bincStr[i] - '0');
-            i++;
-        }
-        inputInc[BLACK] = val;
-    }
-}
-
 void startUCI() {
     BOARD_STATE board;
     init(&board);
@@ -329,13 +267,23 @@ void startUCI() {
             initBoard(&board);
             loadFEN(input, &board, 13);
             parseMoves(input, &board);
+        } else if (strncmp("go perft ", input, 9) == 0) {
+
+            int depth = parseUCINumber(input, " perft ", 0);
+            perft(depth, &board);
         } else if (strncmp("go\n", input, 2) == 0) {
-            inputDepth = MAX_DEPTH;
-            inputInc[WHITE] = DEFAULT_INC;
-            inputInc[BLACK] = DEFAULT_INC;
-            inputTime[WHITE] = DEFAULT_TIME;
-            inputTime[BLACK] = DEFAULT_TIME;
-            parseGo(input);
+            inputDepth = parseUCINumber(input, " depth ", MAX_DEPTH);
+            inputTime[WHITE] = parseUCINumber(input, " wtime ", DEFAULT_TIME);
+            inputTime[BLACK] = parseUCINumber(input, " btime ", DEFAULT_TIME);
+            inputInc[WHITE] = parseUCINumber(input, " winc ", DEFAULT_INC);
+            inputInc[BLACK] = parseUCINumber(input, " binc ", DEFAULT_INC);
+
+            int movetime = parseUCINumber(input, " movetime ", 0);
+            if (movetime != 0) {
+                inputTime[WHITE] = movetime;
+                inputTime[BLACK] = movetime;
+            }
+
             search(&board);
 
         } else if (strcmp("stop\n", input) == 0) {
