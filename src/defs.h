@@ -34,7 +34,7 @@
 #define MAX_DEPTH 20
 #define DEFAULTDEPTH 6
 #define QMAXDEPTH 100
-#define DEFAULT_TIME 1000 * 60 * 60
+#define DEFAULT_TIME 3600000
 #define DEFAULT_INC 0
 
 #define MATE 50000

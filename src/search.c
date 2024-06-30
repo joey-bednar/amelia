@@ -288,11 +288,16 @@ static void copyPVtoTable(BOARD_STATE *board, int depth) {
 }
 
 static int searchCutoff(BOARD_STATE *board, double time_ms) {
+
     // bullet time control
-    if (inputTime[board->turn] < 1000 * 1 && time_ms > 250) {
+    if (inputTime[board->turn] < 1000 * 60 * 1 && time_ms > 100) {
         return TRUE;
     }
-    // other time controls
+    // blitz
+    else if (inputTime[board->turn] < 1000 * 60 * 3 && time_ms > 250) {
+        return TRUE;
+    }
+    // other
     else if (inputTime[board->turn] != DEFAULT_TIME && time_ms > 1000 * 1) {
         return TRUE;
     }

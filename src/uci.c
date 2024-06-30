@@ -241,6 +241,19 @@ static void parseGo(char *string) {
     }
 
     // find and shift to "wtime" occurrence in input
+    char *movetimeStr = strstr(string, " movetime ");
+    if (movetimeStr != NULL) {
+        int i = 10;
+        int val = 0;
+        while (movetimeStr[i] >= '0' && movetimeStr[i] <= '9') {
+            val = val * 10 + (int)(movetimeStr[i] - '0');
+            i++;
+        }
+        inputTime[WHITE] = val;
+        inputTime[BLACK] = val;
+    }
+
+    // find and shift to "wtime" occurrence in input
     char *wtimeStr = strstr(string, " wtime ");
     if (wtimeStr != NULL) {
         int i = 7;
