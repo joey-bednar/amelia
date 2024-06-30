@@ -25,9 +25,12 @@ static void sortMoves(BOARD_STATE *board, MOVE *moves, int n_moves) {
     if (hashtable[board->hash % PVSIZE].pos == board->hash) {
         pvmove = hashtable[board->hash % PVSIZE].move;
         for (int i = 0; i < n_moves; i++) {
-            if (moves[i].startSquare == pvmove.startSquare &&
-                moves[i].endSquare == pvmove.endSquare &&
-                moves[i].promotion == pvmove.promotion) {
+            if (moves[i].startSquare ==
+                    hashtable[board->hash % PVSIZE].move.startSquare &&
+                moves[i].endSquare ==
+                    hashtable[board->hash % PVSIZE].move.endSquare &&
+                moves[i].promotion ==
+                    hashtable[board->hash % PVSIZE].move.promotion) {
                 MOVE temp = moves[i];
                 moves[i] = moves[0];
                 moves[0] = temp;
@@ -92,7 +95,8 @@ static void printInfo(BOARD_STATE *board, double time, int score, int depth) {
     // pv length is always less than the search depth
     // pv length is cut short when mate is within depth
     int i = 0;
-    while (i < dist && i < searchDepth) {
+    // while (i < dist && i < searchDepth) {
+    while (i < board->pvlength[0]) {
         printMoveText(board->pvarray[0][i]);
         printf(" ");
         i++;
@@ -109,6 +113,14 @@ static int quiesce(BOARD_STATE *board, int depth, int alpha, int beta) {
 
     int stand_pat = eval(board);
 
+    if (board->halfmove >= 100) {
+        return 0;
+    }
+
+    if (isThreeFold(board)) {
+        return 0;
+    }
+
     if (depth == 0) {
         return stand_pat;
     }
@@ -118,14 +130,6 @@ static int quiesce(BOARD_STATE *board, int depth, int alpha, int beta) {
     }
     if (alpha < stand_pat) {
         alpha = stand_pat;
-    }
-
-    if (board->halfmove >= 100) {
-        return 0;
-    }
-
-    if (isThreeFold(board)) {
-        return 0;
     }
 
     MOVE moves[MAX_LEGAL_MOVES];
@@ -172,13 +176,11 @@ static int quiesce(BOARD_STATE *board, int depth, int alpha, int beta) {
 static int alphabeta(BOARD_STATE *board, int depth, int alpha, int beta) {
     ++board->nodes;
 
+    board->pvlength[searchDepth - depth] = searchDepth - depth;
+
     int score = -INF;
 
     int legal = 0;
-
-    if (depth == 0) {
-        return quiesce(board, QMAXDEPTH, alpha, beta);
-    }
 
     if (board->halfmove >= 100) {
         return 0;
@@ -186,6 +188,10 @@ static int alphabeta(BOARD_STATE *board, int depth, int alpha, int beta) {
 
     if (isThreeFold(board)) {
         return 0;
+    }
+
+    if (depth == 0) {
+        return quiesce(board, QMAXDEPTH, alpha, beta);
     }
 
     MOVE moves[MAX_LEGAL_MOVES];
@@ -214,9 +220,10 @@ static int alphabeta(BOARD_STATE *board, int depth, int alpha, int beta) {
             // add moves to pvarray
             int ply = searchDepth - depth;
             board->pvarray[ply][ply] = moves[i];
-            for (int j = ply + 1; j < MAX_DEPTH; ++j) {
+            for (int j = ply + 1; j < board->pvlength[ply + 1]; ++j) {
                 board->pvarray[ply][j] = board->pvarray[ply + 1][j];
             }
+            board->pvlength[ply] = board->pvlength[ply + 1];
         }
     }
 
@@ -304,6 +311,7 @@ void search(BOARD_STATE *board) {
     MOVE bestmove;
     MOVE ponder;
     for (searchDepth = 0; searchDepth <= inputDepth; searchDepth++) {
+
         int score = alphabeta(board, searchDepth, -INF, INF);
 
         // compute time taken to search nodes
@@ -317,7 +325,7 @@ void search(BOARD_STATE *board) {
         bestmove = board->pvarray[0][0];
         ponder = board->pvarray[0][1];
 
-        copyPVtoTable(board, searchDepth);
+        copyPVtoTable(board, board->pvlength[0]);
 
         // end searches in timed games if mate is found
         if (isMateEval(score) && inputTime[board->turn] != DEFAULT_TIME) {
