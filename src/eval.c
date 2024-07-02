@@ -101,7 +101,7 @@ static int manhattanDistance(int sq1, int sq2) {
 
 static int computeMopUp(int winningcolor, BOARD_STATE *board) {
     // clang-format off
-    const int arrCenterManhattanDistance[64] = {
+    const int centerManhattanDistance[64] = {
       6, 5, 4, 3, 3, 4, 5, 6,
       5, 4, 3, 2, 2, 3, 4, 5,
       4, 3, 2, 1, 1, 2, 3, 4,
@@ -113,33 +113,17 @@ static int computeMopUp(int winningcolor, BOARD_STATE *board) {
     };
     // clang-format on
 
-    int CMD =
-        arrCenterManhattanDistance[SQ120SQ64(board->kings[!winningcolor])];
+    int CMD = centerManhattanDistance[SQ120SQ64(board->kings[!winningcolor])];
     int MD = manhattanDistance(SQ120SQ64(board->kings[WHITE]),
                                SQ120SQ64(board->kings[BLACK]));
 
     int mopUp = (int)(4.7 * CMD + 1.6 * (14 - MD));
 
-    // int myCMD =
-    // (int)(6-arrCenterManhattanDistance[SQ120SQ64(board->kings[board->turn])]);
-    // int yourCMD =
-    // (int)(6-arrCenterManhattanDistance[SQ120SQ64(board->kings[!board->turn])]);
-    // int newmopUp = myCMD - yourCMD;
-    //
-    // printf("cmd: %d, md: %d, mop: %d\n", CMD, MD, mopUp);
-    //
-    // printf("%d %d\n",SQ120SQ64(E4),SQ120SQ64(E1));
-    // printf("%d
-    // %d\n",arrCenterManhattanDistance[SQ120SQ64(E4)],arrCenterManhattanDistance[SQ120SQ64(E1)]);
-
     return mopUp;
 }
 
 static int isEndgame(int totalMaterial) {
-    if (totalMaterial < 2000) {
-        return TRUE;
-    }
-    return FALSE;
+    return (totalMaterial < 2000);
 }
 
 // returns centipawn evaluation of current position

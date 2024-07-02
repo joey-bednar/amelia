@@ -55,15 +55,19 @@ void perft(int depth, BOARD_STATE *board) {
 
     n_moves = generateMoves(board, move_list);
 
+    ULL count = 0;
+
     for (i = 0; i < n_moves; ++i) {
 
         makeMove(board, move_list[i]);
 
-        ULL count = perftrec(depth - 1, board);
-        total += count;
+        if (!isAttacked(board, board->kings[!board->turn], board->turn)) {
+            count = perftrec(depth - 1, board);
+            total += count;
 
-        printMoveText(move_list[i]);
-        printf(": %llu\n", count);
+            printMoveText(move_list[i]);
+            printf(": %llu\n", count);
+        }
 
         unmakeMove(board, move_list[i]);
     }

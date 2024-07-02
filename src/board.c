@@ -6,7 +6,7 @@ void clearPiece(BOARD_STATE *board, int piece, int sq) {
     // move piece to target square
     CLEARBIT(board->bitboard[GENERIC(piece)], SQ120SQ64(sq));
     CLEARBIT(board->bitboard[COLOR(piece)], SQ120SQ64(sq));
-    CLEARBIT(board->bitboard[bbAny], SQ120SQ64(sq));
+    // CLEARBIT(board->bitboard[bbAny], SQ120SQ64(sq));
     updateZobrist(SQ120SQ64(sq), piece, board);
 }
 
@@ -14,7 +14,7 @@ void placePiece(BOARD_STATE *board, int piece, int sq) {
 
     SETBIT(board->bitboard[GENERIC(piece)], SQ120SQ64(sq));
     SETBIT(board->bitboard[COLOR(piece)], SQ120SQ64(sq));
-    SETBIT(board->bitboard[bbAny], SQ120SQ64(sq));
+    // SETBIT(board->bitboard[bbAny], SQ120SQ64(sq));
     updateZobrist(SQ120SQ64(sq), piece, board);
 }
 
@@ -52,7 +52,7 @@ int isEmptySquare(int sq, BOARD_STATE *board) {
 
 int getGenericPieceSq120(int sq, BOARD_STATE *board) {
     int sq64 = SQ120SQ64(sq);
-    for (int i = bbPawn; i < bbAny; ++i) {
+    for (int i = bbPawn; i <= bbKing; ++i) {
         if (CHECKBIT(board->bitboard[i], sq64)) {
             return i;
         };
@@ -76,7 +76,7 @@ int getPieceSq120(int sq, BOARD_STATE *board) {
         return EMPTY;
     }
 
-    for (int i = bbPawn; i < bbAny; ++i) {
+    for (int i = bbPawn; i <= bbKing; ++i) {
 
         ULL val = CHECKBIT(board->bitboard[i], sq64);
         if (val) {
@@ -106,7 +106,7 @@ void setPiece120(int piece, int sq, BOARD_STATE *board) {
     if (piece != EMPTY) {
         SETBIT(board->bitboard[generic], sq64);
         SETBIT(board->bitboard[color], sq64);
-        SETBIT(board->bitboard[bbAny], sq64);
+        // SETBIT(board->bitboard[bbAny], sq64);
     }
 
     // update king placement
