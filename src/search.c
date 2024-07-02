@@ -119,6 +119,10 @@ static int quiesce(BOARD_STATE *board, int depth, int alpha, int beta) {
         return 0;
     }
 
+    if (isInsufficientMaterial(board)) {
+        return 0;
+    }
+
     if (depth == 0) {
         return stand_pat;
     }
@@ -185,6 +189,10 @@ static int alphabeta(BOARD_STATE *board, int depth, int alpha, int beta) {
     }
 
     if (isThreeFold(board)) {
+        return 0;
+    }
+
+    if (isInsufficientMaterial(board)) {
         return 0;
     }
 

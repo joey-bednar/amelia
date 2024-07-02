@@ -206,6 +206,7 @@ extern void perft(int depth, BOARD_STATE *board);
 extern int eval(BOARD_STATE *board);
 extern MOVE makeBestMove(int depth, BOARD_STATE *board);
 extern int isThreeFold(BOARD_STATE *board);
+extern int isInsufficientMaterial(BOARD_STATE *board);
 
 // search.c
 extern void printMoveText(MOVE move);

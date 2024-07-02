@@ -24,6 +24,38 @@ int isThreeFold(BOARD_STATE *board) {
     return FALSE;
 }
 
+int isInsufficientMaterial(BOARD_STATE *board) {
+
+    // any queen/rook/pawn can mate
+    if (board->bitboard[bbQueen] > 0ull || board->bitboard[bbRook] > 0ull ||
+        board->bitboard[bbPawn] > 0ull) {
+        return FALSE;
+    }
+
+    ULL whiteBishop = board->bitboard[bbBishop] & board->bitboard[WHITE];
+    ULL blackBishop = board->bitboard[bbBishop] & board->bitboard[BLACK];
+
+    ULL whiteKnight = board->bitboard[bbKnight] & board->bitboard[WHITE];
+    ULL blackKnight = board->bitboard[bbKnight] & board->bitboard[BLACK];
+
+    // bishop/knight can mate
+    if (whiteBishop > 0ull && whiteKnight > 0ull) {
+        return FALSE;
+    }
+    if (blackBishop > 0ull && blackKnight > 0ull) {
+        return FALSE;
+    }
+
+    // bishop pair can mate
+    int whiteBishopCount = countBits(whiteBishop);
+    int blackBishopCount = countBits(blackBishop);
+    if (whiteBishopCount > 1 || blackBishopCount > 1) {
+        return FALSE;
+    }
+
+    return TRUE;
+}
+
 // returns eval for material count
 static int computeMaterialTotals(ULL bb, int color, BOARD_STATE *board) {
     int total = 0;
