@@ -57,7 +57,7 @@ int isInsufficientMaterial(BOARD_STATE *board) {
 }
 
 // returns eval for material count
-static int computeMaterialTotals(ULL bb, int color, BOARD_STATE *board) {
+static int computeMaterialTotals(ULL bb, BOARD_STATE *board) {
     int total = 0;
 
     const int val[] = {100, 320, 330, 500, 900, 0};
@@ -166,8 +166,8 @@ int eval(BOARD_STATE *board) {
     int total = 0;
 
     // compute material eval
-    int myMaterial = computeMaterialTotals(mine, board->turn, board);
-    int yourMaterial = computeMaterialTotals(yours, !board->turn, board);
+    int myMaterial = computeMaterialTotals(mine, board);
+    int yourMaterial = computeMaterialTotals(yours, board);
     total += myMaterial - yourMaterial;
 
     // compute mop up eval for endgames

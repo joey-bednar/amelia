@@ -48,6 +48,12 @@
 #define BITLOOP(bb) for (; (bb); (bb) &= ((bb) - 1))
 
 #define PAWNOFFSET(c, i) (pawnOffset[(c)][(i)])
+#define ROOKOFFSET(c, i) (rookOffset[(i)])
+#define BISHOPOFFSET(c, i) (bishopOffset[(i)])
+
+#define ROOKOFFSETS rookOffset
+#define BISHOPOFFSETS bishopOffset
+#define PROMOTES promoteTo
 
 // clang-format off
 enum { EMPTY, wP, wN, wB, wR, wQ, wK, bP, bN, bB, bR, bQ, bK, OFFBOARD };
@@ -151,6 +157,9 @@ extern ULL zobrist_vals[12][64];
 extern ULL zobristB2M;
 
 extern int pawnOffset[2][4];
+extern const int rookOffset[4];
+extern const int bishopOffset[4];
+extern const int promoteTo[4];
 
 // hash.c
 extern void initZobrist();
@@ -203,10 +212,9 @@ extern int bitScanForward(ULL bb);
 extern void perft(int depth, BOARD_STATE *board);
 
 // eval.c
-extern int eval(BOARD_STATE *board);
-extern MOVE makeBestMove(int depth, BOARD_STATE *board);
 extern int isThreeFold(BOARD_STATE *board);
 extern int isInsufficientMaterial(BOARD_STATE *board);
+extern int eval(BOARD_STATE *board);
 
 // search.c
 extern void printMoveText(MOVE move);

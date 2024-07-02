@@ -6,7 +6,6 @@ void clearPiece(BOARD_STATE *board, int piece, int sq) {
     // move piece to target square
     CLEARBIT(board->bitboard[GENERIC(piece)], SQ120SQ64(sq));
     CLEARBIT(board->bitboard[COLOR(piece)], SQ120SQ64(sq));
-    // CLEARBIT(board->bitboard[bbAny], SQ120SQ64(sq));
     updateZobrist(SQ120SQ64(sq), piece, board);
 }
 
@@ -14,7 +13,6 @@ void placePiece(BOARD_STATE *board, int piece, int sq) {
 
     SETBIT(board->bitboard[GENERIC(piece)], SQ120SQ64(sq));
     SETBIT(board->bitboard[COLOR(piece)], SQ120SQ64(sq));
-    // SETBIT(board->bitboard[bbAny], SQ120SQ64(sq));
     updateZobrist(SQ120SQ64(sq), piece, board);
 }
 

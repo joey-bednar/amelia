@@ -3,10 +3,6 @@
 #include <stdio.h>
 #include <time.h>
 
-#define VERBOSE 0
-#define POSITION 0
-#define CUSTOMFEN "8/3k4/3P4/3K4/8/8/8/8 b - - 0 1"
-
 static ULL perftrec(int depth, BOARD_STATE *board) {
     MOVE move_list[MAX_LEGAL_MOVES];
     int n_moves, i;
@@ -43,9 +39,6 @@ static ULL perftrec(int depth, BOARD_STATE *board) {
 }
 
 void perft(int depth, BOARD_STATE *board) {
-    MOVE move_list[MAX_LEGAL_MOVES];
-    int n_moves, i;
-    unsigned int nodes = 0;
 
     ULL total = 0;
 
@@ -53,11 +46,14 @@ void perft(int depth, BOARD_STATE *board) {
         return;
     }
 
-    n_moves = generateMoves(board, move_list);
+    MOVE move_list[MAX_LEGAL_MOVES];
+    int n_moves = generateMoves(board, move_list);
+
+    clock_t t = clock();
 
     ULL count = 0;
 
-    for (i = 0; i < n_moves; ++i) {
+    for (int i = 0; i < n_moves; ++i) {
 
         makeMove(board, move_list[i]);
 
@@ -72,5 +68,8 @@ void perft(int depth, BOARD_STATE *board) {
         unmakeMove(board, move_list[i]);
     }
 
-    printf("\nNodes searched: %llu\n", total);
+    t = clock() - t;
+    double time_taken = ((double)t) / CLOCKS_PER_SEC; // in seconds
+
+    printf("\nNodes searched: %llu (%fs)\n", total, time_taken);
 }

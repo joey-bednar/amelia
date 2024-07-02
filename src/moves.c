@@ -71,10 +71,11 @@ void makeMove(BOARD_STATE *board, MOVE move) {
 
     // remove pieces from end square/en passant square
     if (move.enpassant) {
-        const int offset[2] = {S, N};
+
+        const int offset = PAWNOFFSET(!board->turn, 0);
         board->enpassant = OFFBOARD;
 
-        clearPiece(board, move.captured, move.endSquare + offset[board->turn]);
+        clearPiece(board, move.captured, move.endSquare + offset);
     } else if (move.captured != EMPTY) {
         clearPiece(board, move.captured, move.endSquare);
     }
@@ -233,7 +234,8 @@ static void addMove(BOARD_STATE *board, MOVE *moves, int start, int end,
 // same as generateSimpleMoves() but continues in offset direction until not
 // possible. Used for sliding pieces (bishop,rook,queen)
 static void generateSlidingMoves(BOARD_STATE *board, MOVE *moves, int sq,
-                                 int *index, int *offsets, int offsetssize) {
+                                 int *index, const int *offsets,
+                                 int offsetssize) {
 
     for (int i = 0; i < offsetssize; ++i) {
         int nextSq = sq + offsets[i];
@@ -327,11 +329,10 @@ static void generateCastleMoves(BOARD_STATE *board, MOVE *moves, int *index) {
 // moves list.
 static void addPromotions(BOARD_STATE *board, MOVE *moves, int start, int end,
                           int captured, int *index) {
-    int promoteTo[4] = {bbQueen, bbKnight, bbRook, bbBishop};
 
     for (int i = 0; i < 4; ++i) {
         addMove(board, moves, start, end, captured,
-                TOCOLOR(board->turn, promoteTo[i]), FALSE, FALSE, FALSE, index);
+                TOCOLOR(board->turn, PROMOTES[i]), FALSE, FALSE, FALSE, index);
     }
 }
 
@@ -390,14 +391,12 @@ static void generatePseudoPresetMoves(BOARD_STATE *board, MOVE *moves, int sq,
 
 static void generatePseudoRookMoves(BOARD_STATE *board, MOVE *moves, int sq,
                                     int *index) {
-    int offsets[4] = {-10, -1, 10, 1};
-    generateSlidingMoves(board, moves, sq, index, offsets, 4);
+    generateSlidingMoves(board, moves, sq, index, ROOKOFFSETS, 4);
 }
 
 static void generatePseudoBishopMoves(BOARD_STATE *board, MOVE *moves, int sq,
                                       int *index) {
-    int offsets[4] = {-11, -9, 9, 11};
-    generateSlidingMoves(board, moves, sq, index, offsets, 4);
+    generateSlidingMoves(board, moves, sq, index, BISHOPOFFSETS, 4);
 }
 
 static void generatePseudoEnPassantMoves(BOARD_STATE *board, MOVE *moves,
@@ -429,21 +428,19 @@ void generateOnePawnMoves(BOARD_STATE *board, MOVE *moves, int *index) {
 
     ULL pawns = board->bitboard[board->turn] & board->bitboard[bbPawn];
     ULL up;
-    int push;
+    const int push = PAWNOFFSET(!board->turn, 0);
     ULL promote;
 
     switch (board->turn) {
     case WHITE:
         // white pawns
         up = (pawns << 1);
-        push = -1;
         promote = 0x8080808080808080;
         break;
 
     case BLACK:
         // black pawns
         up = (pawns >> 1);
-        push = 1;
         promote = 0x0101010101010101;
         break;
     default:

@@ -1,5 +1,9 @@
 #include "defs.h"
 
+const int rookOffset[4] = {-10, -1, 10, 1};
+const int bishopOffset[4] = {-11, -9, 9, 11};
+const int promoteTo[4] = {bbQueen, bbKnight, bbRook, bbBishop};
+
 int pawnSqTable[];
 int knightSqTable[];
 int bishopSqTable[];
