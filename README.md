@@ -22,6 +22,7 @@ You can also [spectate active games](https://lichess.org/@/AnnieEdison/tv).
 - Move Ordering ([Principal variation](https://www.chessprogramming.org/Principal_Variation), all captures)
 - [Piece square tables](https://www.chessprogramming.org/Piece-Square_Tables)
 - [Negamax](https://en.wikipedia.org/wiki/Negamax) search
+- [Mop-up Evaluation](https://www.chessprogramming.org/Mop-up_Evaluation)
 - [De Bruijn bitscan](https://en.wikipedia.org/wiki/De_Bruijn_sequence)
 - Bulk [perft](https://www.chessprogramming.org/Perft) testing
 - [UCI](https://en.wikipedia.org/wiki/Universal_Chess_Interface) compatible

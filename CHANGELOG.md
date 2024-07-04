@@ -1,10 +1,22 @@
 # Changelog
 
+## [v0.7](https://github.com/joey-bednar/annie/tree/v0.7) (7/2/24)
+
+Engine can now deliver basic checkmates and use its king in endgames.
+
+- Added Mop-up evaluation
+- Added insufficient material draw condition to search
+- Fixed perft function
+
+**v0.7 vs v0.6:** 243 wins, 111 draws, 146 losses (0.597)
+
+**Elo increase:** 68.3 +/- 27.3
+
 ## [v0.6](https://github.com/joey-bednar/annie/tree/v0.6) (6/30/24)
 
-Engine first searches the principal variation determined by the previous
-search. This is allows the search to prune more branches and reach higher
-depths faster.
+Engine first checks the principal variation determined by the previous
+search. This allows for more branches to be pruned resulting in faster
+search.
 
 - Added PV-table to retrieve PV moves
 - Updated move ordering to prioritize PV moves first
@@ -13,9 +25,9 @@ depths faster.
 - Adjust time management settings
 - Fixed rare illegal PV move shown
 
-**v0.6 vs v0.5:** 105 wins, 83 draws, 12 losses (0.733)
+**v0.6 vs v0.5:** 266 wins, 195 draws, 39 losses (0.727)
 
-**Elo increase:** 175.0 +/- 37.5
+**Elo increase:** 170.1 +/- 24.4
 
 ## [v0.5](https://github.com/joey-bednar/annie/tree/v0.5) (6/27/24)
 
@@ -29,9 +41,9 @@ iterative deepening to display search info/manage time.
 - Added basic logic for time management
 - Added ending search early if found mate
 
-**v0.5 vs v0.4:** 78 wins, 21 draws, 1 losses (0.885)
+**v0.5 vs v0.4:** 395 wins, 98 draws, 7 losses (0.888)
 
-**Elo increase:** 354.5 +/- 77.6
+**Elo increase:** 359.7 +/- 34.7
 
 ## [v0.4](https://github.com/joey-bednar/annie/tree/v0.4) (6/24/24)
 
@@ -45,9 +57,9 @@ significantly faster.
 - Run search using alpha-beta at root node to prune more branches.
 - Increased efficiency of make/unmake functions.
 
-**v0.4 vs v0.3:** 42 wins, 35 draws, 23 losses (0.595)
+**v0.4 vs v0.3:** 216 wins, 178 draws, 106 losses (0.610)
 
-**Elo increase:** 66.8 +/- 55.8
+**Elo increase:** 77.7 +/- 24.7
 
 ## [v0.3](https://github.com/joey-bednar/annie/tree/v0.3) (5/15/24)
 
@@ -57,9 +69,9 @@ Engine can search to greater depth using alpha-beta pruning and does not resign.
 - Fixed illegal moves due to promotion/losing position. Does not play on after mate/stalemate.
 - Added eval/mate UCI info outputs.
 
-**v0.3 vs v0.2:** 57 wins, 43 draws, 0 losses (0.785)
+**v0.3 vs v0.2:** 307 wins, 189 draws, 4 losses (0.803)
 
-**Elo increase:** 225.0 +/- 50.6
+**Elo increase:** 244.1 +/- 24.3
 
 ## [v0.2](https://github.com/joey-bednar/annie/tree/v0.2) (5/13/24)
 
@@ -69,9 +81,9 @@ Engine places pieces on more normal squares.
 - Added piece square tables.
 - Makes some illegal moves when losing badly resulting in resignation.
 
-**v0.2 vs v0.1:** 25 wins, 63 draws, 12 losses (0.565)
+**v0.2 vs v0.1:** 95 wins, 360 draws, 45 losses (0.550)
 
-**Elo increase:** 45.4 +/- 41.3
+**Elo increase:** 34.9 +/- 16.0
 
 ## [v0.1](https://github.com/joey-bednar/annie/tree/v0.1) (5/13/24)
 
