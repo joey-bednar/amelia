@@ -27,8 +27,8 @@ static void sortMoves(BOARD_STATE *board, MOVE *moves, int n_moves) {
                     START120(hashtable[board->hash % PVSIZE].move.compact) &&
                 END120(moves[i].compact) ==
                     END120(hashtable[board->hash % PVSIZE].move.compact) &&
-                moves[i].promotion ==
-                    hashtable[board->hash % PVSIZE].move.promotion) {
+                PROMOTED(moves[i].compact) ==
+                    PROMOTED(hashtable[board->hash % PVSIZE].move.compact)) {
                 MOVE temp = moves[i];
                 moves[i] = moves[0];
                 moves[0] = temp;
@@ -249,13 +249,13 @@ void printMoveText(MOVE move) {
     char endRank = SQ120R(END120(move.compact)) + '1';
 
     char promote = '\0';
-    if (GENERIC(move.promotion) == bbQueen) {
+    if (PROMOTED(move.compact) == bbQueen) {
         promote = 'q';
-    } else if (GENERIC(move.promotion) == bbRook) {
+    } else if (PROMOTED(move.compact) == bbRook) {
         promote = 'r';
-    } else if (GENERIC(move.promotion) == bbBishop) {
+    } else if (PROMOTED(move.compact) == bbBishop) {
         promote = 'b';
-    } else if (GENERIC(move.promotion) == bbKnight) {
+    } else if (PROMOTED(move.compact) == bbKnight) {
         promote = 'n';
     }
 

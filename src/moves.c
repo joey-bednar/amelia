@@ -95,8 +95,9 @@ void makeMove(BOARD_STATE *board, MOVE move) {
     // move piece to target square
     clearPiece(board, piece, START120(move.compact));
 
-    if (move.promotion) {
-        placePiece(board, move.promotion, END120(move.compact));
+    if (PROMOTED(move.compact)) {
+        placePiece(board, TOCOLOR(board->turn, PROMOTED(move.compact)),
+                   END120(move.compact));
     } else {
         placePiece(board, piece, END120(move.compact));
     }
@@ -184,7 +185,7 @@ void unmakeMove(BOARD_STATE *board, MOVE move) {
     }
 
     // undo promotion
-    if (move.promotion == EMPTY) {
+    if (PROMOTED(move.compact) == EMPTY) {
         placePiece(board, piece, START120(move.compact));
     } else {
         int pawn = TOCOLOR(COLOR(piece), bbPawn);
@@ -211,7 +212,7 @@ static void addMove(BOARD_STATE *board, MOVE *moves, int start, int end,
                     int captured, int promotion, int enpassant, int twopawnmove,
                     int castle, int *index) {
     // moves[*index].captured = captured;
-    moves[*index].promotion = promotion;
+    // moves[*index].promotion = promotion;
 
     moves[*index].enpassant = enpassant;
     moves[*index].twopawnmove = twopawnmove;
@@ -221,8 +222,9 @@ static void addMove(BOARD_STATE *board, MOVE *moves, int start, int end,
 
     // 0000 0000 0000 0000 0000 0000 0111 1111 : start
     // 0000 0000 0000 0000 0001 1111 1000 0000 : end
-    // 0000 0000 0000 0001 1110 0000 0000 0000 : captured piece
-    // 0000 0000 0001 1110 1000 0000 0000 0000 : promoted piece
+    // 0000 0000 0000 0000 1110 0000 0000 0000 : captured piece
+    // 0000 0000 0000 0111 0000 0000 0000 0000 : promoted piece
+    //
     // 0000 0000 0010 0000 1000 0000 0000 0000 : en passant
     // 0000 0000 0100 0000 1000 0000 0000 0000 : two pawn move
     // 0000 0000 1000 0000 1000 0000 0000 0000 : castle
@@ -230,8 +232,8 @@ static void addMove(BOARD_STATE *board, MOVE *moves, int start, int end,
     moves[*index].compact =
         (((unsigned long)SQ120SQ64(start) << 0) & 0x0000007Ful) |
         (((unsigned long)SQ120SQ64(end) << 7) & 0x00001F80ul) |
-        (((unsigned long)GENERIC(captured) << 14) & 0x0001E000ul); // |
-    // (((unsigned long)GENERIC(promotion) << 18) & 0x001E0000ul) |
+        (((unsigned long)GENERIC(captured) << 13) & 0x0000E000ul) |
+        (((unsigned long)GENERIC(promotion) << 16) & 0x00070000ul); // |
     // (((unsigned long)enpassant << 19) & 0x00200000ul);
 
     ++(*index);

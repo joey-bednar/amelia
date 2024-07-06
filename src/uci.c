@@ -53,7 +53,7 @@ static void playUCIMove(BOARD_STATE *board, int start, int end, char promo) {
                 // printMoveText(moves[i]);
                 // printf("move no promote\n");
                 return;
-            } else if (GENERIC(moves[i].promotion) == piece) {
+            } else if (PROMOTED(moves[i].compact) == piece) {
                 makeMove(board, moves[i]);
                 // printMoveText(moves[i]);
                 // printf("move promote type %d\n",moves[i].type);
