@@ -61,6 +61,9 @@
 #define END120(move) SQ64SQ120((int)(((move) & 0x0FC0) >> 6))
 #define CAPTURED(move) (int)(((move) & 0x07000ul) >> 12)
 #define PROMOTED(move) (int)(((move) & 0x38000ul) >> 15)
+#define EPFLAG(move) (int)(((move) & 0x40000ul) >> 18)
+#define TWOPAWNFLAG(move) (int)(((move) & 0x80000ul) >> 19)
+#define CASTLEFLAG(move) (int)(((move) & 0x100000ul) >> 20)
 
 // clang-format off
 enum { EMPTY, wP, wN, wB, wR, wQ, wK, bP, bN, bB, bR, bQ, bK, OFFBOARD };
@@ -92,9 +95,9 @@ typedef struct {
     // int endSquare;
     // int captured;
     // int promotion;
-    int castle;
-    int enpassant;
-    int twopawnmove;
+    // int castle;
+    // int enpassant;
+    // int twopawnmove;
 
     int check;
 

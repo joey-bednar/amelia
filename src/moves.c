@@ -72,12 +72,12 @@ void makeMove(BOARD_STATE *board, MOVE move) {
                         getGenericPieceSq120(START120(move.compact), board));
 
     // move rooks for castling moves
-    if (move.castle) {
+    if (CASTLEFLAG(move.compact)) {
         castleRooks(board, END120(move.compact));
     }
 
     // remove pieces from end square/en passant square
-    if (move.enpassant) {
+    if (EPFLAG(move.compact)) {
 
         const int offset = PAWNOFFSET(!board->turn, 0);
         board->enpassant = OFFBOARD;
@@ -108,7 +108,7 @@ void makeMove(BOARD_STATE *board, MOVE move) {
     }
 
     // update en passant square
-    if (move.twopawnmove) {
+    if (TWOPAWNFLAG(move.compact)) {
         const int offset = PAWNOFFSET(!board->turn, 0);
         board->enpassant = END120(move.compact) + offset;
     } else {
@@ -144,7 +144,7 @@ void unmakeMove(BOARD_STATE *board, MOVE move) {
     board->playedmoves[index].hash = 0ull;
 
     // move rooks back
-    if (move.castle) {
+    if (CASTLEFLAG(move.compact)) {
         unmakeCastleMove(board, END120(move.compact));
     }
 
@@ -156,7 +156,7 @@ void unmakeMove(BOARD_STATE *board, MOVE move) {
                         getGenericPieceSq120(END120(move.compact), board));
 
     // perform en passant
-    if (move.enpassant) {
+    if (EPFLAG(move.compact)) {
         board->enpassant = END120(move.compact);
 
         const int offset = PAWNOFFSET(board->turn, 0);
@@ -214,9 +214,9 @@ static void addMove(BOARD_STATE *board, MOVE *moves, int start, int end,
     // moves[*index].captured = captured;
     // moves[*index].promotion = promotion;
 
-    moves[*index].enpassant = enpassant;
-    moves[*index].twopawnmove = twopawnmove;
-    moves[*index].castle = castle;
+    // moves[*index].enpassant = enpassant;
+    // moves[*index].twopawnmove = twopawnmove;
+    // moves[*index].castle = castle;
 
     moves[*index].check = 0;
 
@@ -224,18 +224,21 @@ static void addMove(BOARD_STATE *board, MOVE *moves, int start, int end,
     // 0000 0000 0000 0000 0000 1111 1100 0000 : end
     // 0000 0000 0000 0000 0111 0000 0000 0000 : captured piece
     // 0000 0000 0000 0011 1000 0000 0000 0000 : promoted piece
-    //
     // 0000 0000 0000 0100 0000 0000 0000 0000 : en passant
     // 0000 0000 0000 1000 0000 0000 0000 0000 : two pawn move
     // 0000 0000 0001 0000 0000 0000 0000 0000 : castle
-    // 0000 0000 0000 0000 0000 0000 0000 0000 : MVV LVA
+    //
     // 0000 0000 0000 0000 0000 0000 0000 0000 : check
+    // 0000 0000 0000 0000 0000 0000 0000 0000 : MVV LVA
 
     moves[*index].compact =
         (((unsigned long)SQ120SQ64(start) << 0) & 0x0000003Ful) |
         (((unsigned long)SQ120SQ64(end) << 6) & 0x00000FC0ul) |
         (((unsigned long)GENERIC(captured) << 12) & 0x00007000ul) |
-        (((unsigned long)GENERIC(promotion) << 15) & 0x00038000ul); // |
+        (((unsigned long)GENERIC(promotion) << 15) & 0x00038000ul) |
+        (((unsigned long)enpassant << 18) & 0x00040000ul) |
+        (((unsigned long)twopawnmove << 19) & 0x00080000ul) |
+        (((unsigned long)castle << 20) & 0x00100000ul); // |
     // (((unsigned long)enpassant << 19) & 0x00200000ul);
 
     ++(*index);
