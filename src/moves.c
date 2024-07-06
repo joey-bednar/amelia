@@ -68,56 +68,54 @@ void makeMove(BOARD_STATE *board, MOVE move) {
     board->playedmoves[index].castle = board->castle;
     board->playedmoves[index].enpassant = board->enpassant;
 
-    int piece = TOCOLOR(board->turn,
-                        getGenericPieceSq120(START120(move.compact), board));
+    int piece =
+        TOCOLOR(board->turn, getGenericPieceSq120(START120(move), board));
 
     // move rooks for castling moves
-    if (CASTLEFLAG(move.compact)) {
-        castleRooks(board, END120(move.compact));
+    if (CASTLEFLAG(move)) {
+        castleRooks(board, END120(move));
     }
 
     // remove pieces from end square/en passant square
-    if (EPFLAG(move.compact)) {
+    if (EPFLAG(move)) {
 
         const int offset = PAWNOFFSET(!board->turn, 0);
         board->enpassant = OFFBOARD;
 
-        clearPiece(board, TOCOLOR(!board->turn, CAPTURED(move.compact)),
-                   END120(move.compact) + offset);
-    } else if (TOCOLOR(!board->turn, CAPTURED(move.compact)) != EMPTY) {
-        clearPiece(board, TOCOLOR(!board->turn, CAPTURED(move.compact)),
-                   END120(move.compact));
+        clearPiece(board, TOCOLOR(!board->turn, CAPTURED(move)),
+                   END120(move) + offset);
+    } else if (TOCOLOR(!board->turn, CAPTURED(move)) != EMPTY) {
+        clearPiece(board, TOCOLOR(!board->turn, CAPTURED(move)), END120(move));
     }
 
     // update castling permissions
     updateCastling(board, move);
 
     // move piece to target square
-    clearPiece(board, piece, START120(move.compact));
+    clearPiece(board, piece, START120(move));
 
-    if (PROMOTED(move.compact)) {
-        placePiece(board, TOCOLOR(board->turn, PROMOTED(move.compact)),
-                   END120(move.compact));
+    if (PROMOTED(move)) {
+        placePiece(board, TOCOLOR(board->turn, PROMOTED(move)), END120(move));
     } else {
-        placePiece(board, piece, END120(move.compact));
+        placePiece(board, piece, END120(move));
     }
 
     // update king position
-    if (CHECKBIT(board->bitboard[bbKing], SQ120SQ64(END120(move.compact)))) {
-        board->kings[board->turn] = END120(move.compact);
+    if (CHECKBIT(board->bitboard[bbKing], SQ120SQ64(END120(move)))) {
+        board->kings[board->turn] = END120(move);
     }
 
     // update en passant square
-    if (TWOPAWNFLAG(move.compact)) {
+    if (TWOPAWNFLAG(move)) {
         const int offset = PAWNOFFSET(!board->turn, 0);
-        board->enpassant = END120(move.compact) + offset;
+        board->enpassant = END120(move) + offset;
     } else {
         board->enpassant = OFFBOARD;
     }
 
     // update half move
     if (GENERIC(piece) == bbPawn ||
-        TOCOLOR(!board->turn, CAPTURED(move.compact)) != EMPTY) {
+        TOCOLOR(!board->turn, CAPTURED(move)) != EMPTY) {
         board->halfmove = 0;
     } else {
         ++board->halfmove;
@@ -144,30 +142,30 @@ void unmakeMove(BOARD_STATE *board, MOVE move) {
     board->playedmoves[index].hash = 0ull;
 
     // move rooks back
-    if (CASTLEFLAG(move.compact)) {
-        unmakeCastleMove(board, END120(move.compact));
+    if (CASTLEFLAG(move)) {
+        unmakeCastleMove(board, END120(move));
     }
 
     // reset castling abilities
     board->castle = board->playedmoves[index].castle;
     board->halfmove = board->playedmoves[index].halfmove;
 
-    int piece = TOCOLOR(!board->turn,
-                        getGenericPieceSq120(END120(move.compact), board));
+    int piece =
+        TOCOLOR(!board->turn, getGenericPieceSq120(END120(move), board));
 
     // perform en passant
-    if (EPFLAG(move.compact)) {
-        board->enpassant = END120(move.compact);
+    if (EPFLAG(move)) {
+        board->enpassant = END120(move);
 
         const int offset = PAWNOFFSET(board->turn, 0);
 
         // put back captured piece
-        placePiece(board, TOCOLOR(board->turn, CAPTURED(move.compact)),
-                   END120(move.compact) + offset);
+        placePiece(board, TOCOLOR(board->turn, CAPTURED(move)),
+                   END120(move) + offset);
 
         // move pawn back to original square
-        clearPiece(board, piece, END120(move.compact));
-        placePiece(board, piece, START120(move.compact));
+        clearPiece(board, piece, END120(move));
+        placePiece(board, piece, START120(move));
 
         if (board->turn == WHITE) {
             --board->fullmove;
@@ -178,23 +176,22 @@ void unmakeMove(BOARD_STATE *board, MOVE move) {
     }
 
     // remove piece from end square and replace with captured piece if possible
-    clearPiece(board, piece, END120(move.compact));
-    if (TOCOLOR(board->turn, CAPTURED(move.compact)) != EMPTY) {
-        placePiece(board, TOCOLOR(board->turn, CAPTURED(move.compact)),
-                   END120(move.compact));
+    clearPiece(board, piece, END120(move));
+    if (TOCOLOR(board->turn, CAPTURED(move)) != EMPTY) {
+        placePiece(board, TOCOLOR(board->turn, CAPTURED(move)), END120(move));
     }
 
     // undo promotion
-    if (PROMOTED(move.compact) == EMPTY) {
-        placePiece(board, piece, START120(move.compact));
+    if (PROMOTED(move) == EMPTY) {
+        placePiece(board, piece, START120(move));
     } else {
         int pawn = TOCOLOR(COLOR(piece), bbPawn);
-        placePiece(board, pawn, START120(move.compact));
+        placePiece(board, pawn, START120(move));
     }
 
     // update king position
     if (GENERIC(piece) == bbKing) {
-        board->kings[!board->turn] = START120(move.compact);
+        board->kings[!board->turn] = START120(move);
     }
 
     board->enpassant = board->playedmoves[index].enpassant;
@@ -211,14 +208,6 @@ void unmakeMove(BOARD_STATE *board, MOVE move) {
 static void addMove(BOARD_STATE *board, MOVE *moves, int start, int end,
                     int captured, int promotion, int enpassant, int twopawnmove,
                     int castle, int *index) {
-    // moves[*index].captured = captured;
-    // moves[*index].promotion = promotion;
-
-    // moves[*index].enpassant = enpassant;
-    // moves[*index].twopawnmove = twopawnmove;
-    // moves[*index].castle = castle;
-
-    // moves[*index].check = 0;
 
     // 0000 0000 0000 0000 0000 0000 0011 1111 : start
     // 0000 0000 0000 0000 0000 1111 1100 0000 : end
@@ -231,15 +220,13 @@ static void addMove(BOARD_STATE *board, MOVE *moves, int start, int end,
     // 0000 0000 0000 0000 0000 0000 0000 0000 : check
     // 0000 0000 0000 0000 0000 0000 0000 0000 : MVV LVA
 
-    moves[*index].compact =
-        (((unsigned long)SQ120SQ64(start) << 0) & 0x0000003Ful) |
-        (((unsigned long)SQ120SQ64(end) << 6) & 0x00000FC0ul) |
-        (((unsigned long)GENERIC(captured) << 12) & 0x00007000ul) |
-        (((unsigned long)GENERIC(promotion) << 15) & 0x00038000ul) |
-        (((unsigned long)enpassant << 18) & 0x00040000ul) |
-        (((unsigned long)twopawnmove << 19) & 0x00080000ul) |
-        (((unsigned long)castle << 20) & 0x00100000ul); // |
-    // (((unsigned long)enpassant << 19) & 0x00200000ul);
+    moves[*index] = (((unsigned long)SQ120SQ64(start) << 0) & 0x0000003Ful) |
+                    (((unsigned long)SQ120SQ64(end) << 6) & 0x00000FC0ul) |
+                    (((unsigned long)GENERIC(captured) << 12) & 0x00007000ul) |
+                    (((unsigned long)GENERIC(promotion) << 15) & 0x00038000ul) |
+                    (((unsigned long)enpassant << 18) & 0x00040000ul) |
+                    (((unsigned long)twopawnmove << 19) & 0x00080000ul) |
+                    (((unsigned long)castle << 20) & 0x00100000ul); // |
 
     ++(*index);
 }

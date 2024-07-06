@@ -87,21 +87,7 @@ enum {NW=-9, N=1, NE=11, E=10, SE=9, S=-1, SW=-11, W=-10};
 enum { NO_CASTLE, WK_CASTLE, WQ_CASTLE, BK_CASTLE, BQ_CASTLE };
 typedef unsigned long long ULL;
 
-typedef struct {
-
-    unsigned long compact;
-
-    // int startSquare;
-    // int endSquare;
-    // int captured;
-    // int promotion;
-    // int castle;
-    // int enpassant;
-    // int twopawnmove;
-
-    int check;
-
-} MOVE;
+typedef unsigned long MOVE;
 
 typedef struct {
     ULL hash;
@@ -233,7 +219,7 @@ extern int eval(BOARD_STATE *board);
 
 // search.c
 extern void printMoveText(MOVE move);
-extern int compareMoves(const void *a, const void *b);
+extern int compareMoves(const MOVE a, const MOVE b);
 extern void search(BOARD_STATE *board);
 
 // uci.c

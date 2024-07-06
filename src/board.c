@@ -18,23 +18,23 @@ void placePiece(BOARD_STATE *board, int piece, int sq) {
 
 void updateCastling(BOARD_STATE *board, MOVE move) {
 
-    int piece = getGenericPieceSq120(START120(move.compact), board);
+    int piece = getGenericPieceSq120(START120(move), board);
 
     if (piece == bbRook) {
-        if (START120(move.compact) == H1) {
+        if (START120(move) == H1) {
             CLEARBIT(board->castle, WK_CASTLE);
-        } else if (START120(move.compact) == A1) {
+        } else if (START120(move) == A1) {
             CLEARBIT(board->castle, WQ_CASTLE);
-        } else if (START120(move.compact) == H8) {
+        } else if (START120(move) == H8) {
             CLEARBIT(board->castle, BK_CASTLE);
-        } else if (START120(move.compact) == A8) {
+        } else if (START120(move) == A8) {
             CLEARBIT(board->castle, BQ_CASTLE);
         }
     } else if (piece == bbKing) {
-        if (START120(move.compact) == E1) {
+        if (START120(move) == E1) {
             CLEARBIT(board->castle, WK_CASTLE);
             CLEARBIT(board->castle, WQ_CASTLE);
-        } else if (END120(move.compact) == E8) {
+        } else if (END120(move) == E8) {
             CLEARBIT(board->castle, BK_CASTLE);
             CLEARBIT(board->castle, BQ_CASTLE);
         }

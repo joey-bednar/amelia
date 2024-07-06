@@ -46,14 +46,14 @@ static void playUCIMove(BOARD_STATE *board, int start, int end, char promo) {
     int n_moves = generateMoves(board, moves);
 
     for (int i = 0; i < n_moves; ++i) {
-        if (START120(moves[i].compact) == start &&
-            END120(moves[i].compact) == end && isLegalMove(board, moves[i])) {
+        if (START120(moves[i]) == start && END120(moves[i]) == end &&
+            isLegalMove(board, moves[i])) {
             if (promo == ' ' || promo == '\n') {
                 makeMove(board, moves[i]);
                 // printMoveText(moves[i]);
                 // printf("move no promote\n");
                 return;
-            } else if (PROMOTED(moves[i].compact) == piece) {
+            } else if (PROMOTED(moves[i]) == piece) {
                 makeMove(board, moves[i]);
                 // printMoveText(moves[i]);
                 // printf("move promote type %d\n",moves[i].type);

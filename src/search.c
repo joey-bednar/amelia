@@ -7,12 +7,8 @@
 
 int searchDepth;
 
-int compareMoves(const void *a, const void *b) {
-    MOVE *moveA = (MOVE *)a;
-    MOVE *moveB = (MOVE *)b;
-
-    // return (moveB->check - moveA->check) +
-    return (CAPTURED(moveB->compact) - CAPTURED(moveA->compact));
+int compareMoves(const MOVE moveA, const MOVE moveB) {
+    return (CAPTURED(moveB) - CAPTURED(moveA));
 }
 
 static void sortMoves(BOARD_STATE *board, MOVE *moves, int n_moves) {
@@ -23,12 +19,12 @@ static void sortMoves(BOARD_STATE *board, MOVE *moves, int n_moves) {
 
     if (hashtable[board->hash % PVSIZE].pos == board->hash) {
         for (int i = 0; i < n_moves; i++) {
-            if (START120(moves[i].compact) ==
-                    START120(hashtable[board->hash % PVSIZE].move.compact) &&
-                END120(moves[i].compact) ==
-                    END120(hashtable[board->hash % PVSIZE].move.compact) &&
-                PROMOTED(moves[i].compact) ==
-                    PROMOTED(hashtable[board->hash % PVSIZE].move.compact)) {
+            if (START120(moves[i]) ==
+                    START120(hashtable[board->hash % PVSIZE].move) &&
+                END120(moves[i]) ==
+                    END120(hashtable[board->hash % PVSIZE].move) &&
+                PROMOTED(moves[i]) ==
+                    PROMOTED(hashtable[board->hash % PVSIZE].move)) {
                 MOVE temp = moves[i];
                 moves[i] = moves[0];
                 moves[0] = temp;
@@ -142,7 +138,7 @@ static int quiesce(BOARD_STATE *board, int depth, int alpha, int beta) {
         if (!isAttacked(board, board->kings[!board->turn], board->turn)) {
             ++legal;
 
-            if (CAPTURED(moves[i].compact) != EMPTY) {
+            if (CAPTURED(moves[i]) != EMPTY) {
                 score = -quiesce(board, depth - 1, -beta, -alpha);
             }
         }
@@ -243,19 +239,19 @@ static int alphabeta(BOARD_STATE *board, int depth, int alpha, int beta) {
 
 void printMoveText(MOVE move) {
 
-    char startFile = SQ120F(START120(move.compact)) + 'a';
-    char startRank = SQ120R(START120(move.compact)) + '1';
-    char endFile = SQ120F(END120(move.compact)) + 'a';
-    char endRank = SQ120R(END120(move.compact)) + '1';
+    char startFile = SQ120F(START120(move)) + 'a';
+    char startRank = SQ120R(START120(move)) + '1';
+    char endFile = SQ120F(END120(move)) + 'a';
+    char endRank = SQ120R(END120(move)) + '1';
 
     char promote = '\0';
-    if (PROMOTED(move.compact) == bbQueen) {
+    if (PROMOTED(move) == bbQueen) {
         promote = 'q';
-    } else if (PROMOTED(move.compact) == bbRook) {
+    } else if (PROMOTED(move) == bbRook) {
         promote = 'r';
-    } else if (PROMOTED(move.compact) == bbBishop) {
+    } else if (PROMOTED(move) == bbBishop) {
         promote = 'b';
-    } else if (PROMOTED(move.compact) == bbKnight) {
+    } else if (PROMOTED(move) == bbKnight) {
         promote = 'n';
     }
 
