@@ -11,8 +11,8 @@ int compareMoves(const void *a, const void *b) {
     MOVE *moveA = (MOVE *)a;
     MOVE *moveB = (MOVE *)b;
 
-    return (moveB->check - moveA->check) +
-           (CAPTURED(moveB->compact) - CAPTURED(moveA->compact));
+    // return (moveB->check - moveA->check) +
+    return (CAPTURED(moveB->compact) - CAPTURED(moveA->compact));
 }
 
 static void sortMoves(BOARD_STATE *board, MOVE *moves, int n_moves) {

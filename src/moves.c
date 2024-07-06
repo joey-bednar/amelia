@@ -218,7 +218,7 @@ static void addMove(BOARD_STATE *board, MOVE *moves, int start, int end,
     // moves[*index].twopawnmove = twopawnmove;
     // moves[*index].castle = castle;
 
-    moves[*index].check = 0;
+    // moves[*index].check = 0;
 
     // 0000 0000 0000 0000 0000 0000 0011 1111 : start
     // 0000 0000 0000 0000 0000 1111 1100 0000 : end
