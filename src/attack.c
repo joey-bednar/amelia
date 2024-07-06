@@ -17,8 +17,8 @@ static int isAttackedPreset(BOARD_STATE *board, int sq, int enemycolor,
 // return TRUE if sq(120) is attacked by an enemy piece on the file/rank/diag
 // given by the offset directions
 static int isAttackedSliding(BOARD_STATE *board, int sq, const int *offsets,
-                             const int sizeoffset, int enemycolor, int RB) {
-    for (int i = 0; i < sizeoffset; ++i) {
+                             int enemycolor, int RB) {
+    for (int i = 0; i < 4; ++i) {
         int nextSq = sq + offsets[i];
 
         while (ONBOARD(nextSq) &&
@@ -70,16 +70,13 @@ static int isAttackedPawn(BOARD_STATE *board, int sq, int enemycolor) {
 // return TRUE if sq(120) is attacked by the enemy color
 int isAttacked(BOARD_STATE *board, int sq, int enemycolor) {
 
-    const int rook[4] = {-10, -1, 10, 1};
-    const int bishop[4] = {-11, -9, 9, 11};
-
     return isAttackedPreset(board, sq, enemycolor, KINGBB(SQ120SQ64(sq)),
                             bbKing) ||
            isAttackedPreset(board, sq, enemycolor, KNIGHTBB(SQ120SQ64(sq)),
                             bbKnight) ||
            isAttackedPawn(board, sq, enemycolor) ||
-           isAttackedSliding(board, sq, rook, 4, enemycolor, bbRook) ||
-           isAttackedSliding(board, sq, bishop, 4, enemycolor, bbBishop);
+           isAttackedSliding(board, sq, ROOKOFFSETS, enemycolor, bbRook) ||
+           isAttackedSliding(board, sq, BISHOPOFFSETS, enemycolor, bbBishop);
 }
 
 // return TRUE if move is legal

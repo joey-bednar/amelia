@@ -48,8 +48,8 @@
 #define BITLOOP(bb) for (; (bb); (bb) &= ((bb) - 1))
 
 #define PAWNOFFSET(c, i) (pawnOffset[(c)][(i)])
-#define ROOKOFFSET(c, i) (rookOffset[(i)])
-#define BISHOPOFFSET(c, i) (bishopOffset[(i)])
+#define ROOKOFFSET(i) (rookOffset[(i)])
+#define BISHOPOFFSET(i) (bishopOffset[(i)])
 
 #define ROOKOFFSETS rookOffset
 #define BISHOPOFFSETS bishopOffset

@@ -90,14 +90,9 @@ static void printInfo(BOARD_STATE *board, double time, int score, int depth) {
 
     printf("pv ");
 
-    // pv length is always less than the search depth
-    // pv length is cut short when mate is within depth
-    int i = 0;
-    // while (i < dist && i < searchDepth) {
-    while (i < board->pvlength[0]) {
+    for (int i = 0; i < board->pvlength[0]; ++i) {
         printMoveText(board->pvarray[0][i]);
         printf(" ");
-        i++;
     }
     printf("\n");
 }
