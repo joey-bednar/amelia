@@ -86,13 +86,16 @@ typedef struct {
     int enpassant;
     int twopawnmove;
 
-    int priorep;
-    int priorhalf;
-    int priorcastle;
-
     int check;
 
 } MOVE;
+
+typedef struct {
+    ULL hash;
+    int castle;
+    int enpassant;
+    int halfmove;
+} POSRECORD;
 
 typedef struct {
     ULL pos;
@@ -113,7 +116,7 @@ typedef struct {
     MOVE pvarray[MAX_DEPTH][MAX_DEPTH];
     int pvlength[MAX_DEPTH];
 
-    ULL playedmoves[MAX_GAME_LENGTH * 2];
+    POSRECORD playedmoves[MAX_GAME_LENGTH * 2];
 
     int nodes;
 
@@ -126,7 +129,6 @@ typedef struct {
     int enpassant;
 } BOARD_STATE;
 
-// extern PVENTRY *hashtable;
 extern PVENTRY hashtable[PVSIZE];
 
 extern int inputDepth;

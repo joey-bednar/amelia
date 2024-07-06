@@ -35,7 +35,7 @@ void loadZobrist(BOARD_STATE *board) {
     }
 
     for (int i = 0; i < 2 * MAX_GAME_LENGTH; ++i) {
-        board->playedmoves[i] = 0;
+        board->playedmoves[i].hash = 0ull;
     }
 }
 

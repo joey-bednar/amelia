@@ -61,6 +61,13 @@ static void castleRooks(BOARD_STATE *board, int end) {
 
 // play a move on the board
 void makeMove(BOARD_STATE *board, MOVE move) {
+
+    // add info to played moves
+    int index = 2 * (board->fullmove - 1) + board->turn;
+    board->playedmoves[index].halfmove = board->halfmove;
+    board->playedmoves[index].castle = board->castle;
+    board->playedmoves[index].enpassant = board->enpassant;
+
     int piece =
         TOCOLOR(board->turn, getGenericPieceSq120(move.startSquare, board));
 
@@ -113,7 +120,7 @@ void makeMove(BOARD_STATE *board, MOVE move) {
     }
 
     // add hash to played moves
-    board->playedmoves[2 * (board->fullmove - 1) + board->turn] = board->hash;
+    board->playedmoves[index].hash = board->hash;
 
     // update full move
     if (board->turn == BLACK) {
@@ -128,7 +135,9 @@ void makeMove(BOARD_STATE *board, MOVE move) {
 // undo a move on the board
 void unmakeMove(BOARD_STATE *board, MOVE move) {
 
-    board->playedmoves[2 * (board->fullmove - 1) + board->turn - 1] = 0;
+    // clear hash
+    int index = 2 * (board->fullmove - 1) + board->turn - 1;
+    board->playedmoves[index].hash = 0ull;
 
     // move rooks back
     if (move.castle) {
@@ -136,8 +145,8 @@ void unmakeMove(BOARD_STATE *board, MOVE move) {
     }
 
     // reset castling abilities
-    board->castle = move.priorcastle;
-    board->halfmove = move.priorhalf;
+    board->castle = board->playedmoves[index].castle;
+    board->halfmove = board->playedmoves[index].halfmove;
 
     int piece =
         TOCOLOR(!board->turn, getGenericPieceSq120(move.endSquare, board));
@@ -182,7 +191,7 @@ void unmakeMove(BOARD_STATE *board, MOVE move) {
         board->kings[!board->turn] = move.startSquare;
     }
 
-    board->enpassant = move.priorep;
+    board->enpassant = board->playedmoves[index].enpassant;
 
     if (board->turn == WHITE) {
         --board->fullmove;
@@ -201,9 +210,6 @@ static void addMove(BOARD_STATE *board, MOVE *moves, int start, int end,
     moves[*index].endSquare = end;
     moves[*index].captured = captured;
     moves[*index].promotion = promotion;
-    moves[*index].priorep = board->enpassant;
-    moves[*index].priorcastle = board->castle;
-    moves[*index].priorhalf = board->halfmove;
 
     moves[*index].enpassant = enpassant;
     moves[*index].twopawnmove = twopawnmove;
@@ -212,23 +218,6 @@ static void addMove(BOARD_STATE *board, MOVE *moves, int start, int end,
     moves[*index].check = 0;
 
     ++(*index);
-
-    // flags:
-    // castle
-    // capture
-    // enpassant
-    // twopawnmove
-    // promotion
-    // check
-
-    // types
-    // simple
-    // capture simple
-    // en passant capture
-    // two pawn move
-    // simple promotion
-    // capture promotion
-    // castle 4 types
 }
 
 // same as generateSimpleMoves() but continues in offset direction until not

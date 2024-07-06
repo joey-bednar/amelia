@@ -11,7 +11,7 @@ int isThreeFold(BOARD_STATE *board) {
         int start = 0; // end - board->halfmove;
         int count = 0;
         for (int i = start; i <= end; ++i) {
-            if ((board->hash ^ zobristB2M) == board->playedmoves[i]) {
+            if ((board->hash ^ zobristB2M) == board->playedmoves[i].hash) {
                 ++count;
             }
         }
