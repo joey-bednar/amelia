@@ -12,7 +12,7 @@ int compareMoves(const void *a, const void *b) {
     MOVE *moveB = (MOVE *)b;
 
     return (moveB->check - moveA->check) +
-           (GENERIC(moveB->captured) - GENERIC(moveA->captured));
+           (CAPTURED(moveB->compact) - CAPTURED(moveA->compact));
 }
 
 static void sortMoves(BOARD_STATE *board, MOVE *moves, int n_moves) {
@@ -25,7 +25,7 @@ static void sortMoves(BOARD_STATE *board, MOVE *moves, int n_moves) {
         for (int i = 0; i < n_moves; i++) {
             if (START120(moves[i].compact) ==
                     START120(hashtable[board->hash % PVSIZE].move.compact) &&
-                moves[i].endSquare ==
+                END120(moves[i].compact) ==
                     END120(hashtable[board->hash % PVSIZE].move.compact) &&
                 moves[i].promotion ==
                     hashtable[board->hash % PVSIZE].move.promotion) {
@@ -142,7 +142,7 @@ static int quiesce(BOARD_STATE *board, int depth, int alpha, int beta) {
         if (!isAttacked(board, board->kings[!board->turn], board->turn)) {
             ++legal;
 
-            if (moves[i].captured != EMPTY) {
+            if (CAPTURED(moves[i].compact) != EMPTY) {
                 score = -quiesce(board, depth - 1, -beta, -alpha);
             }
         }
@@ -245,8 +245,8 @@ void printMoveText(MOVE move) {
 
     char startFile = SQ120F(START120(move.compact)) + 'a';
     char startRank = SQ120R(START120(move.compact)) + '1';
-    char endFile = SQ120F(move.endSquare) + 'a';
-    char endRank = SQ120R(move.endSquare) + '1';
+    char endFile = SQ120F(END120(move.compact)) + 'a';
+    char endRank = SQ120R(END120(move.compact)) + '1';
 
     char promote = '\0';
     if (GENERIC(move.promotion) == bbQueen) {

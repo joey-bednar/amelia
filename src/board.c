@@ -34,7 +34,7 @@ void updateCastling(BOARD_STATE *board, MOVE move) {
         if (START120(move.compact) == E1) {
             CLEARBIT(board->castle, WK_CASTLE);
             CLEARBIT(board->castle, WQ_CASTLE);
-        } else if (move.endSquare == E8) {
+        } else if (END120(move.compact) == E8) {
             CLEARBIT(board->castle, BK_CASTLE);
             CLEARBIT(board->castle, BQ_CASTLE);
         }

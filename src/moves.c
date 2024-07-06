@@ -210,10 +210,7 @@ void unmakeMove(BOARD_STATE *board, MOVE move) {
 static void addMove(BOARD_STATE *board, MOVE *moves, int start, int end,
                     int captured, int promotion, int enpassant, int twopawnmove,
                     int castle, int *index) {
-    // moves[*index].piece = piece;
-    // moves[*index].startSquare = start;
-    moves[*index].endSquare = end;
-    moves[*index].captured = captured;
+    // moves[*index].captured = captured;
     moves[*index].promotion = promotion;
 
     moves[*index].enpassant = enpassant;
