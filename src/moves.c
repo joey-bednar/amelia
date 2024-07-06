@@ -220,20 +220,22 @@ static void addMove(BOARD_STATE *board, MOVE *moves, int start, int end,
 
     moves[*index].check = 0;
 
-    // 0000 0000 0000 0000 0000 0000 0111 1111 : start
-    // 0000 0000 0000 0000 0001 1111 1000 0000 : end
-    // 0000 0000 0000 0000 1110 0000 0000 0000 : captured piece
-    // 0000 0000 0000 0111 0000 0000 0000 0000 : promoted piece
+    // 0000 0000 0000 0000 0000 0000 0011 1111 : start
+    // 0000 0000 0000 0000 0000 1111 1100 0000 : end
+    // 0000 0000 0000 0000 0111 0000 0000 0000 : captured piece
+    // 0000 0000 0000 0011 1000 0000 0000 0000 : promoted piece
     //
-    // 0000 0000 0010 0000 1000 0000 0000 0000 : en passant
-    // 0000 0000 0100 0000 1000 0000 0000 0000 : two pawn move
-    // 0000 0000 1000 0000 1000 0000 0000 0000 : castle
+    // 0000 0000 0000 0100 0000 0000 0000 0000 : en passant
+    // 0000 0000 0000 1000 0000 0000 0000 0000 : two pawn move
+    // 0000 0000 0001 0000 0000 0000 0000 0000 : castle
+    // 0000 0000 0000 0000 0000 0000 0000 0000 : MVV LVA
+    // 0000 0000 0000 0000 0000 0000 0000 0000 : check
 
     moves[*index].compact =
-        (((unsigned long)SQ120SQ64(start) << 0) & 0x0000007Ful) |
-        (((unsigned long)SQ120SQ64(end) << 7) & 0x00001F80ul) |
-        (((unsigned long)GENERIC(captured) << 13) & 0x0000E000ul) |
-        (((unsigned long)GENERIC(promotion) << 16) & 0x00070000ul); // |
+        (((unsigned long)SQ120SQ64(start) << 0) & 0x0000003Ful) |
+        (((unsigned long)SQ120SQ64(end) << 6) & 0x00000FC0ul) |
+        (((unsigned long)GENERIC(captured) << 12) & 0x00007000ul) |
+        (((unsigned long)GENERIC(promotion) << 15) & 0x00038000ul); // |
     // (((unsigned long)enpassant << 19) & 0x00200000ul);
 
     ++(*index);
