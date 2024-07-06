@@ -23,10 +23,10 @@ static void sortMoves(BOARD_STATE *board, MOVE *moves, int n_moves) {
 
     if (hashtable[board->hash % PVSIZE].pos == board->hash) {
         for (int i = 0; i < n_moves; i++) {
-            if (moves[i].startSquare ==
-                    hashtable[board->hash % PVSIZE].move.startSquare &&
+            if (START120(moves[i].compact) ==
+                    START120(hashtable[board->hash % PVSIZE].move.compact) &&
                 moves[i].endSquare ==
-                    hashtable[board->hash % PVSIZE].move.endSquare &&
+                    END120(hashtable[board->hash % PVSIZE].move.compact) &&
                 moves[i].promotion ==
                     hashtable[board->hash % PVSIZE].move.promotion) {
                 MOVE temp = moves[i];
@@ -243,8 +243,8 @@ static int alphabeta(BOARD_STATE *board, int depth, int alpha, int beta) {
 
 void printMoveText(MOVE move) {
 
-    char startFile = SQ120F(move.startSquare) + 'a';
-    char startRank = SQ120R(move.startSquare) + '1';
+    char startFile = SQ120F(START120(move.compact)) + 'a';
+    char startRank = SQ120R(START120(move.compact)) + '1';
     char endFile = SQ120F(move.endSquare) + 'a';
     char endRank = SQ120R(move.endSquare) + '1';
 
