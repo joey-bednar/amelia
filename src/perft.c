@@ -29,7 +29,8 @@ static ULL perftrec(int depth, BOARD_STATE *board) {
 
         makeMove(board, move_list[i]);
 
-        if (!isAttacked(board, board->kings[!board->turn], board->turn)) {
+        if (!isAttacked(board, SQ64SQ120(getKingSq(board, !board->turn)),
+                        board->turn)) {
             nodes += perftrec(depth - 1, board);
         }
 
@@ -57,7 +58,8 @@ void perft(int depth, BOARD_STATE *board) {
 
         makeMove(board, move_list[i]);
 
-        if (!isAttacked(board, board->kings[!board->turn], board->turn)) {
+        if (!isAttacked(board, SQ64SQ120(getKingSq(board, !board->turn)),
+                        board->turn)) {
             count = perftrec(depth - 1, board);
             total += count;
 

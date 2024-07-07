@@ -4,9 +4,6 @@
 
 // clears the chess board of any pieces
 void clearBoard(BOARD_STATE *board) {
-    // remove kings
-    board->kings[WHITE] = OFFBOARD;
-    board->kings[BLACK] = OFFBOARD;
 
     for (int i = 0; i < bbLength; ++i) {
         board->bitboard[i] = 0ull;
@@ -66,6 +63,12 @@ void placePiece(BOARD_STATE *board, int piece, int sq) {
     SETBIT(board->bitboard[GENERIC(piece)], SQ120SQ64(sq));
     SETBIT(board->bitboard[COLOR(piece)], SQ120SQ64(sq));
     updateZobrist(SQ120SQ64(sq), piece, board);
+}
+
+int getKingSq(BOARD_STATE *board, int color) {
+    ULL kings = board->bitboard[color] & board->bitboard[bbKing];
+    int sq = bitScanForward(kings);
+    return sq;
 }
 
 void updateCastling(BOARD_STATE *board, MOVE move) {
@@ -156,13 +159,6 @@ void setPiece120(int piece, int sq, BOARD_STATE *board) {
     if (piece != EMPTY) {
         SETBIT(board->bitboard[generic], sq64);
         SETBIT(board->bitboard[color], sq64);
-    }
-
-    // update king placement
-    if (piece == wK) {
-        board->kings[WHITE] = sq;
-    } else if (piece == bK) {
-        board->kings[BLACK] = sq;
     }
 }
 

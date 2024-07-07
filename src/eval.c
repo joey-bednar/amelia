@@ -145,9 +145,9 @@ static int computeMopUp(int winningcolor, BOARD_STATE *board) {
     };
     // clang-format on
 
-    int CMD = centerManhattanDistance[SQ120SQ64(board->kings[!winningcolor])];
-    int MD = manhattanDistance(SQ120SQ64(board->kings[WHITE]),
-                               SQ120SQ64(board->kings[BLACK]));
+    int CMD = centerManhattanDistance[getKingSq(board, !winningcolor)];
+    int MD =
+        manhattanDistance(getKingSq(board, WHITE), getKingSq(board, BLACK));
 
     int mopUp = (int)(4.7 * CMD + 1.6 * (14 - MD));
 

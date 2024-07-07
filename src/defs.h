@@ -128,8 +128,6 @@ typedef struct {
 
     int nodes;
 
-    int kings[2];
-
 } BOARD_STATE;
 
 extern PVENTRY hashtable[PVSIZE];
@@ -178,6 +176,8 @@ extern void clearBoard(BOARD_STATE *board);
 extern void init(BOARD_STATE *board);
 
 // board.c
+
+extern int getKingSq(BOARD_STATE *board, int color);
 
 extern void setPiece(int piece, int file, int rank, BOARD_STATE *board);
 extern void setPiece120(int piece, int sq, BOARD_STATE *board);

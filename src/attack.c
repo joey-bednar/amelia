@@ -83,7 +83,7 @@ int isAttacked(BOARD_STATE *board, int sq, int enemycolor) {
 int isLegalMove(BOARD_STATE *board, MOVE move) {
     int color = board->turn;
     makeMove(board, move);
-    int kingsq = board->kings[color];
+    int kingsq = SQ64SQ120(getKingSq(board, color));
     int check = isAttacked(board, kingsq, board->turn);
     unmakeMove(board, move);
     return !check;
@@ -92,7 +92,7 @@ int isLegalMove(BOARD_STATE *board, MOVE move) {
 // return TRUE if move is a check
 int isCheck(BOARD_STATE *board, MOVE move) {
     makeMove(board, move);
-    int kingsq = board->kings[board->turn];
+    int kingsq = SQ64SQ120(getKingSq(board, board->turn));
     int check = isAttacked(board, kingsq, !board->turn);
     unmakeMove(board, move);
     return check;

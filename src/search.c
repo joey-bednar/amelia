@@ -132,7 +132,8 @@ static int quiesce(BOARD_STATE *board, int depth, int alpha, int beta) {
 
         makeMove(board, moves[i]);
 
-        if (!isAttacked(board, board->kings[!board->turn], board->turn)) {
+        if (!isAttacked(board, SQ64SQ120(getKingSq(board, !board->turn)),
+                        board->turn)) {
             ++legal;
 
             if (CAPTURED(moves[i]) != EMPTY) {
@@ -151,7 +152,8 @@ static int quiesce(BOARD_STATE *board, int depth, int alpha, int beta) {
     }
 
     if (legal == 0) {
-        if (isAttacked(board, board->kings[board->turn], !board->turn)) {
+        if (isAttacked(board, SQ64SQ120(getKingSq(board, board->turn)),
+                       !board->turn)) {
             // checkmate
             return -MATE - depth;
         } else {
@@ -198,7 +200,8 @@ static int alphabeta(BOARD_STATE *board, int depth, int alpha, int beta) {
 
         makeMove(board, moves[i]);
 
-        if (!isAttacked(board, board->kings[!board->turn], board->turn)) {
+        if (!isAttacked(board, SQ64SQ120(getKingSq(board, !board->turn)),
+                        board->turn)) {
             ++legal;
             score = -alphabeta(board, depth - 1, -beta, -alpha);
         }
@@ -222,7 +225,8 @@ static int alphabeta(BOARD_STATE *board, int depth, int alpha, int beta) {
     }
 
     if (legal == 0) {
-        if (isAttacked(board, board->kings[board->turn], !board->turn)) {
+        if (isAttacked(board, SQ64SQ120(getKingSq(board, board->turn)),
+                       !board->turn)) {
             // checkmate
             return -MATE - depth;
         } else {

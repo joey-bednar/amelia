@@ -29,7 +29,6 @@ static void castleRooks(BOARD_STATE *board, int end) {
 
     switch (end) {
     case G1:
-        board->kings[WHITE] = end;
         clearPiece(board, wR, H1);
         placePiece(board, wR, F1);
         CLEARBIT(board->castle, WK_CASTLE);
@@ -40,17 +39,14 @@ static void castleRooks(BOARD_STATE *board, int end) {
         placePiece(board, wR, D1);
         CLEARBIT(board->castle, WK_CASTLE);
         CLEARBIT(board->castle, WQ_CASTLE);
-        board->kings[WHITE] = end;
         break;
     case G8:
-        board->kings[BLACK] = end;
         clearPiece(board, bR, H8);
         placePiece(board, bR, F8);
         CLEARBIT(board->castle, BK_CASTLE);
         CLEARBIT(board->castle, BQ_CASTLE);
         break;
     case C8:
-        board->kings[BLACK] = end;
         clearPiece(board, bR, A8);
         placePiece(board, bR, D8);
         CLEARBIT(board->castle, BK_CASTLE);
@@ -101,11 +97,6 @@ void makeMove(BOARD_STATE *board, MOVE move) {
         placePiece(board, TOCOLOR(board->turn, PROMOTED(move)), END120(move));
     } else {
         placePiece(board, piece, END120(move));
-    }
-
-    // update king position
-    if (CHECKBIT(board->bitboard[bbKing], END(move))) {
-        board->kings[board->turn] = END120(move);
     }
 
     // update en passant square
@@ -192,11 +183,6 @@ void unmakeMove(BOARD_STATE *board, MOVE move) {
         placePiece(board, pawn, START120(move));
     }
 
-    // update king position
-    if (GENERIC(piece) == bbKing) {
-        board->kings[!board->turn] = START120(move);
-    }
-
     board->enpassant = board->playedmoves[index].enpassant;
 
     if (board->turn == WHITE) {
@@ -277,13 +263,13 @@ static void generateCastleMoves(BOARD_STATE *board, MOVE *moves, int *index) {
 
     int color = board->turn;
 
-    if (isAttacked(board, board->kings[color], !color)) {
+    if (isAttacked(board, SQ64SQ120(getKingSq(board, color)), !color)) {
         return;
     }
 
     ULL bb = board->bitboard[bbRook] & board->bitboard[color];
 
-    if (board->kings[color] == FR2SQ120(FILE_E, rank)) {
+    if (SQ64SQ120(getKingSq(board, color)) == FR2SQ120(FILE_E, rank)) {
         if (CHECKBIT(board->castle, kingside) &&
             CHECKBIT(bb, FR2SQ64(FILE_H, rank))) {
 
