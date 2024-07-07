@@ -5,8 +5,6 @@
 #include <stdlib.h>
 #include <time.h>
 
-int searchDepth;
-
 int compareMoves(const void *moveA, const void *moveB) {
     return (CAPTURED(*(MOVE *)moveB) - CAPTURED(*(MOVE *)moveA));
 }
@@ -76,7 +74,7 @@ static void printInfo(BOARD_STATE *board, double time, int score, int depth) {
     printf("nps %ld ", nps);
     printf("time %ld ", time_d);
 
-    if (searchDepth == 0) {
+    if (board->pvlength[0] == 0) {
         printf("\n");
         return;
     }
@@ -131,6 +129,7 @@ static int quiesce(BOARD_STATE *board, int depth, int alpha, int beta) {
     for (int i = 0; i < n_moves; ++i) {
 
         makeMove(board, moves[i]);
+        ++board->ply;
 
         if (!isAttacked(board, SQ64SQ120(getKingSq(board, !board->turn)),
                         board->turn)) {
@@ -142,6 +141,7 @@ static int quiesce(BOARD_STATE *board, int depth, int alpha, int beta) {
         }
 
         unmakeMove(board, moves[i]);
+        --board->ply;
 
         if (score >= beta) {
             return beta;
@@ -168,7 +168,7 @@ static int quiesce(BOARD_STATE *board, int depth, int alpha, int beta) {
 static int alphabeta(BOARD_STATE *board, int depth, int alpha, int beta) {
     ++board->nodes;
 
-    board->pvlength[searchDepth - depth] = searchDepth - depth;
+    board->pvlength[board->ply] = board->ply;
 
     int score = -INF;
 
@@ -199,6 +199,7 @@ static int alphabeta(BOARD_STATE *board, int depth, int alpha, int beta) {
     for (int i = 0; i < n_moves; ++i) {
 
         makeMove(board, moves[i]);
+        ++board->ply;
 
         if (!isAttacked(board, SQ64SQ120(getKingSq(board, !board->turn)),
                         board->turn)) {
@@ -207,6 +208,7 @@ static int alphabeta(BOARD_STATE *board, int depth, int alpha, int beta) {
         }
 
         unmakeMove(board, moves[i]);
+        --board->ply;
 
         if (score >= beta) {
             return beta;
@@ -215,12 +217,13 @@ static int alphabeta(BOARD_STATE *board, int depth, int alpha, int beta) {
             alpha = score;
 
             // add moves to pvarray
-            int ply = searchDepth - depth;
-            board->pvarray[ply][ply] = moves[i];
-            for (int j = ply + 1; j < board->pvlength[ply + 1]; ++j) {
-                board->pvarray[ply][j] = board->pvarray[ply + 1][j];
+            board->pvarray[board->ply][board->ply] = moves[i];
+            for (int j = board->ply + 1; j < board->pvlength[board->ply + 1];
+                 ++j) {
+                board->pvarray[board->ply][j] =
+                    board->pvarray[board->ply + 1][j];
             }
-            board->pvlength[ply] = board->pvlength[ply + 1];
+            board->pvlength[board->ply] = board->pvlength[board->ply + 1];
         }
     }
 
@@ -304,7 +307,9 @@ void search(BOARD_STATE *board) {
 
     // iterative deepening
     MOVE bestmove;
-    for (searchDepth = 0; searchDepth <= inputDepth; searchDepth++) {
+    for (int searchDepth = 0; searchDepth <= inputDepth; searchDepth++) {
+
+        board->ply = 0;
 
         int score = alphabeta(board, searchDepth, -INF, INF);
 
