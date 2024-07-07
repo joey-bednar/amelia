@@ -8,7 +8,7 @@
 int searchDepth;
 
 int compareMoves(const void *moveA, const void *moveB) {
-    return (*(MOVE *)moveB - *(MOVE *)moveA);
+    return (CAPTURED(*(MOVE *)moveB) - CAPTURED(*(MOVE *)moveA));
 }
 
 static void sortMoves(BOARD_STATE *board, MOVE *moves, int n_moves) {
