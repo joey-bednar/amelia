@@ -40,23 +40,18 @@ static int isMateEval(int score) {
 }
 
 // prints uci centipawn/mate search info
-// if forced mate, return distance to mate
-// otherwise return max depth
-static int printEval(int score, int depth) {
+static void printEval(int score, int depth) {
     if (score + MATETHRESHOLD >= MATE && score - MATETHRESHOLD <= MATE) {
         int dist = (MATE - score) + depth;
         int mate = (dist + 1) / 2;
         printf("score mate %d ", mate);
-        return dist;
     } else if (score + MATETHRESHOLD >= -MATE &&
                score - MATETHRESHOLD <= -MATE) {
         int dist = (MATE + score) + depth;
         int mate = (dist) / 2;
         printf("score mate -%d ", mate);
-        return dist;
     } else {
         printf("score cp %d ", score);
-        return MAX_DEPTH;
     }
 }
 
@@ -74,6 +69,7 @@ static void printInfo(BOARD_STATE *board, double time, int score, int depth) {
     printf("nps %ld ", nps);
     printf("time %ld ", time_d);
 
+    // skip pv output for search depth 0
     if (board->pvlength[0] == 0) {
         printf("\n");
         return;
