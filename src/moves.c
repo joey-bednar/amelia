@@ -3,7 +3,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-static void unmakeCastleMove(BOARD_STATE *board, int end) {
+static void uncastleRooks(BOARD_STATE *board, int end) {
 
     switch (end) {
     case G1:
@@ -76,7 +76,7 @@ void makeMove(BOARD_STATE *board, MOVE move) {
         castleRooks(board, END120(move));
     }
 
-    // remove pieces from end square/en passant square
+    // remove piece from en passant square
     if (EPFLAG(move)) {
 
         const int offset = PAWNOFFSET(!board->turn, 0);
@@ -84,7 +84,10 @@ void makeMove(BOARD_STATE *board, MOVE move) {
 
         clearPiece(board, TOCOLOR(!board->turn, CAPTURED(move)),
                    END120(move) + offset);
-    } else if (TOCOLOR(!board->turn, CAPTURED(move)) != EMPTY) {
+    }
+
+    // remove captured piece
+    if (CAPTURED(move) != EMPTY) {
         clearPiece(board, TOCOLOR(!board->turn, CAPTURED(move)), END120(move));
     }
 
@@ -101,7 +104,7 @@ void makeMove(BOARD_STATE *board, MOVE move) {
     }
 
     // update king position
-    if (CHECKBIT(board->bitboard[bbKing], SQ120SQ64(END120(move)))) {
+    if (CHECKBIT(board->bitboard[bbKing], END(move))) {
         board->kings[board->turn] = END120(move);
     }
 
@@ -143,7 +146,7 @@ void unmakeMove(BOARD_STATE *board, MOVE move) {
 
     // move rooks back
     if (CASTLEFLAG(move)) {
-        unmakeCastleMove(board, END120(move));
+        uncastleRooks(board, END120(move));
     }
 
     // reset castling abilities

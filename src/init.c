@@ -1,5 +1,25 @@
 #include "defs.h"
 
+int epMap[120];
+int sq120sq64Map[120];
+int sq64sq120Map[64];
+int colorMap[OFFBOARD + 1];
+int notcolorMap[OFFBOARD + 1];
+int genericMap[OFFBOARD + 1];
+int toColor[2][OFFBOARD + 1];
+int onboardMap[120];
+ULL knightJumps[64];
+ULL kingJumps[64];
+
+ULL zobrist_vals[12][64];
+ULL zobristB2M;
+
+int pawnOffset[2][4] = {{N, 2 * N, NW, NE}, {S, 2 * S, SW, SE}};
+
+int inputDepth;
+int inputTime[2];
+int inputInc[2];
+
 const int rookOffset[4] = {-10, -1, 10, 1};
 const int bishopOffset[4] = {-11, -9, 9, 11};
 const int promoteTo[4] = {bbQueen, bbKnight, bbRook, bbBishop};
@@ -202,58 +222,6 @@ static void initJumps() {
             knightJumps[sq64] = bitboardKnight;
             kingJumps[sq64] = bitboardKing;
         }
-    }
-}
-
-// clears the chess board of any pieces
-void clearBoard(BOARD_STATE *board) {
-    // remove kings
-    board->kings[WHITE] = OFFBOARD;
-    board->kings[BLACK] = OFFBOARD;
-
-    for (int i = 0; i < bbLength; ++i) {
-        board->bitboard[i] = 0;
-    }
-
-    board->turn = WHITE;
-    board->enpassant = OFFBOARD;
-    board->halfmove = 0;
-    board->fullmove = 1;
-    SETBIT(board->castle, WK_CASTLE);
-    SETBIT(board->castle, WQ_CASTLE);
-    SETBIT(board->castle, BK_CASTLE);
-    SETBIT(board->castle, BQ_CASTLE);
-}
-
-// sets up the pieces for a new game
-void initBoard(BOARD_STATE *board) {
-
-    clearBoard(board);
-
-    // add white pieces
-    setPiece(wR, FILE_A, RANK_1, board);
-    setPiece(wN, FILE_B, RANK_1, board);
-    setPiece(wB, FILE_C, RANK_1, board);
-    setPiece(wQ, FILE_D, RANK_1, board);
-    setPiece(wK, FILE_E, RANK_1, board);
-    setPiece(wB, FILE_F, RANK_1, board);
-    setPiece(wN, FILE_G, RANK_1, board);
-    setPiece(wR, FILE_H, RANK_1, board);
-
-    // add black pieces
-    setPiece(bR, FILE_A, RANK_8, board);
-    setPiece(bN, FILE_B, RANK_8, board);
-    setPiece(bB, FILE_C, RANK_8, board);
-    setPiece(bQ, FILE_D, RANK_8, board);
-    setPiece(bK, FILE_E, RANK_8, board);
-    setPiece(bB, FILE_F, RANK_8, board);
-    setPiece(bN, FILE_G, RANK_8, board);
-    setPiece(bR, FILE_H, RANK_8, board);
-
-    // add pawns
-    for (int file = FILE_A; file <= FILE_H; ++file) {
-        setPiece(wP, file, RANK_2, board);
-        setPiece(bP, file, RANK_7, board);
     }
 }
 

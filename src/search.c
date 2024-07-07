@@ -7,8 +7,8 @@
 
 int searchDepth;
 
-int compareMoves(const MOVE moveA, const MOVE moveB) {
-    return (CAPTURED(moveB) - CAPTURED(moveA));
+int compareMoves(const void *moveA, const void *moveB) {
+    return (*(MOVE *)moveB - *(MOVE *)moveA);
 }
 
 static void sortMoves(BOARD_STATE *board, MOVE *moves, int n_moves) {
@@ -28,9 +28,6 @@ static void sortMoves(BOARD_STATE *board, MOVE *moves, int n_moves) {
                 MOVE temp = moves[i];
                 moves[i] = moves[0];
                 moves[0] = temp;
-                // printf("pv used: ");
-                // printMoveText(moves[0]);
-                // printf("in %llu \n",board->hash);
             }
         }
         qsort(moves + 1, n_moves - 1, sizeof(MOVE), compareMoves);
@@ -267,20 +264,13 @@ static void copyPVtoTable(BOARD_STATE *board, int depth) {
         ULL hash = board->hash;
         hashtable[hash % PVSIZE].pos = hash;
         hashtable[hash % PVSIZE].move = board->pvarray[0][i];
-        // printf("stored ");
-        // printMoveText(hashtable[hash % PVSIZE].move);
-        // printf(" at %llu\n",board->hash);
         makeMove(board, hashtable[hash % PVSIZE].move);
-        // printMoveText(pv.move);
     }
 
     for (int i = depth - 1; i >= 0; i--) {
         MOVE move = board->pvarray[0][i];
-        // printMoveText(move);
-        // printBoard(board);
         unmakeMove(board, move);
     }
-    // printBoard(board);
 }
 
 static int searchCutoff(BOARD_STATE *board, double time_ms) {

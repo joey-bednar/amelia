@@ -2,6 +2,58 @@
 #include <assert.h>
 #include <stdio.h>
 
+// clears the chess board of any pieces
+void clearBoard(BOARD_STATE *board) {
+    // remove kings
+    board->kings[WHITE] = OFFBOARD;
+    board->kings[BLACK] = OFFBOARD;
+
+    for (int i = 0; i < bbLength; ++i) {
+        board->bitboard[i] = 0ull;
+    }
+
+    board->turn = WHITE;
+    board->enpassant = OFFBOARD;
+    board->halfmove = 0;
+    board->fullmove = 1;
+    SETBIT(board->castle, WK_CASTLE);
+    SETBIT(board->castle, WQ_CASTLE);
+    SETBIT(board->castle, BK_CASTLE);
+    SETBIT(board->castle, BQ_CASTLE);
+}
+
+// sets up the pieces for a new game
+void initBoard(BOARD_STATE *board) {
+
+    clearBoard(board);
+
+    // add white pieces
+    setPiece(wR, FILE_A, RANK_1, board);
+    setPiece(wN, FILE_B, RANK_1, board);
+    setPiece(wB, FILE_C, RANK_1, board);
+    setPiece(wQ, FILE_D, RANK_1, board);
+    setPiece(wK, FILE_E, RANK_1, board);
+    setPiece(wB, FILE_F, RANK_1, board);
+    setPiece(wN, FILE_G, RANK_1, board);
+    setPiece(wR, FILE_H, RANK_1, board);
+
+    // add black pieces
+    setPiece(bR, FILE_A, RANK_8, board);
+    setPiece(bN, FILE_B, RANK_8, board);
+    setPiece(bB, FILE_C, RANK_8, board);
+    setPiece(bQ, FILE_D, RANK_8, board);
+    setPiece(bK, FILE_E, RANK_8, board);
+    setPiece(bB, FILE_F, RANK_8, board);
+    setPiece(bN, FILE_G, RANK_8, board);
+    setPiece(bR, FILE_H, RANK_8, board);
+
+    // add pawns
+    for (int file = FILE_A; file <= FILE_H; ++file) {
+        setPiece(wP, file, RANK_2, board);
+        setPiece(bP, file, RANK_7, board);
+    }
+}
+
 void clearPiece(BOARD_STATE *board, int piece, int sq) {
     // move piece to target square
     CLEARBIT(board->bitboard[GENERIC(piece)], SQ120SQ64(sq));
@@ -104,7 +156,6 @@ void setPiece120(int piece, int sq, BOARD_STATE *board) {
     if (piece != EMPTY) {
         SETBIT(board->bitboard[generic], sq64);
         SETBIT(board->bitboard[color], sq64);
-        // SETBIT(board->bitboard[bbAny], sq64);
     }
 
     // update king placement

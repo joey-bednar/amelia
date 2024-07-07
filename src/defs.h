@@ -1,60 +1,61 @@
 #ifndef DEFS_H
 
+// settings
+#define DEFAULTDEPTH 6
+#define MAX_DEPTH 20
+#define QMAXDEPTH 100
+#define DEFAULT_TIME 3600000
+#define DEFAULT_INC 0
+#define PVSIZE 20000
+
+// internal constants
 #define FALSE 0
 #define TRUE 1
+#define MAX_LEGAL_MOVES 256
+#define MAX_GAME_LENGTH 512
+#define MATE 50000
+#define MATETHRESHOLD 50
+#define INF 99999
 
+// squares
 #define SQ120R(sq) (((sq) % 10) - 1)
 #define SQ120F(sq) (((sq) - 21) / (10))
 #define FR2SQ120(f, r) ((21 + (r)) + ((f) * 10))
 #define FR2SQ64(f, r) ((r) + ((f) * 8))
 #define SQ120SQ64(sq) (sq120sq64Map[(sq)])
 #define SQ64SQ120(sq) (sq64sq120Map[(sq)])
+#define CHAR2FILE(c) ((int)((c) - 'a'))
+#define CHAR2RANK(c) ((int)((c) - '1'))
+#define CHAR2SQ120(f, r) (FR2SQ120((CHAR2FILE((f))), (CHAR2RANK((r)))))
 
+// pieces and colors
 #define COLOR(p) (colorMap[(p)])
 #define NOTCOLOR(p) (notcolorMap[(p)])
-
 #define GENERIC(p) (genericMap[(p)])
 #define TOWHITE(p) (toColor[WHITE][(p)])
 #define TOBLACK(p) (toColor[BLACK][(p)])
 #define TOCOLOR(c, p) (toColor[c][(p)])
 #define ONBOARD(sq) (onboardMap[(sq)])
 
+// bit operations
 #define CHECKBIT(bb, sq64) (((bb)) >> ((sq64)) & 1ULL)
 #define CLEARBIT(bb, sq64) ((bb) &= ~(1ULL << sq64))
 #define SETBIT(bb, sq64) ((bb) |= (1ULL << sq64))
 #define CLEARBITBOARD(bb) ((bb) = 0)
+
+// attack bitboards
 #define KNIGHTBB(sq64) (knightJumps[(sq64)])
 #define KINGBB(sq64) (kingJumps[(sq64)])
 
-#define MAX_LEGAL_MOVES 256
-#define MAX_GAME_LENGTH 512
-
-#define PVSIZE 20000
-
-#define MAX_DEPTH 20
-#define DEFAULTDEPTH 6
-#define QMAXDEPTH 100
-#define DEFAULT_TIME 3600000
-#define DEFAULT_INC 0
-
-#define MATE 50000
-#define MATETHRESHOLD 50
-#define INF 99999
-
-#define CHAR2FILE(c) ((int)((c) - 'a'))
-#define CHAR2RANK(c) ((int)((c) - '1'))
-#define CHAR2SQ120(f, r) (FR2SQ120((CHAR2FILE((f))), (CHAR2RANK((r)))))
-
-#define BITLOOP(bb) for (; (bb); (bb) &= ((bb) - 1))
-
+// piece offsets and promotions
 #define PAWNOFFSET(c, i) (pawnOffset[(c)][(i)])
 #define ROOKOFFSET(i) (rookOffset[(i)])
-#define BISHOPOFFSET(i) (bishopOffset[(i)])
-
 #define ROOKOFFSETS rookOffset
+#define BISHOPOFFSET(i) (bishopOffset[(i)])
 #define BISHOPOFFSETS bishopOffset
 #define PROMOTES promoteTo
 
+// move bitmasks
 #define START(move) (int)((move) & 0x3Ful)
 #define START120(move) SQ64SQ120((int)((move) & 0x3Ful))
 #define END(move) (int)(((move) & 0x0FC0) >> 6)
@@ -64,6 +65,8 @@
 #define EPFLAG(move) (int)(((move) & 0x40000ul) >> 18)
 #define TWOPAWNFLAG(move) (int)(((move) & 0x80000ul) >> 19)
 #define CASTLEFLAG(move) (int)(((move) & 0x100000ul) >> 20)
+
+#define BITLOOP(bb) for (; (bb); (bb) &= ((bb) - 1))
 
 // clang-format off
 enum { EMPTY, wP, wN, wB, wR, wQ, wK, bP, bN, bB, bR, bQ, bK, OFFBOARD };
@@ -85,8 +88,8 @@ enum {NW=-9, N=1, NE=11, E=10, SE=9, S=-1, SW=-11, W=-10};
 // clang-format on
 
 enum { NO_CASTLE, WK_CASTLE, WQ_CASTLE, BK_CASTLE, BQ_CASTLE };
-typedef unsigned long long ULL;
 
+typedef unsigned long long ULL;
 typedef unsigned long MOVE;
 
 typedef struct {
@@ -106,9 +109,15 @@ typedef struct {
 typedef struct {
     ULL bitboard[bbLength];
 
-    int ply;
+    int turn;
+    int halfmove;
+    int fullmove;
+    int castle;
+    int enpassant;
 
     ULL hash;
+
+    int ply;
 
     PVENTRY pvtable[PVSIZE];
 
@@ -121,11 +130,6 @@ typedef struct {
 
     int kings[2];
 
-    int turn;
-    int halfmove;
-    int fullmove;
-    int castle;
-    int enpassant;
 } BOARD_STATE;
 
 extern PVENTRY hashtable[PVSIZE];
@@ -219,7 +223,7 @@ extern int eval(BOARD_STATE *board);
 
 // search.c
 extern void printMoveText(MOVE move);
-extern int compareMoves(const MOVE a, const MOVE b);
+extern int compareMoves(const void *a, const void *b);
 extern void search(BOARD_STATE *board);
 
 // uci.c
