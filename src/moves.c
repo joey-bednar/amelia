@@ -223,10 +223,9 @@ static void addMove(BOARD_STATE *board, MOVE *moves, int start, int end,
 // same as generateSimpleMoves() but continues in offset direction until not
 // possible. Used for sliding pieces (bishop,rook,queen)
 static void generateSlidingMoves(BOARD_STATE *board, MOVE *moves, int sq,
-                                 int *index, const int *offsets,
-                                 int offsetssize) {
+                                 int *index, const int *offsets) {
 
-    for (int i = 0; i < offsetssize; ++i) {
+    for (int i = 0; i < 4; ++i) {
         int nextSq = sq + offsets[i];
 
         // if square is empty or can capture enemy piece, it is a pseudolegal
@@ -380,12 +379,12 @@ static void generatePseudoPresetMoves(BOARD_STATE *board, MOVE *moves, int sq,
 
 static void generatePseudoRookMoves(BOARD_STATE *board, MOVE *moves, int sq,
                                     int *index) {
-    generateSlidingMoves(board, moves, sq, index, ROOKOFFSETS, 4);
+    generateSlidingMoves(board, moves, sq, index, ROOKOFFSETS);
 }
 
 static void generatePseudoBishopMoves(BOARD_STATE *board, MOVE *moves, int sq,
                                       int *index) {
-    generateSlidingMoves(board, moves, sq, index, BISHOPOFFSETS, 4);
+    generateSlidingMoves(board, moves, sq, index, BISHOPOFFSETS);
 }
 
 static void generatePseudoEnPassantMoves(BOARD_STATE *board, MOVE *moves,
