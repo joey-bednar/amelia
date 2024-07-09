@@ -98,12 +98,24 @@ void printBits(unsigned long long num) {
 
 void printBitboard(ULL bitboard) {
 
+    // ULL bbcopy = bitboard;
+
+    // create a flipped copy
+    ULL bbcopy = 0ull;
+    for (int i = 0; i < 64; ++i) {
+        int val = CHECKBIT(bitboard, i);
+        if (val) {
+            SETBIT(bbcopy, ((((i >> 3) | (i << 3)) & 63) ^ 56));
+        }
+    }
+
+    // print flipped copy
     printf("\n");
     for (int i = 0; i < 64; ++i) {
         if (i % 8 == 0) {
             printf("\n");
         }
-        if (bitboard >> i & 1ULL)
+        if (bbcopy >> i & 1)
             printf("1 ");
         else
             printf("0 ");

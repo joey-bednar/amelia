@@ -148,6 +148,7 @@ extern int toColor[2][OFFBOARD + 1];
 extern int onboardMap[120];
 extern ULL knightJumps[64];
 extern ULL kingJumps[64];
+extern ULL slidingRay[8][64];
 
 extern int pawnSqTable[64];
 extern int knightSqTable[64];
@@ -212,6 +213,7 @@ extern int countBits(unsigned long long b);
 extern void printBoard(BOARD_STATE *board);
 extern void printBoardIndex();
 extern int bitScanForward(ULL bb);
+extern int bitScanReverse(ULL bb);
 
 // perft.c
 extern void perft(int depth, BOARD_STATE *board);

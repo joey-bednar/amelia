@@ -1,4 +1,5 @@
 #include "defs.h"
+#include <stdio.h>
 
 int epMap[120];
 int sq120sq64Map[120];
@@ -30,6 +31,31 @@ int bishopSqTable[];
 int rookSqTable[];
 int queenSqTable[];
 int kingSqTable[];
+
+ULL slidingRay[8][64];
+
+static ULL initSingleSlidingRay(int sq64, int dir) {
+    ULL bb = 0ull;
+    int sq120 = SQ64SQ120(sq64);
+
+    sq120 += dir;
+    while (ONBOARD(sq120)) {
+        int sq64now = SQ120SQ64(sq120);
+        SETBIT(bb, sq64now);
+        sq120 += dir;
+    }
+    return bb;
+}
+
+static void initSlidingRays() {
+
+    const int dirs[8] = {N, NE, E, SE, S, SW, W, NW};
+    for (int i = 0; i < 8; ++i) {
+        for (int j = 0; j < 64; ++j) {
+            slidingRay[i][j] = initSingleSlidingRay(j, dirs[i]);
+        }
+    }
+}
 
 static void initPieceSqMaps() {
 
@@ -105,6 +131,13 @@ static void initPieceSqMaps() {
         queenSqTable[(((i >> 3) | (i << 3)) & 63) ^ 7] = queen[i];
         kingSqTable[(((i >> 3) | (i << 3)) & 63) ^ 7] = king[i];
     }
+
+    // for(int i=0;i<64;i++) {
+    //     if(i % 8 == 0) {
+    //         printf("\n");
+    //     }
+    //     printf("%d ",king[i]);
+    // }
 }
 
 // array map for possible en passant squares
@@ -233,6 +266,7 @@ void init(BOARD_STATE *board) {
     initJumps();
     initPieceSqMaps();
     initZobrist();
+    initSlidingRays();
 
     clearBoard(board);
     initBoard(board);
