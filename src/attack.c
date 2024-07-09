@@ -1,6 +1,5 @@
 #include "defs.h"
 #include <assert.h>
-#include <stdio.h>
 
 // return TRUE if sq(120) is attacked by an enemy piece. calculated
 // using preset attack bitboards
@@ -14,12 +13,52 @@ static int isAttackedPreset(BOARD_STATE *board, int sq, int enemycolor,
     return !(ONBOARD(sq) && bb == 0);
 }
 
+static int isAttackedRay(BOARD_STATE *board, int sq120, int enemycolor) {
+    if (!ONBOARD(sq120)) {
+        return FALSE;
+    }
+
+    const int piece[8] = {bbRook, bbBishop, bbRook, bbBishop,
+                          bbRook, bbBishop, bbRook, bbBishop};
+
+    int sq64 = SQ120SQ64(sq120);
+
+    ULL allpieces = board->bitboard[WHITE] | board->bitboard[BLACK];
+
+    for (int dir = 0; dir < 8; dir++) {
+
+        ULL enemypieces =
+            board->bitboard[enemycolor] &
+            (board->bitboard[piece[dir]] | board->bitboard[bbQueen]);
+
+        ULL attacked = slidingRay[dir][sq64] & enemypieces;
+
+        if (!attacked) {
+            continue;
+        }
+
+        int nearSq;
+        if (dir < 4) {
+            nearSq = bitScanForward(slidingRay[dir][sq64] & allpieces);
+        } else {
+            nearSq = bitScanReverse(slidingRay[dir][sq64] & allpieces);
+        }
+
+        if (CHECKBIT(enemypieces, nearSq)) {
+            return TRUE;
+        }
+    }
+
+    return FALSE;
+}
+
 // return TRUE if sq(120) is attacked by an enemy piece on the file/rank/diag
 // given by the offset directions
 static int isAttackedSliding(BOARD_STATE *board, int sq, const int *offsets,
                              int enemycolor, int RB) {
+    int nextSq;
     for (int i = 0; i < 4; ++i) {
-        int nextSq = sq + offsets[i];
+        nextSq = sq + offsets[i];
 
         while (ONBOARD(nextSq) &&
                !CHECKBIT(board->bitboard[bbWhite] | board->bitboard[bbBlack],
@@ -37,6 +76,7 @@ static int isAttackedSliding(BOARD_STATE *board, int sq, const int *offsets,
             }
         }
     }
+
     return FALSE;
 }
 
@@ -75,8 +115,11 @@ int isAttacked(BOARD_STATE *board, int sq, int enemycolor) {
            isAttackedPreset(board, sq, enemycolor, KNIGHTBB(SQ120SQ64(sq)),
                             bbKnight) ||
            isAttackedPawn(board, sq, enemycolor) ||
-           isAttackedSliding(board, sq, ROOKOFFSETS, enemycolor, bbRook) ||
-           isAttackedSliding(board, sq, BISHOPOFFSETS, enemycolor, bbBishop);
+
+           isAttackedRay(board, sq, enemycolor);
+
+    // isAttackedSliding(board, sq, ROOKOFFSETS, enemycolor, bbRook) ||
+    // isAttackedSliding(board, sq, BISHOPOFFSETS, enemycolor, bbBishop);
 }
 
 // return TRUE if move is legal
