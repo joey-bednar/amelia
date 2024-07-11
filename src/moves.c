@@ -212,7 +212,7 @@ static void addMove(BOARD_STATE *board, MOVE *moves, int start, int end,
     moves[*index] = (((unsigned long)SQ120SQ64(start) << 0) & 0x0000003Ful) |
                     (((unsigned long)SQ120SQ64(end) << 6) & 0x00000FC0ul) |
                     (((unsigned long)captured << 12) & 0x00007000ul) |
-                    (((unsigned long)GENERIC(promotion) << 15) & 0x00038000ul) |
+                    (((unsigned long)promotion << 15) & 0x00038000ul) |
                     (((unsigned long)enpassant << 18) & 0x00040000ul) |
                     (((unsigned long)twopawnmove << 19) & 0x00080000ul) |
                     (((unsigned long)castle << 20) & 0x00100000ul); // |
@@ -318,8 +318,8 @@ static void addPromotions(BOARD_STATE *board, MOVE *moves, int start, int end,
                           int captured, int *index) {
 
     for (int i = 0; i < 4; ++i) {
-        addMove(board, moves, start, end, captured,
-                TOCOLOR(board->turn, PROMOTES[i]), FALSE, FALSE, FALSE, index);
+        addMove(board, moves, start, end, captured, PROMOTES[i], FALSE, FALSE,
+                FALSE, index);
     }
 }
 
