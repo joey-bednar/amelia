@@ -110,7 +110,7 @@ int getGenericPieceSq120(int sq, BOARD_STATE *board) {
             return i;
         };
     }
-    return -1;
+    return EMPTY;
 }
 
 // return piece on square given by 120 index

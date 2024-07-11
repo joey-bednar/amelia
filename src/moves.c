@@ -211,7 +211,7 @@ static void addMove(BOARD_STATE *board, MOVE *moves, int start, int end,
 
     moves[*index] = (((unsigned long)SQ120SQ64(start) << 0) & 0x0000003Ful) |
                     (((unsigned long)SQ120SQ64(end) << 6) & 0x00000FC0ul) |
-                    (((unsigned long)GENERIC(captured) << 12) & 0x00007000ul) |
+                    (((unsigned long)captured << 12) & 0x00007000ul) |
                     (((unsigned long)GENERIC(promotion) << 15) & 0x00038000ul) |
                     (((unsigned long)enpassant << 18) & 0x00040000ul) |
                     (((unsigned long)twopawnmove << 19) & 0x00080000ul) |
@@ -240,8 +240,7 @@ static void generateSlidingMoves(BOARD_STATE *board, MOVE *moves, int sq,
 
         if (ONBOARD(nextSq) &&
             CHECKBIT(board->bitboard[(!board->turn)], SQ120SQ64(nextSq))) {
-            int squareContains =
-                TOCOLOR(!board->turn, getGenericPieceSq120(nextSq, board));
+            int squareContains = getGenericPieceSq120(nextSq, board);
             addMove(board, moves, sq, nextSq, squareContains, EMPTY, FALSE,
                     FALSE, FALSE, index);
         }
@@ -342,8 +341,7 @@ static void generatePseudoPawnMoves(BOARD_STATE *board, MOVE *moves, int sq,
         }
 
         if (CHECKBIT(board->bitboard[(!board->turn)], SQ120SQ64(enemysquare))) {
-            int enemypiece =
-                TOCOLOR(!board->turn, getGenericPieceSq120(enemysquare, board));
+            int enemypiece = getGenericPieceSq120(enemysquare, board);
 
             if (SQ120R(enemysquare) == eighthrank) {
                 addPromotions(board, moves, sq, enemysquare, enemypiece, index);
@@ -371,7 +369,7 @@ static void generatePseudoPresetMoves(BOARD_STATE *board, MOVE *moves, int sq,
         int nextSq64 = bitScanForward(bb);
         int nextSq120 = SQ64SQ120(nextSq64);
 
-        int squareContains = getPieceSq120(nextSq120, board);
+        int squareContains = getGenericPieceSq120(nextSq120, board);
         addMove(board, moves, sq, nextSq120, squareContains, EMPTY, FALSE,
                 FALSE, FALSE, index);
     }
@@ -405,9 +403,8 @@ static void generatePseudoEnPassantMoves(BOARD_STATE *board, MOVE *moves,
         // same color pawns
         if (ONBOARD(sq) && CHECKBIT(bb, SQ120SQ64(sq))) {
 
-            addMove(board, moves, sq, board->enpassant,
-                    TOCOLOR(!board->turn, bbPawn), EMPTY, TRUE, FALSE, FALSE,
-                    index);
+            addMove(board, moves, sq, board->enpassant, bbPawn, EMPTY, TRUE,
+                    FALSE, FALSE, index);
         }
     }
 }
