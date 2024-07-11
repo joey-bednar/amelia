@@ -56,18 +56,17 @@ static void printEval(int score, int depth) {
 }
 
 // prints uci search info
-static void printInfo(BOARD_STATE *board, double time, int score, int depth) {
+static void printInfo(BOARD_STATE *board, float time, int score, int depth) {
 
     // print search info
-    long nps = (long)floor(((double)1000 * board->nodes / time));
-    long time_d = (long)time;
+    long nps = floor((1000 * (double)board->nodes / time));
 
     printf("info ");
     printf("depth %d ", depth);
     printEval(score, depth);
     printf("nodes %ld ", (long)board->nodes);
     printf("nps %ld ", nps);
-    printf("time %ld ", time_d);
+    printf("time %ld ", (long)time);
 
     // skip pv output for search depth 0
     if (board->pvlength[0] == 0) {
@@ -84,7 +83,21 @@ static void printInfo(BOARD_STATE *board, double time, int score, int depth) {
     printf("\n");
 }
 
+static void checkTime(BOARD_STATE *board) {
+    if (board->nodes % 1024 == 0) {
+        float new_t = clock() - board->start;
+        float time_taken_ms = (1000 * new_t) / CLOCKS_PER_SEC;
+        if (time_taken_ms > board->cutoffTime) {
+            board->stopped = TRUE;
+        }
+    }
+}
+
 static int quiesce(BOARD_STATE *board, int depth, int alpha, int beta) {
+    checkTime(board);
+    if (board->stopped) {
+        return 0;
+    }
     ++board->nodes;
 
     int score = -INF;
@@ -162,6 +175,11 @@ static int quiesce(BOARD_STATE *board, int depth, int alpha, int beta) {
 }
 
 static int alphabeta(BOARD_STATE *board, int depth, int alpha, int beta) {
+
+    checkTime(board);
+    if (board->stopped) {
+        return 0;
+    }
     ++board->nodes;
 
     board->pvlength[board->ply] = board->ply;
@@ -276,21 +294,62 @@ static void copyPVtoTable(BOARD_STATE *board, int depth) {
     }
 }
 
-static int searchCutoff(BOARD_STATE *board, double time_ms) {
+// returns true when next iteration of search should be
+// prevented due to time restrictions
+static int searchCutoff(BOARD_STATE *board, float time_ms) {
+
+    int time = inputTime[board->turn];
+    if (time == DEFAULT_TIME) {
+        return FALSE;
+    }
 
     // bullet time control
-    if (inputTime[board->turn] < 1000 * 60 * 1 && time_ms > 100) {
+    if (time < 1000 * 60 * 1 && time_ms > 100) {
         return TRUE;
     }
     // blitz
-    else if (inputTime[board->turn] < 1000 * 60 * 3 && time_ms > 250) {
+    if (time < 1000 * 60 * 3 && time_ms > 250) {
         return TRUE;
     }
     // other
-    else if (inputTime[board->turn] != DEFAULT_TIME && time_ms > 1000 * 1) {
+    if (time_ms > 1000 * 1) {
         return TRUE;
     }
     return FALSE;
+}
+
+static float setCutoff(BOARD_STATE *board) {
+    int time = inputTime[board->turn];
+    int inc = inputInc[board->turn];
+
+    if (time == DEFAULT_TIME) {
+        return 1000 * 60 * 36;
+    }
+
+    // // emergency
+    // if (time <= 1000 * 5) {
+    //     return 200 + inc;
+    // }
+
+    // // bullet
+    // if (time <= 1000 * 60) {
+    //     return 2000 + inc;
+    // }
+
+    // // blitz
+    // if (time <= 1000 * 60 * 3) {
+    //     return 4000 + inc;
+    // }
+    //
+    // // blitz
+    // if (time <= 1000 * 60 * 5) {
+    //     return 8000 + inc;
+    // }
+
+    // rapid
+    // return 10000 + inc;
+
+    return 999999;
 }
 
 void search(BOARD_STATE *board) {
@@ -298,8 +357,12 @@ void search(BOARD_STATE *board) {
     // reset nodes searched
     board->nodes = 0;
 
+    // reset search time parameters
+    board->stopped = FALSE;
+    board->cutoffTime = setCutoff(board);
+
     // begin timer
-    clock_t t = clock();
+    board->start = clock();
 
     // iterative deepening
     MOVE bestmove;
@@ -309,9 +372,12 @@ void search(BOARD_STATE *board) {
 
         int score = alphabeta(board, searchDepth, -INF, INF);
 
-        // compute time taken to search nodes
-        clock_t new_t = clock() - t;
-        double time_taken_ms = 1000 * ((double)new_t) / CLOCKS_PER_SEC;
+        if (board->stopped) {
+            break;
+        }
+
+        float new_t = clock() - board->start;
+        float time_taken_ms = (1000 * new_t) / CLOCKS_PER_SEC;
 
         // print search info
         printInfo(board, time_taken_ms, score, searchDepth);
@@ -326,10 +392,13 @@ void search(BOARD_STATE *board) {
             break;
         }
 
-        // cutoff length of searches in timed games
+        // prevent new searches if not enough time
         if (searchCutoff(board, time_taken_ms)) {
             break;
         }
+        // if(time_taken_ms * 2 > board->cutoffTime) {
+        //     break;
+        // }
     }
 
     // print best move

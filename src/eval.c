@@ -53,6 +53,11 @@ int isInsufficientMaterial(BOARD_STATE *board) {
         return FALSE;
     }
 
+    // self mate possible with KN vs KN
+    if (whiteKnight > 0ull && blackKnight > 0ull) {
+        return FALSE;
+    }
+
     return TRUE;
 }
 

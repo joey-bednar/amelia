@@ -127,6 +127,9 @@ typedef struct {
     POSRECORD playedmoves[MAX_GAME_LENGTH * 2];
 
     int nodes;
+    int stopped;
+    int cutoffTime;
+    float start;
 
 } BOARD_STATE;
 
