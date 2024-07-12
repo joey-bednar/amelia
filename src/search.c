@@ -298,21 +298,29 @@ static void copyPVtoTable(BOARD_STATE *board, int depth) {
 // prevented due to time restrictions
 static int searchCutoff(BOARD_STATE *board, float time_ms) {
 
+    // 0.555 default; 0LOT
+    // 0.635
+
     int time = inputTime[board->turn];
     if (time == DEFAULT_TIME) {
         return FALSE;
     }
 
+    // emergency
+    if (time <= 1000 * 5 && time_ms > 150) {
+        return TRUE;
+    }
+
     // bullet time control
-    if (time < 1000 * 60 * 1 && time_ms > 100) {
+    if (time <= 1000 * 60 * 1 && time_ms > 400) {
         return TRUE;
     }
     // blitz
-    if (time < 1000 * 60 * 3 && time_ms > 250) {
+    if (time <= 1000 * 60 * 3 && time_ms > 250) {
         return TRUE;
     }
     // other
-    if (time_ms > 1000 * 1) {
+    if (time_ms >= 1000 * 1) {
         return TRUE;
     }
     return FALSE;
@@ -326,15 +334,15 @@ static float setCutoff(BOARD_STATE *board) {
         return 1000 * 60 * 36;
     }
 
-    // // emergency
-    // if (time <= 1000 * 5) {
-    //     return 200 + inc;
-    // }
+    // emergency
+    if (time <= 1000 * 5) {
+        return 150 + inc;
+    }
 
-    // // bullet
-    // if (time <= 1000 * 60) {
-    //     return 2000 + inc;
-    // }
+    // bullet
+    if (time <= 1000 * 60) {
+        return 5000 + inc;
+    }
 
     // // blitz
     // if (time <= 1000 * 60 * 3) {
