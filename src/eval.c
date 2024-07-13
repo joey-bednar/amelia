@@ -32,7 +32,8 @@ int isInsufficientMaterial(BOARD_STATE *board) {
         return FALSE;
     }
 
-    // return (countBits(board->bitboard[bbBishop] | board->bitboard[bbKnight]) <
+    // return (countBits(board->bitboard[bbBishop] | board->bitboard[bbKnight])
+    // <
     //         2);
 
     ULL whiteBishop = board->bitboard[bbBishop] & board->bitboard[WHITE];
@@ -41,11 +42,13 @@ int isInsufficientMaterial(BOARD_STATE *board) {
     ULL whiteKnight = board->bitboard[bbKnight] & board->bitboard[WHITE];
     ULL blackKnight = board->bitboard[bbKnight] & board->bitboard[BLACK];
 
-    ULL white = (board->bitboard[bbBishop] | board->bitboard[bbKnight]) & board->bitboard[WHITE];
-    ULL black = (board->bitboard[bbBishop] | board->bitboard[bbKnight]) & board->bitboard[BLACK];
+    ULL white = (board->bitboard[bbBishop] | board->bitboard[bbKnight]) &
+                board->bitboard[WHITE];
+    ULL black = (board->bitboard[bbBishop] | board->bitboard[bbKnight]) &
+                board->bitboard[BLACK];
 
     // K minor vs K minor
-    if(white > 0ull && black > 0ull) {
+    if (white > 0ull && black > 0ull) {
         return FALSE;
     }
 

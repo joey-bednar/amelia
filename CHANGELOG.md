@@ -1,5 +1,21 @@
 # Changelog
 
+
+## [v0.8](https://github.com/joey-bednar/annie/tree/v0.8) (7/13/24)
+
+Improved move generation and time management.
+
+Engine can now deliver basic checkmates and use its king in endgames.
+
+- Added emergency stop to search after cutoff time
+- Use precomputed attack rays to search for attacks/checks
+- Refactor of move generation to compress move data
+- Switch insufficient material rules from USCF to FIDE
+
+**v0.8 vs v0.7:** 254 wins, 104 draws, 142 losses (0.612)
+
+**Elo increase:** 79.2 +/- 27.6
+
 ## [v0.7](https://github.com/joey-bednar/annie/tree/v0.7) (7/2/24)
 
 Engine can now deliver basic checkmates and use its king in endgames.

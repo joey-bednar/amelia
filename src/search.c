@@ -188,7 +188,8 @@ static int alphabeta(BOARD_STATE *board, int depth, int alpha, int beta) {
 
     int legal = 0;
 
-    if (board->halfmove >= 100 || isThreeFold(board) || isInsufficientMaterial(board)) {
+    if (board->halfmove >= 100 || isThreeFold(board) ||
+        isInsufficientMaterial(board)) {
         return 0;
     }
 
