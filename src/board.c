@@ -13,6 +13,7 @@ void clearBoard(BOARD_STATE *board) {
     board->enpassant = OFFBOARD;
     board->halfmove = 0;
     board->fullmove = 1;
+    board->pmindex = 0;
     SETBIT(board->castle, WK_CASTLE);
     SETBIT(board->castle, WQ_CASTLE);
     SETBIT(board->castle, BK_CASTLE);

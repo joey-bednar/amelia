@@ -7,7 +7,7 @@
 // returns true if position has been repeated three times
 int isThreeFold(BOARD_STATE *board) {
     if (board->halfmove >= 4) {
-        int end = 2 * (board->fullmove - 1) + board->turn;
+        int end = board->pmindex;
         int start = 0; // end - board->halfmove;
         int count = 0;
         for (int i = start; i <= end; ++i) {
@@ -32,36 +32,39 @@ int isInsufficientMaterial(BOARD_STATE *board) {
         return FALSE;
     }
 
-    return (countBits(board->bitboard[bbBishop] | board->bitboard[bbKnight]) <
-            2);
+    // return (countBits(board->bitboard[bbBishop] | board->bitboard[bbKnight]) <
+    //         2);
 
-    // ULL whiteBishop = board->bitboard[bbBishop] & board->bitboard[WHITE];
-    // ULL blackBishop = board->bitboard[bbBishop] & board->bitboard[BLACK];
-    //
-    // ULL whiteKnight = board->bitboard[bbKnight] & board->bitboard[WHITE];
-    // ULL blackKnight = board->bitboard[bbKnight] & board->bitboard[BLACK];
-    //
-    // // bishop/knight can mate
-    // if (whiteBishop > 0ull && whiteKnight > 0ull) {
-    //     return FALSE;
-    // }
-    // if (blackBishop > 0ull && blackKnight > 0ull) {
-    //     return FALSE;
-    // }
-    //
-    // // bishop pair can mate
-    // int whiteBishopCount = countBits(whiteBishop);
-    // int blackBishopCount = countBits(blackBishop);
-    // if (whiteBishopCount > 1 || blackBishopCount > 1) {
-    //     return FALSE;
-    // }
-    //
-    // // self mate possible with KN vs KN
-    // if (whiteKnight > 0ull && blackKnight > 0ull) {
-    //     return FALSE;
-    // }
-    //
-    // return TRUE;
+    ULL whiteBishop = board->bitboard[bbBishop] & board->bitboard[WHITE];
+    ULL blackBishop = board->bitboard[bbBishop] & board->bitboard[BLACK];
+
+    ULL whiteKnight = board->bitboard[bbKnight] & board->bitboard[WHITE];
+    ULL blackKnight = board->bitboard[bbKnight] & board->bitboard[BLACK];
+
+    ULL white = (board->bitboard[bbBishop] | board->bitboard[bbKnight]) & board->bitboard[WHITE];
+    ULL black = (board->bitboard[bbBishop] | board->bitboard[bbKnight]) & board->bitboard[BLACK];
+
+    // K minor vs K minor
+    if(white > 0ull && black > 0ull) {
+        return FALSE;
+    }
+
+    // bishop/knight can mate
+    if (whiteBishop > 0ull && whiteKnight > 0ull) {
+        return FALSE;
+    }
+    if (blackBishop > 0ull && blackKnight > 0ull) {
+        return FALSE;
+    }
+
+    // bishop pair can mate
+    int whiteBishopCount = countBits(whiteBishop);
+    int blackBishopCount = countBits(blackBishop);
+    if (whiteBishopCount > 1 || blackBishopCount > 1) {
+        return FALSE;
+    }
+
+    return TRUE;
 }
 
 // returns eval for material count

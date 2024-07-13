@@ -59,7 +59,7 @@ static void castleRooks(BOARD_STATE *board, int end) {
 void makeMove(BOARD_STATE *board, MOVE move) {
 
     // add info to played moves
-    int index = 2 * (board->fullmove - 1) + board->turn;
+    int index = board->pmindex; //2 * (board->fullmove - 1) + board->turn;
     board->playedmoves[index].halfmove = board->halfmove;
     board->playedmoves[index].castle = board->castle;
     board->playedmoves[index].enpassant = board->enpassant;
@@ -83,7 +83,7 @@ void makeMove(BOARD_STATE *board, MOVE move) {
     }
 
     // remove captured piece
-    if (CAPTURED(move) != EMPTY) {
+    else if (CAPTURED(move) != EMPTY) {
         clearPiece(board, TOCOLOR(!board->turn, CAPTURED(move)), END120(move));
     }
 
@@ -117,6 +117,7 @@ void makeMove(BOARD_STATE *board, MOVE move) {
 
     // add hash to played moves
     board->playedmoves[index].hash = board->hash;
+    ++board->pmindex;
 
     // update full move
     if (board->turn == BLACK) {
@@ -132,7 +133,7 @@ void makeMove(BOARD_STATE *board, MOVE move) {
 void unmakeMove(BOARD_STATE *board, MOVE move) {
 
     // clear hash
-    int index = 2 * (board->fullmove - 1) + board->turn - 1;
+    int index = --board->pmindex; //2 * (board->fullmove - 1) + board->turn - 1;
     board->playedmoves[index].hash = 0ull;
 
     // move rooks back
@@ -164,6 +165,8 @@ void unmakeMove(BOARD_STATE *board, MOVE move) {
         if (board->turn == WHITE) {
             --board->fullmove;
         }
+
+        // --board->pmindex;
         turnZobrist(board);
         board->turn = !(board->turn);
         return;
@@ -189,6 +192,7 @@ void unmakeMove(BOARD_STATE *board, MOVE move) {
         --board->fullmove;
     }
 
+    // --board->pmindex;
     turnZobrist(board);
     board->turn = !(board->turn);
 }

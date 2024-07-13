@@ -125,6 +125,7 @@ typedef struct {
     int pvlength[MAX_DEPTH];
 
     POSRECORD playedmoves[MAX_GAME_LENGTH * 2];
+    int pmindex;
 
     int nodes;
     int stopped;

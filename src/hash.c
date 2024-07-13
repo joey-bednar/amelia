@@ -12,6 +12,7 @@ static ULL get64rand() {
 
 // init random zobrist values
 void initZobrist() {
+    srand(1);
     for (int piece = wP; piece <= bK; ++piece) {
         for (int sq = 0; sq < 64; ++sq) {
             zobrist_vals[piece - 1][sq] = get64rand();
