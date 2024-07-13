@@ -267,6 +267,7 @@ void startUCI() {
             initBoard(&board);
             loadFEN(input, &board, 13);
             parseMoves(input, &board);
+
         } else if (strncmp("go perft ", input, 9) == 0) {
 
             int depth = parseUCINumber(input, " perft ", 0);

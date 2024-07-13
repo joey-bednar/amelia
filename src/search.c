@@ -188,15 +188,7 @@ static int alphabeta(BOARD_STATE *board, int depth, int alpha, int beta) {
 
     int legal = 0;
 
-    if (board->halfmove >= 100) {
-        return 0;
-    }
-
-    if (isThreeFold(board)) {
-        return 0;
-    }
-
-    if (isInsufficientMaterial(board)) {
+    if (board->halfmove >= 100 || isThreeFold(board) || isInsufficientMaterial(board)) {
         return 0;
     }
 
@@ -307,20 +299,25 @@ static int searchCutoff(BOARD_STATE *board, float time_ms) {
     }
 
     // emergency
-    if (time <= 1000 * 5 && time_ms > 150) {
+    if (time <= 1000 * 5 && time_ms > 100) {
         return TRUE;
     }
 
     // bullet time control
-    if (time <= 1000 * 60 * 1 && time_ms > 400) {
+    if (time <= 1000 * 60 * 1 && time_ms > 300) {
         return TRUE;
     }
+
     // blitz
-    if (time <= 1000 * 60 * 3 && time_ms > 250) {
+    if (time <= 1000 * 60 * 3 && time_ms > 900) {
         return TRUE;
     }
+    if (time <= 1000 * 60 * 5 && time_ms > 1100) {
+        return TRUE;
+    }
+
     // other
-    if (time_ms >= 1000 * 1) {
+    if (time_ms >= 2000 * 1) {
         return TRUE;
     }
     return FALSE;
@@ -344,20 +341,20 @@ static float setCutoff(BOARD_STATE *board) {
         return 5000 + inc;
     }
 
-    // // blitz
-    // if (time <= 1000 * 60 * 3) {
-    //     return 4000 + inc;
-    // }
-    //
-    // // blitz
-    // if (time <= 1000 * 60 * 5) {
-    //     return 8000 + inc;
-    // }
+    // blitz
+    if (time <= 1000 * 60 * 3) {
+        return 8000 + inc;
+    }
+
+    // blitz
+    if (time <= 1000 * 60 * 5) {
+        return 10000 + inc;
+    }
 
     // rapid
-    // return 10000 + inc;
+    return 20000 + inc;
 
-    return 999999;
+    // return 999999;
 }
 
 void search(BOARD_STATE *board) {
@@ -413,4 +410,7 @@ void search(BOARD_STATE *board) {
     printf("bestmove ");
     printMoveText(bestmove);
     printf("\n");
+
+    // makeMove(board, bestmove);
+    // printBoard(board);
 }
