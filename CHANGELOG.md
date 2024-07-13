@@ -5,9 +5,8 @@
 
 Improved move generation and time management.
 
-Engine can now deliver basic checkmates and use its king in endgames.
-
 - Added emergency stop to search after cutoff time
+- Added increment to time management calculations
 - Use precomputed attack rays to search for attacks/checks
 - Refactor of move generation to compress move data
 - Switch insufficient material rules from USCF to FIDE
