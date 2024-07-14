@@ -63,6 +63,13 @@ int isInsufficientMaterial(BOARD_STATE *board) {
         return FALSE;
     }
 
+    // FIDE rules KNN vs K not forced draw
+    int whiteKnightCount = countBits(whiteKnight);
+    int blackKnightCount = countBits(blackKnight);
+    if (whiteKnightCount > 1 || blackKnightCount > 1) {
+        return FALSE;
+    }
+
     return TRUE;
 }
 
