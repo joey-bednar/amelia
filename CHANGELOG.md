@@ -1,5 +1,16 @@
 # Changelog
 
+## [v0.9](https://github.com/joey-bednar/annie/tree/v0.9) (7/14/24)
+
+Search efficiency was greatly improved using pruning/extension techniques.
+
+- Added null move pruning
+- Added check extensions
+- Fix KNN vs K not forced draw by FIDE rules
+
+**v0.9 vs v0.8:** 286 wins, 93 draws, 121 losses (0.612)
+
+**Elo increase:** 119.1 +/- 28.7
 
 ## [v0.8](https://github.com/joey-bednar/annie/tree/v0.8) (7/13/24)
 
