@@ -41,14 +41,15 @@ static int isMateEval(int score) {
 
 // prints uci centipawn/mate search info
 static void printEval(int score, int depth) {
+
     if (score + MATETHRESHOLD >= MATE && score - MATETHRESHOLD <= MATE) {
-        int dist = (MATE - score) + depth;
-        int mate = (dist + 1) / 2;
+        int dist = (MATE - score);
+        int mate = (depth + 1) / 2;
         printf("score mate %d ", mate);
     } else if (score + MATETHRESHOLD >= -MATE &&
                score - MATETHRESHOLD <= -MATE) {
-        int dist = (MATE + score) + depth;
-        int mate = (dist) / 2;
+        int dist = (MATE + score);
+        int mate = (depth) / 2;
         printf("score mate -%d ", mate);
     } else {
         printf("score cp %d ", score);
@@ -63,7 +64,7 @@ static void printInfo(BOARD_STATE *board, float time, int score, int depth) {
 
     printf("info ");
     printf("depth %d ", depth);
-    printEval(score, depth);
+    printEval(score, board->pvlength[0]);
     printf("nodes %ld ", (long)board->nodes);
     printf("nps %ld ", nps);
     printf("time %ld ", (long)time);
@@ -164,7 +165,7 @@ static int quiesce(BOARD_STATE *board, int depth, int alpha, int beta) {
         if (isAttacked(board, SQ64SQ120(getKingSq(board, board->turn)),
                        !board->turn)) {
             // checkmate
-            return -MATE - depth;
+            return -MATE + board->ply;
         } else {
             // stalemate
             return 0;
@@ -233,7 +234,7 @@ static int nullmovesearch(BOARD_STATE *board, int depth, int alpha, int beta) {
     if (legal == 0) {
         if (incheck) {
             // checkmate
-            return -MATE - depth;
+            return -MATE + board->ply;
         } else {
             // stalemate
             return 0;
@@ -325,7 +326,7 @@ static int alphabeta(BOARD_STATE *board, int depth, int alpha, int beta,
     if (legal == 0) {
         if (incheck) {
             // checkmate
-            return -MATE - depth;
+            return -MATE + board->ply;
         } else {
             // stalemate
             return 0;
@@ -377,9 +378,6 @@ static void copyPVtoTable(BOARD_STATE *board, int depth) {
 // returns true when next iteration of search should be
 // prevented due to time restrictions
 static int searchCutoff(BOARD_STATE *board, float time_ms) {
-
-    // 0.555 default; 0LOT
-    // 0.635
 
     int time = inputTime[board->turn];
     if (time == DEFAULT_TIME) {
@@ -495,7 +493,4 @@ void search(BOARD_STATE *board) {
     printf("bestmove ");
     printMoveText(bestmove);
     printf("\n");
-
-    // makeMove(board, bestmove);
-    // printBoard(board);
 }
