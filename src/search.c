@@ -193,6 +193,13 @@ static int alphabeta(BOARD_STATE *board, int depth, int alpha, int beta) {
         return 0;
     }
 
+    // check extension
+    int incheck = isAttacked(board, SQ64SQ120(getKingSq(board, board->turn)),
+                             !board->turn);
+    if (incheck) {
+        ++depth;
+    }
+
     if (depth == 0) {
         return quiesce(board, QMAXDEPTH, alpha, beta);
     }
@@ -235,8 +242,7 @@ static int alphabeta(BOARD_STATE *board, int depth, int alpha, int beta) {
     }
 
     if (legal == 0) {
-        if (isAttacked(board, SQ64SQ120(getKingSq(board, board->turn)),
-                       !board->turn)) {
+        if (incheck) {
             // checkmate
             return -MATE - depth;
         } else {
@@ -402,9 +408,6 @@ void search(BOARD_STATE *board) {
         if (searchCutoff(board, time_taken_ms)) {
             break;
         }
-        // if(time_taken_ms * 2 > board->cutoffTime) {
-        //     break;
-        // }
     }
 
     // print best move

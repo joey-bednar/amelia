@@ -43,6 +43,10 @@
 #define SETBIT(bb, sq64) ((bb) |= (1ULL << sq64))
 #define CLEARBITBOARD(bb) ((bb) = 0)
 
+// math
+#define MIN(a, b) (((a) < (b)) ? (a) : (b))
+#define MAX(a, b) (((a) > (b)) ? (a) : (b))
+
 // attack bitboards
 #define KNIGHTBB(sq64) (knightJumps[(sq64)])
 #define KINGBB(sq64) (kingJumps[(sq64)])
