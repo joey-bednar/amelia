@@ -32,10 +32,6 @@ int isInsufficientMaterial(BOARD_STATE *board) {
         return FALSE;
     }
 
-    // return (countBits(board->bitboard[bbBishop] | board->bitboard[bbKnight])
-    // <
-    //         2);
-
     ULL whiteBishop = board->bitboard[bbBishop] & board->bitboard[WHITE];
     ULL blackBishop = board->bitboard[bbBishop] & board->bitboard[BLACK];
 

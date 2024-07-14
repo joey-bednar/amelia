@@ -274,10 +274,10 @@ static int alphabeta(BOARD_STATE *board, int depth, int alpha, int beta,
         return quiesce(board, QMAXDEPTH, alpha, beta);
     }
 
-    if (depth >= 3 && !incheck) {
+    if (depth >= 4 && !incheck) {
 
         makeNullMove(board);
-        int nullScore = -nullmovesearch(board, depth - 3, -beta, -beta + 1);
+        int nullScore = -nullmovesearch(board, depth - 2, -beta, -beta + 1);
         unmakeNullMove(board);
 
         if (nullScore >= beta) {
