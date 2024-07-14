@@ -55,6 +55,45 @@ static void castleRooks(BOARD_STATE *board, int end) {
     }
 }
 
+void makeNullMove(BOARD_STATE *board) {
+
+    assert(!isAttacked(board, SQ64SQ120(getKingSq(board, board->turn)),
+                       !board->turn));
+
+    // add info to played moves
+    int index = board->pmindex;
+    board->playedmoves[index].halfmove = board->halfmove;
+    board->playedmoves[index].castle = board->castle;
+    board->playedmoves[index].enpassant = board->enpassant;
+    board->playedmoves[index].hash = board->hash;
+
+    board->enpassant = OFFBOARD;
+
+    // add hash to played moves
+    ++board->pmindex;
+
+    turnZobrist(board);
+    board->turn = !(board->turn);
+}
+
+void unmakeNullMove(BOARD_STATE *board) {
+
+    assert(!isAttacked(board, SQ64SQ120(getKingSq(board, board->turn)),
+                       !board->turn));
+
+    // clear hash
+    int index = --board->pmindex;
+    board->playedmoves[index].hash = 0ull;
+
+    // reset castling abilities
+    board->castle = board->playedmoves[index].castle;
+    board->halfmove = board->playedmoves[index].halfmove;
+    board->enpassant = board->playedmoves[index].enpassant;
+
+    turnZobrist(board);
+    board->turn = !(board->turn);
+}
+
 // play a move on the board
 void makeMove(BOARD_STATE *board, MOVE move) {
 
@@ -126,6 +165,7 @@ void makeMove(BOARD_STATE *board, MOVE move) {
 
     turnZobrist(board);
     board->turn = !(board->turn);
+
     return;
 }
 

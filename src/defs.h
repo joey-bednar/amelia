@@ -206,6 +206,8 @@ extern void updateCastling(BOARD_STATE *board, MOVE move);
 extern int generateMoves(BOARD_STATE *board, MOVE *move);
 extern void makeMove(BOARD_STATE *board, MOVE move);
 extern void unmakeMove(BOARD_STATE *board, MOVE move);
+extern void makeNullMove(BOARD_STATE *board);
+extern void unmakeNullMove(BOARD_STATE *board);
 
 // attack.c
 extern int isAttacked(BOARD_STATE *board, int sq, int enemycolor);
