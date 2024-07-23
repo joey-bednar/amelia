@@ -57,9 +57,6 @@ static void castleRooks(BOARD_STATE *board, int end) {
 
 void makeNullMove(BOARD_STATE *board) {
 
-    assert(!isAttacked(board, SQ64SQ120(getKingSq(board, board->turn)),
-                       !board->turn));
-
     // add info to played moves
     int index = board->pmindex;
     board->playedmoves[index].halfmove = board->halfmove;
@@ -77,9 +74,6 @@ void makeNullMove(BOARD_STATE *board) {
 }
 
 void unmakeNullMove(BOARD_STATE *board) {
-
-    assert(!isAttacked(board, SQ64SQ120(getKingSq(board, board->turn)),
-                       !board->turn));
 
     // clear hash
     int index = --board->pmindex;

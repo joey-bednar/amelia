@@ -401,9 +401,12 @@ static int searchCutoff(BOARD_STATE *board, float time_ms) {
     if (time <= 1000 * 60 * 5 && time_ms > 1100) {
         return TRUE;
     }
+    if (time <= 1000 * 60 * 7 && time_ms > 1500) {
+        return TRUE;
+    }
 
-    // other
-    if (time_ms >= 2000 * 1) {
+    // rapid
+    if (time_ms >= 5000 * 1) {
         return TRUE;
     }
     return FALSE;
@@ -440,7 +443,6 @@ static float setCutoff(BOARD_STATE *board) {
     // rapid
     return 20000 + inc;
 
-    // return 999999;
 }
 
 void search(BOARD_STATE *board) {
