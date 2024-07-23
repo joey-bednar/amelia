@@ -43,12 +43,10 @@ static int isMateEval(int score) {
 static void printEval(int score, int depth) {
 
     if (score + MATETHRESHOLD >= MATE && score - MATETHRESHOLD <= MATE) {
-        int dist = (MATE - score);
         int mate = (depth + 1) / 2;
         printf("score mate %d ", mate);
     } else if (score + MATETHRESHOLD >= -MATE &&
                score - MATETHRESHOLD <= -MATE) {
-        int dist = (MATE + score);
         int mate = (depth) / 2;
         printf("score mate -%d ", mate);
     } else {
@@ -442,7 +440,6 @@ static float setCutoff(BOARD_STATE *board) {
 
     // rapid
     return 20000 + inc;
-
 }
 
 void search(BOARD_STATE *board) {

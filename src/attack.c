@@ -52,34 +52,6 @@ static int isAttackedRay(BOARD_STATE *board, int sq120, int enemycolor) {
     return FALSE;
 }
 
-// return TRUE if sq(120) is attacked by an enemy piece on the file/rank/diag
-// given by the offset directions
-static int isAttackedSliding(BOARD_STATE *board, int sq, const int *offsets,
-                             int enemycolor, int RB) {
-    int nextSq;
-    for (int i = 0; i < 4; ++i) {
-        nextSq = sq + offsets[i];
-
-        while (ONBOARD(nextSq) &&
-               !CHECKBIT(board->bitboard[bbWhite] | board->bitboard[bbBlack],
-                         SQ120SQ64(nextSq))) {
-            nextSq = nextSq + offsets[i];
-        }
-
-        if (ONBOARD(nextSq)) {
-
-            ULL bb = (board->bitboard[bbQueen] | board->bitboard[RB]) &
-                     board->bitboard[enemycolor];
-
-            if (CHECKBIT(bb, SQ120SQ64(nextSq))) {
-                return TRUE;
-            }
-        }
-    }
-
-    return FALSE;
-}
-
 // return TRUE if sq(120) is attacked by an enemy pawn
 static int isAttackedPawn(BOARD_STATE *board, int sq, int enemycolor) {
 
@@ -117,9 +89,6 @@ int isAttacked(BOARD_STATE *board, int sq, int enemycolor) {
            isAttackedPawn(board, sq, enemycolor) ||
 
            isAttackedRay(board, sq, enemycolor);
-
-    // isAttackedSliding(board, sq, ROOKOFFSETS, enemycolor, bbRook) ||
-    // isAttackedSliding(board, sq, BISHOPOFFSETS, enemycolor, bbBishop);
 }
 
 // return TRUE if move is legal
