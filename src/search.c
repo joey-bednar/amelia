@@ -456,7 +456,7 @@ void search(BOARD_STATE *board) {
 
     // iterative deepening
     MOVE bestmove;
-    for (int searchDepth = 0; searchDepth <= inputDepth; searchDepth++) {
+    for (int searchDepth = 1; searchDepth <= inputDepth; searchDepth++) {
 
         board->ply = 0;
 
