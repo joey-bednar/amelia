@@ -25,12 +25,12 @@ const int rookOffset[4] = {-10, -1, 10, 1};
 const int bishopOffset[4] = {-11, -9, 9, 11};
 const int promoteTo[4] = {bbQueen, bbKnight, bbRook, bbBishop};
 
-int pawnSqTable[];
-int knightSqTable[];
-int bishopSqTable[];
-int rookSqTable[];
-int queenSqTable[];
-int kingSqTable[];
+int pawnSqTable[2][64];
+int knightSqTable[2][64];
+int bishopSqTable[2][64];
+int rookSqTable[2][64];
+int queenSqTable[2][64];
+int kingSqTable[2][64];
 
 ULL slidingRay[8][64];
 
@@ -70,6 +70,26 @@ static void initPieceSqMaps() {
      5, 10, 10,-20,-20, 10, 10,  5,
      0,  0,  0,  0,  0,  0,  0,  0
     };
+    static const int pawnEndgame[] = {
+    0,  0,  0,  0,  0,  0,  0,  0,
+    50, 50, 50, 50, 50, 50, 50, 50,
+    10, 10, 20, 30, 30, 20, 10, 10,
+     5,  5, 10, 25, 25, 10,  5,  5,
+     0,  0,  0, 20, 20,  0,  0,  0,
+     5, -5,-10,  0,  0,-10, -5,  5,
+     5, 10, 10,-20,-20, 10, 10,  5,
+     0,  0,  0,  0,  0,  0,  0,  0
+    };
+    // static const int pawnEndgame[] = {
+    // 0,  0,  0,  0,  0,  0,  0,  0,
+    // 90, 90, 90, 90, 90, 90, 90, 90,
+    // 70, 70, 70, 70, 70, 70, 70, 70,
+    // 50, 50, 50, 50, 50, 50, 50, 50,
+    // 30, 30, 30, 30, 30, 30, 30, 30,
+    // 10, 10, 10, 10, 10, 10, 10, 10,
+    //  5,  5,  5,  5,  5,  5,  5,  5,
+    //  0,  0,  0,  0,  0,  0,  0,  0
+    // };
     static const int knight[] = {
     -50,-40,-30,-30,-30,-30,-40,-50,
     -40,-20,  0,  0,  0,  0,-20,-40,
@@ -120,16 +140,43 @@ static void initPieceSqMaps() {
      20, 20,  0,  0,  0,  0, 20, 20,
      20, 30, 10,  0,  0, 10, 30, 20
     };
+    // static const int kingEndgame[] = {
+    // -50,-40,-30,-20,-20,-30,-40,-50,
+    // -30,-20,-10,  0,  0,-10,-20,-30,
+    // -30,-10, 20, 30, 30, 20,-10,-30,
+    // -30,-10, 30, 40, 40, 30,-10,-30,
+    // -30,-10, 30, 40, 40, 30,-10,-30,
+    // -30,-10, 20, 30, 30, 20,-10,-30,
+    // -30,-30,  0,  0,  0,  0,-30,-30,
+    // -50,-30,-30,-30,-30,-30,-30,-50
+    // };
+    static const int kingEndgame[] = {
+     0,  0,  0,  0,  0,  0,  0,  0,
+     0,  0,  0,  0,  0,  0,  0,  0,
+     0,  0,  0,  0,  0,  0,  0,  0,
+     0,  0,  0,  0,  0,  0,  0,  0,
+     0,  0,  0,  0,  0,  0,  0,  0,
+     0,  0,  0,  0,  0,  0,  0,  0,
+     0,  0,  0,  0,  0,  0,  0,  0,
+     0,  0,  0,  0,  0,  0,  0,  0,
+    };
     // clang-format on
 
     // rotate piece maps to match bitboard indices
     for (int i = 0; i < 64; ++i) {
-        pawnSqTable[(((i >> 3) | (i << 3)) & 63) ^ 7] = pawn[i];
-        knightSqTable[(((i >> 3) | (i << 3)) & 63) ^ 7] = knight[i];
-        bishopSqTable[(((i >> 3) | (i << 3)) & 63) ^ 7] = bishop[i];
-        rookSqTable[(((i >> 3) | (i << 3)) & 63) ^ 7] = rook[i];
-        queenSqTable[(((i >> 3) | (i << 3)) & 63) ^ 7] = queen[i];
-        kingSqTable[(((i >> 3) | (i << 3)) & 63) ^ 7] = king[i];
+        pawnSqTable[0][(((i >> 3) | (i << 3)) & 63) ^ 7] = pawn[i];
+        knightSqTable[0][(((i >> 3) | (i << 3)) & 63) ^ 7] = knight[i];
+        bishopSqTable[0][(((i >> 3) | (i << 3)) & 63) ^ 7] = bishop[i];
+        rookSqTable[0][(((i >> 3) | (i << 3)) & 63) ^ 7] = rook[i];
+        queenSqTable[0][(((i >> 3) | (i << 3)) & 63) ^ 7] = queen[i];
+        kingSqTable[0][(((i >> 3) | (i << 3)) & 63) ^ 7] = king[i];
+
+        pawnSqTable[1][(((i >> 3) | (i << 3)) & 63) ^ 7] = pawnEndgame[i];
+        knightSqTable[1][(((i >> 3) | (i << 3)) & 63) ^ 7] = knight[i];
+        bishopSqTable[1][(((i >> 3) | (i << 3)) & 63) ^ 7] = bishop[i];
+        rookSqTable[1][(((i >> 3) | (i << 3)) & 63) ^ 7] = rook[i];
+        queenSqTable[1][(((i >> 3) | (i << 3)) & 63) ^ 7] = queen[i];
+        kingSqTable[1][(((i >> 3) | (i << 3)) & 63) ^ 7] = kingEndgame[i];
     }
 
     // for(int i=0;i<64;i++) {

@@ -1,8 +1,13 @@
 #include "defs.h"
-#include <assert.h>
-#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
+
+// returns number of pseudolegal king moves. used to evaluate king safety
+static int pawnShield(BOARD_STATE *board, int color) {
+    ULL moves = KINGBB(getKingSq(board, color)) & board->bitboard[color] &
+                board->bitboard[bbPawn];
+    return countBits(moves);
+}
 
 // returns true if position has been repeated three times
 int isThreeFold(BOARD_STATE *board) {
@@ -97,10 +102,6 @@ static int computePieceSqTotals(ULL bb, int color, int endgame,
                                 BOARD_STATE *board) {
     int total = 0;
 
-    if (endgame) {
-        bb &= ~board->bitboard[bbKing];
-    }
-
     BITLOOP(bb) {
         int index64 = bitScanForward(bb);
         int sq = SQ64SQ120(index64);
@@ -113,22 +114,22 @@ static int computePieceSqTotals(ULL bb, int color, int endgame,
 
         switch (piece) {
         case bbPawn:
-            total += pawnSqTable[index64];
+            total += pawnSqTable[endgame][index64];
             break;
         case bbRook:
-            total += rookSqTable[index64];
+            total += rookSqTable[endgame][index64];
             break;
         case bbBishop:
-            total += bishopSqTable[index64];
+            total += bishopSqTable[endgame][index64];
             break;
         case bbKnight:
-            total += knightSqTable[index64];
+            total += knightSqTable[endgame][index64];
             break;
         case bbQueen:
-            total += queenSqTable[index64];
+            total += queenSqTable[endgame][index64];
             break;
         case bbKing:
-            total += kingSqTable[index64];
+            total += kingSqTable[endgame][index64];
             break;
         }
     }
@@ -172,11 +173,12 @@ static int computeMopUp(int winningcolor, BOARD_STATE *board) {
 }
 
 static int isEndgame(int totalMaterial) {
-    return (totalMaterial < 2000);
+    return (totalMaterial < 2500);
 }
 
 // returns centipawn evaluation of current position
 int eval(BOARD_STATE *board) {
+
     ULL mine = board->bitboard[board->turn];
     ULL yours = board->bitboard[!board->turn];
 
@@ -188,15 +190,22 @@ int eval(BOARD_STATE *board) {
     total += myMaterial - yourMaterial;
 
     // compute mop up eval for endgames
-    int endgame = isEndgame(myMaterial + yourMaterial);
+    int endgame = (myMaterial + yourMaterial < 2500) ||
+                  board->bitboard[bbQueen] ==
+                      0ull; // isEndgame(myMaterial + yourMaterial);
     if (endgame) {
-        int winningcolor;
         if (total > 0) {
             total += computeMopUp(board->turn, board);
         } else {
             total -= computeMopUp(!board->turn, board);
         }
     }
+    // else {
+    //     // compute king safety in opening/middlegame
+    //     int shield =
+    //         pawnShield(board, board->turn) - pawnShield(board, !board->turn);
+    //     total += 10 * shield;
+    // }
 
     // compute piece square eval
     total += computePieceSqTotals(mine, board->turn, endgame, board);

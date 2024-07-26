@@ -158,12 +158,12 @@ extern ULL knightJumps[64];
 extern ULL kingJumps[64];
 extern ULL slidingRay[8][64];
 
-extern int pawnSqTable[64];
-extern int knightSqTable[64];
-extern int bishopSqTable[64];
-extern int rookSqTable[64];
-extern int queenSqTable[64];
-extern int kingSqTable[64];
+extern int pawnSqTable[2][64];
+extern int knightSqTable[2][64];
+extern int bishopSqTable[2][64];
+extern int rookSqTable[2][64];
+extern int queenSqTable[2][64];
+extern int kingSqTable[2][64];
 
 extern ULL zobrist_vals[12][64];
 extern ULL zobristB2M;
