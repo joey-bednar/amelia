@@ -172,10 +172,6 @@ static int computeMopUp(int winningcolor, BOARD_STATE *board) {
     return mopUp;
 }
 
-static int isEndgame(int totalMaterial) {
-    return (totalMaterial < 2500);
-}
-
 // returns centipawn evaluation of current position
 int eval(BOARD_STATE *board) {
 
@@ -190,14 +186,13 @@ int eval(BOARD_STATE *board) {
     total += myMaterial - yourMaterial;
 
     // compute mop up eval for endgames
-    int endgame = (myMaterial + yourMaterial < 2500) ||
-                  board->bitboard[bbQueen] ==
-                      0ull; // isEndgame(myMaterial + yourMaterial);
+    int endgame =
+        (myMaterial + yourMaterial < 2500) || board->bitboard[bbQueen] == 0ull;
     if (endgame) {
-        if (total > 0) {
-            total += computeMopUp(board->turn, board);
-        } else {
-            total -= computeMopUp(!board->turn, board);
+        if (total > 400) {
+            total += 10 * computeMopUp(board->turn, board);
+        } else if (total < -400) {
+            total -= 10 * computeMopUp(!board->turn, board);
         }
     }
     // else {

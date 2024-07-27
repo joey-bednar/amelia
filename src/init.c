@@ -83,9 +83,9 @@ static void initPieceSqMaps() {
     // static const int pawnEndgame[] = {
     // 0,  0,  0,  0,  0,  0,  0,  0,
     // 90, 90, 90, 90, 90, 90, 90, 90,
-    // 70, 70, 70, 70, 70, 70, 70, 70,
-    // 50, 50, 50, 50, 50, 50, 50, 50,
-    // 30, 30, 30, 30, 30, 30, 30, 30,
+    // 60, 60, 60, 60, 60, 60, 60, 60,
+    // 40, 40, 40, 40, 40, 40, 40, 40,
+    // 20, 20, 20, 20, 20, 20, 20, 20,
     // 10, 10, 10, 10, 10, 10, 10, 10,
     //  5,  5,  5,  5,  5,  5,  5,  5,
     //  0,  0,  0,  0,  0,  0,  0,  0
@@ -140,43 +140,43 @@ static void initPieceSqMaps() {
      20, 20,  0,  0,  0,  0, 20, 20,
      20, 30, 10,  0,  0, 10, 30, 20
     };
-    // static const int kingEndgame[] = {
-    // -50,-40,-30,-20,-20,-30,-40,-50,
-    // -30,-20,-10,  0,  0,-10,-20,-30,
-    // -30,-10, 20, 30, 30, 20,-10,-30,
-    // -30,-10, 30, 40, 40, 30,-10,-30,
-    // -30,-10, 30, 40, 40, 30,-10,-30,
-    // -30,-10, 20, 30, 30, 20,-10,-30,
-    // -30,-30,  0,  0,  0,  0,-30,-30,
-    // -50,-30,-30,-30,-30,-30,-30,-50
-    // };
     static const int kingEndgame[] = {
-     0,  0,  0,  0,  0,  0,  0,  0,
-     0,  0,  0,  0,  0,  0,  0,  0,
-     0,  0,  0,  0,  0,  0,  0,  0,
-     0,  0,  0,  0,  0,  0,  0,  0,
-     0,  0,  0,  0,  0,  0,  0,  0,
-     0,  0,  0,  0,  0,  0,  0,  0,
-     0,  0,  0,  0,  0,  0,  0,  0,
-     0,  0,  0,  0,  0,  0,  0,  0,
+    -50,-40,-30,-20,-20,-30,-40,-50,
+    -30,-20,-10,  0,  0,-10,-20,-30,
+    -30,-10, 20, 30, 30, 20,-10,-30,
+    -30,-10, 30, 40, 40, 30,-10,-30,
+    -30,-10, 30, 40, 40, 30,-10,-30,
+    -30,-10, 20, 30, 30, 20,-10,-30,
+    -30,-30,  0,  0,  0,  0,-30,-30,
+    -50,-30,-30,-30,-30,-30,-30,-50
     };
+    // static const int kingEndgame[] = {
+    //  0,  0,  0,  0,  0,  0,  0,  0,
+    //  0,  0,  0,  0,  0,  0,  0,  0,
+    //  0,  0,  0,  0,  0,  0,  0,  0,
+    //  0,  0,  0,  0,  0,  0,  0,  0,
+    //  0,  0,  0,  0,  0,  0,  0,  0,
+    //  0,  0,  0,  0,  0,  0,  0,  0,
+    //  0,  0,  0,  0,  0,  0,  0,  0,
+    //  0,  0,  0,  0,  0,  0,  0,  0,
+    // };
     // clang-format on
 
     // rotate piece maps to match bitboard indices
     for (int i = 0; i < 64; ++i) {
-        pawnSqTable[0][(((i >> 3) | (i << 3)) & 63) ^ 7] = pawn[i];
-        knightSqTable[0][(((i >> 3) | (i << 3)) & 63) ^ 7] = knight[i];
-        bishopSqTable[0][(((i >> 3) | (i << 3)) & 63) ^ 7] = bishop[i];
-        rookSqTable[0][(((i >> 3) | (i << 3)) & 63) ^ 7] = rook[i];
-        queenSqTable[0][(((i >> 3) | (i << 3)) & 63) ^ 7] = queen[i];
-        kingSqTable[0][(((i >> 3) | (i << 3)) & 63) ^ 7] = king[i];
+        pawnSqTable[0][BBROTATE(i)] = pawn[i];
+        knightSqTable[0][BBROTATE(i)] = knight[i];
+        bishopSqTable[0][BBROTATE(i)] = bishop[i];
+        rookSqTable[0][BBROTATE(i)] = rook[i];
+        queenSqTable[0][BBROTATE(i)] = queen[i];
+        kingSqTable[0][BBROTATE(i)] = king[i];
 
-        pawnSqTable[1][(((i >> 3) | (i << 3)) & 63) ^ 7] = pawnEndgame[i];
-        knightSqTable[1][(((i >> 3) | (i << 3)) & 63) ^ 7] = knight[i];
-        bishopSqTable[1][(((i >> 3) | (i << 3)) & 63) ^ 7] = bishop[i];
-        rookSqTable[1][(((i >> 3) | (i << 3)) & 63) ^ 7] = rook[i];
-        queenSqTable[1][(((i >> 3) | (i << 3)) & 63) ^ 7] = queen[i];
-        kingSqTable[1][(((i >> 3) | (i << 3)) & 63) ^ 7] = kingEndgame[i];
+        pawnSqTable[1][BBROTATE(i)] = pawnEndgame[i];
+        knightSqTable[1][BBROTATE(i)] = knight[i];
+        bishopSqTable[1][BBROTATE(i)] = bishop[i];
+        rookSqTable[1][BBROTATE(i)] = rook[i];
+        queenSqTable[1][BBROTATE(i)] = queen[i];
+        kingSqTable[1][BBROTATE(i)] = kingEndgame[i];
     }
 
     // for(int i=0;i<64;i++) {

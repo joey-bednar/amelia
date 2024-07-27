@@ -42,6 +42,7 @@
 #define CLEARBIT(bb, sq64) ((bb) &= ~(1ULL << sq64))
 #define SETBIT(bb, sq64) ((bb) |= (1ULL << sq64))
 #define CLEARBITBOARD(bb) ((bb) = 0)
+#define BBROTATE(i) ((((i) >> 3) | ((i) << 3)) & 63) ^ 7
 
 // math
 #define MIN(a, b) (((a) < (b)) ? (a) : (b))
