@@ -456,16 +456,31 @@ void search(BOARD_STATE *board) {
 
     // iterative deepening
     MOVE bestmove;
+    int alpha = -INF;
+    int beta = INF;
     for (int searchDepth = 1; searchDepth <= inputDepth; searchDepth++) {
 
         board->ply = 0;
 
-        int score = alphabeta(board, searchDepth, -INF, INF, TRUE);
+        int score = alphabeta(board, searchDepth, alpha, beta, TRUE);
 
         if (board->stopped) {
             break;
         }
 
+        // redo search with INF window if score is outside aspiration window
+        if (score <= alpha || score >= beta) {
+            alpha = -INF;
+            beta = INF;
+            searchDepth--;
+            continue;
+        }
+
+        // set aspiration window
+        alpha = score - ASPIRATION_WINDOW;
+        beta = score + ASPIRATION_WINDOW;
+
+        // measure time spent
         float new_t = clock() - board->start;
         float time_taken_ms = (1000 * new_t) / CLOCKS_PER_SEC;
 
@@ -475,6 +490,7 @@ void search(BOARD_STATE *board) {
         // get bestmove/ponder from pv
         bestmove = board->pvarray[0][0];
 
+        // load PV into TT
         copyPVtoTable(board, board->pvlength[0]);
 
         // end searches in timed games if mate is found

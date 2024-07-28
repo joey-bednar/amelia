@@ -3,6 +3,7 @@
 #include <stdlib.h>
 
 PVENTRY hashtable[PVSIZE];
+TT tt[TT_SIZE];
 
 int main() {
     BOARD_STATE board;
@@ -10,9 +11,12 @@ int main() {
 
     PVENTRY *hashtable = (PVENTRY *)calloc(PVSIZE, sizeof(PVENTRY));
 
+    TT *tt = (TT *)calloc(TT_SIZE, sizeof(TT));
+
     startUCI();
 
     free(hashtable);
+    free(tt);
 
     return 0;
 }

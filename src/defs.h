@@ -7,6 +7,7 @@
 #define DEFAULT_TIME 3600000
 #define DEFAULT_INC 0
 #define PVSIZE 20000
+#define ASPIRATION_WINDOW 50
 
 // internal constants
 #define FALSE 0
@@ -71,6 +72,13 @@
 #define TWOPAWNFLAG(move) (int)(((move) & 0x80000ul) >> 19)
 #define CASTLEFLAG(move) (int)(((move) & 0x100000ul) >> 20)
 
+// hash table
+#define TT_SIZE 0x400000
+#define TT_EMPTY 1234
+#define TT_EXACT_FLAG 0
+#define TT_ALPHA_FLAG 1
+#define TT_BETA_FLAG 2
+
 #define BITLOOP(bb) for (; (bb); (bb) &= ((bb) - 1))
 
 // clang-format off
@@ -96,6 +104,13 @@ enum { NO_CASTLE, WK_CASTLE, WQ_CASTLE, BK_CASTLE, BQ_CASTLE };
 
 typedef unsigned long long ULL;
 typedef unsigned long MOVE;
+
+typedef struct tt {
+    ULL hash;
+    int depth;
+    int flag;
+    int score;
+} TT;
 
 typedef struct {
     ULL hash;
@@ -140,6 +155,7 @@ typedef struct {
 } BOARD_STATE;
 
 extern PVENTRY hashtable[PVSIZE];
+extern TT tt[TT_SIZE];
 
 extern int inputDepth;
 extern int inputTime[2];
