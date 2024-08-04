@@ -306,7 +306,7 @@ static int alphabeta(BOARD_STATE *board, int depth, int alpha, int beta,
         --board->ply;
 
         if (score >= beta) {
-            // storeTT(board->hash, moves[i], beta, TT_BETA_FLAG, depth);
+            storeTT(board->hash, moves[i], beta, TT_BETA_FLAG, depth);
             return beta;
         }
         if (score > alpha) {
