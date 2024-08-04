@@ -6,7 +6,11 @@
 #include <time.h>
 
 int compareMoves(const void *moveA, const void *moveB) {
-    return (CAPTURED(*(MOVE *)moveB) - CAPTURED(*(MOVE *)moveA));
+
+    MOVE A = *(MOVE *)moveA;
+    MOVE B = *(MOVE *)moveB;
+
+    return MVVLVA(PIECE(B), CAPTURED(B)) - MVVLVA(PIECE(A), CAPTURED(A));
 }
 
 static void sortMoves(BOARD_STATE *board, MOVE *moves, int n_moves) {
@@ -17,12 +21,7 @@ static void sortMoves(BOARD_STATE *board, MOVE *moves, int n_moves) {
 
     if (hashtable[board->hash % PVSIZE].pos == board->hash) {
         for (int i = 0; i < n_moves; i++) {
-            if (START120(moves[i]) ==
-                    START120(hashtable[board->hash % PVSIZE].move) &&
-                END120(moves[i]) ==
-                    END120(hashtable[board->hash % PVSIZE].move) &&
-                PROMOTED(moves[i]) ==
-                    PROMOTED(hashtable[board->hash % PVSIZE].move)) {
+            if (moves[i] == hashtable[board->hash % PVSIZE].move) {
                 MOVE temp = moves[i];
                 moves[i] = moves[0];
                 moves[0] = temp;
@@ -292,6 +291,9 @@ static int alphabeta(BOARD_STATE *board, int depth, int alpha, int beta,
 
     for (int i = 0; i < n_moves; ++i) {
 
+        // printMoveText(moves[i]);
+        // printf(":%d ", MVVLVA(PIECE(moves[i]), CAPTURED(moves[i])));
+
         makeMove(board, moves[i]);
         ++board->ply;
 
@@ -468,17 +470,17 @@ void search(BOARD_STATE *board) {
             break;
         }
 
-        // redo search with INF window if score is outside aspiration window
-        if (score <= alpha || score >= beta) {
-            alpha = -INF;
-            beta = INF;
-            searchDepth--;
-            continue;
-        }
-
-        // set aspiration window
-        alpha = score - ASPIRATION_WINDOW;
-        beta = score + ASPIRATION_WINDOW;
+        // // redo search with INF window if score is outside aspiration window
+        // if (score <= alpha || score >= beta) {
+        //     alpha = -INF;
+        //     beta = INF;
+        //     searchDepth--;
+        //     continue;
+        // }
+        //
+        // // set aspiration window
+        // alpha = score - ASPIRATION_WINDOW;
+        // beta = score + ASPIRATION_WINDOW;
 
         // measure time spent
         float new_t = clock() - board->start;

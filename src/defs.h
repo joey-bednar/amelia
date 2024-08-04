@@ -60,6 +60,7 @@
 #define BISHOPOFFSET(i) (bishopOffset[(i)])
 #define BISHOPOFFSETS bishopOffset
 #define PROMOTES promoteTo
+#define MVVLVA(p, c) (MVVLVA[(p)][(c)])
 
 // move bitmasks
 #define START(move) (int)((move) & 0x3Ful)
@@ -71,6 +72,7 @@
 #define EPFLAG(move) (int)(((move) & 0x40000ul) >> 18)
 #define TWOPAWNFLAG(move) (int)(((move) & 0x80000ul) >> 19)
 #define CASTLEFLAG(move) (int)(((move) & 0x100000ul) >> 20)
+#define PIECE(move) (int)(((move) & 0x00E00000ul) >> 21)
 
 // hash table
 #define TT_SIZE 0x400000
@@ -181,6 +183,8 @@ extern int bishopSqTable[2][64];
 extern int rookSqTable[2][64];
 extern int queenSqTable[2][64];
 extern int kingSqTable[2][64];
+
+extern int MVVLVA[8][8];
 
 extern ULL zobrist_vals[12][64];
 extern ULL zobristB2M;

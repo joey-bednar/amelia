@@ -97,8 +97,7 @@ void makeMove(BOARD_STATE *board, MOVE move) {
     board->playedmoves[index].castle = board->castle;
     board->playedmoves[index].enpassant = board->enpassant;
 
-    int piece =
-        TOCOLOR(board->turn, getGenericPieceSq120(START120(move), board));
+    int piece = TOCOLOR(board->turn, PIECE(move));
 
     // move rooks for castling moves
     if (CASTLEFLAG(move)) {
@@ -179,8 +178,12 @@ void unmakeMove(BOARD_STATE *board, MOVE move) {
     board->castle = board->playedmoves[index].castle;
     board->halfmove = board->playedmoves[index].halfmove;
 
-    int piece =
-        TOCOLOR(!board->turn, getGenericPieceSq120(END120(move), board));
+    int piece;
+    if (PROMOTED(move) != EMPTY) {
+        piece = TOCOLOR(!board->turn, PROMOTED(move));
+    } else {
+        piece = TOCOLOR(!board->turn, PIECE(move));
+    }
 
     // perform en passant
     if (EPFLAG(move)) {
@@ -230,7 +233,7 @@ void unmakeMove(BOARD_STATE *board, MOVE move) {
 }
 
 // add a move to the provided moves array
-static void addMove(MOVE *moves, int start, int end, int captured,
+static void addMove(MOVE *moves, int start, int end, int piece, int captured,
                     int promotion, int enpassant, int twopawnmove, int castle,
                     int *index) {
 
@@ -241,6 +244,7 @@ static void addMove(MOVE *moves, int start, int end, int captured,
     // 0000 0000 0000 0100 0000 0000 0000 0000 : en passant
     // 0000 0000 0000 1000 0000 0000 0000 0000 : two pawn move
     // 0000 0000 0001 0000 0000 0000 0000 0000 : castle
+    // 0000 0000 1110 0000 0000 0000 0000 0000 : piece
     //
     // 0000 0000 0000 0000 0000 0000 0000 0000 : check
     // 0000 0000 0000 0000 0000 0000 0000 0000 : MVV LVA
@@ -251,7 +255,8 @@ static void addMove(MOVE *moves, int start, int end, int captured,
                     (((unsigned long)promotion << 15) & 0x00038000ul) |
                     (((unsigned long)enpassant << 18) & 0x00040000ul) |
                     (((unsigned long)twopawnmove << 19) & 0x00080000ul) |
-                    (((unsigned long)castle << 20) & 0x00100000ul); // |
+                    (((unsigned long)castle << 20) & 0x00100000ul) |
+                    (((unsigned long)piece << 21) & 0x00E00000ul);
 
     ++(*index);
 }
@@ -259,7 +264,7 @@ static void addMove(MOVE *moves, int start, int end, int captured,
 // same as generateSimpleMoves() but continues in offset direction until not
 // possible. Used for sliding pieces (bishop,rook,queen)
 static void generateSlidingMoves(BOARD_STATE *board, MOVE *moves, int sq,
-                                 int *index, const int *offsets) {
+                                 int *index, int piece, const int *offsets) {
 
     for (int i = 0; i < 4; ++i) {
         int nextSq = sq + offsets[i];
@@ -268,7 +273,7 @@ static void generateSlidingMoves(BOARD_STATE *board, MOVE *moves, int sq,
         // move
 
         while (isEmptySquare(nextSq, board)) {
-            addMove(moves, sq, nextSq, EMPTY, EMPTY, FALSE, FALSE, FALSE,
+            addMove(moves, sq, nextSq, piece, EMPTY, EMPTY, FALSE, FALSE, FALSE,
                     index);
 
             nextSq = nextSq + offsets[i];
@@ -277,8 +282,8 @@ static void generateSlidingMoves(BOARD_STATE *board, MOVE *moves, int sq,
         if (ONBOARD(nextSq) &&
             CHECKBIT(board->bitboard[(!board->turn)], SQ120SQ64(nextSq))) {
             int squareContains = getGenericPieceSq120(nextSq, board);
-            addMove(moves, sq, nextSq, squareContains, EMPTY, FALSE, FALSE,
-                    FALSE, index);
+            addMove(moves, sq, nextSq, piece, squareContains, EMPTY, FALSE,
+                    FALSE, FALSE, index);
         }
     }
 }
@@ -319,7 +324,7 @@ static void generateCastleMoves(BOARD_STATE *board, MOVE *moves, int *index) {
 
             if (!throughcheck && !blocked) {
                 addMove(moves, FR2SQ120(FILE_E, rank), FR2SQ120(FILE_G, rank),
-                        EMPTY, EMPTY, FALSE, FALSE, TRUE, index);
+                        bbKing, EMPTY, EMPTY, FALSE, FALSE, TRUE, index);
             }
         }
 
@@ -340,7 +345,7 @@ static void generateCastleMoves(BOARD_STATE *board, MOVE *moves, int *index) {
 
             if (!throughcheck && !blocked) {
                 addMove(moves, FR2SQ120(FILE_E, rank), FR2SQ120(FILE_C, rank),
-                        EMPTY, EMPTY, FALSE, FALSE, TRUE, index);
+                        bbKing, EMPTY, EMPTY, FALSE, FALSE, TRUE, index);
             }
         }
     }
@@ -352,8 +357,8 @@ static void addPromotions(MOVE *moves, int start, int end, int captured,
                           int *index) {
 
     for (int i = 0; i < 4; ++i) {
-        addMove(moves, start, end, captured, PROMOTES[i], FALSE, FALSE, FALSE,
-                index);
+        addMove(moves, start, end, bbPawn, captured, PROMOTES[i], FALSE, FALSE,
+                FALSE, index);
     }
 }
 
@@ -380,8 +385,8 @@ static void generatePseudoPawnMoves(BOARD_STATE *board, MOVE *moves, int sq,
             if (SQ120R(enemysquare) == eighthrank) {
                 addPromotions(moves, sq, enemysquare, enemypiece, index);
             } else {
-                addMove(moves, sq, enemysquare, enemypiece, EMPTY, FALSE, FALSE,
-                        FALSE, index);
+                addMove(moves, sq, enemysquare, bbPawn, enemypiece, EMPTY,
+                        FALSE, FALSE, FALSE, index);
             }
         }
     }
@@ -389,14 +394,15 @@ static void generatePseudoPawnMoves(BOARD_STATE *board, MOVE *moves, int sq,
     // up two
     if (SQ120R(sq) == secondrank && isEmptySquare(one, board) &&
         isEmptySquare(two, board)) {
-        addMove(moves, sq, two, EMPTY, EMPTY, FALSE, TRUE, FALSE, index);
+        addMove(moves, sq, two, bbPawn, EMPTY, EMPTY, FALSE, TRUE, FALSE,
+                index);
     }
 }
 
 // use pregenerated attack bitboards to generate all pseudolegal moves
 // and add to array.
 static void generatePseudoPresetMoves(BOARD_STATE *board, MOVE *moves, int sq,
-                                      ULL bitboard, int *index) {
+                                      ULL bitboard, int piece, int *index) {
     ULL bb = ~board->bitboard[board->turn] & bitboard;
 
     BITLOOP(bb) {
@@ -404,19 +410,25 @@ static void generatePseudoPresetMoves(BOARD_STATE *board, MOVE *moves, int sq,
         int nextSq120 = SQ64SQ120(nextSq64);
 
         int squareContains = getGenericPieceSq120(nextSq120, board);
-        addMove(moves, sq, nextSq120, squareContains, EMPTY, FALSE, FALSE,
-                FALSE, index);
+        addMove(moves, sq, nextSq120, piece, squareContains, EMPTY, FALSE,
+                FALSE, FALSE, index);
     }
 }
 
 static void generatePseudoRookMoves(BOARD_STATE *board, MOVE *moves, int sq,
                                     int *index) {
-    generateSlidingMoves(board, moves, sq, index, ROOKOFFSETS);
+    generateSlidingMoves(board, moves, sq, index, bbRook, ROOKOFFSETS);
 }
 
 static void generatePseudoBishopMoves(BOARD_STATE *board, MOVE *moves, int sq,
                                       int *index) {
-    generateSlidingMoves(board, moves, sq, index, BISHOPOFFSETS);
+    generateSlidingMoves(board, moves, sq, index, bbBishop, BISHOPOFFSETS);
+}
+
+static void generatePseudoQueenMoves(BOARD_STATE *board, MOVE *moves, int sq,
+                                     int *index) {
+    generateSlidingMoves(board, moves, sq, index, bbQueen, BISHOPOFFSETS);
+    generateSlidingMoves(board, moves, sq, index, bbQueen, ROOKOFFSETS);
 }
 
 static void generatePseudoEnPassantMoves(BOARD_STATE *board, MOVE *moves,
@@ -437,8 +449,8 @@ static void generatePseudoEnPassantMoves(BOARD_STATE *board, MOVE *moves,
         // same color pawns
         if (ONBOARD(sq) && CHECKBIT(bb, SQ120SQ64(sq))) {
 
-            addMove(moves, sq, board->enpassant, bbPawn, EMPTY, TRUE, FALSE,
-                    FALSE, index);
+            addMove(moves, sq, board->enpassant, bbPawn, bbPawn, EMPTY, TRUE,
+                    FALSE, FALSE, index);
         }
     }
 }
@@ -483,8 +495,8 @@ void generateOnePawnMoves(BOARD_STATE *board, MOVE *moves, int *index) {
 
         int one = bitScanForward(bbone);
 
-        addMove(moves, SQ64SQ120(one + push), SQ64SQ120(one), EMPTY, EMPTY,
-                FALSE, FALSE, FALSE, index);
+        addMove(moves, SQ64SQ120(one + push), SQ64SQ120(one), bbPawn, EMPTY,
+                EMPTY, FALSE, FALSE, FALSE, index);
     }
 }
 
@@ -512,28 +524,25 @@ int generateMoves(BOARD_STATE *board, MOVE *moves) {
         int i64 = bitScanForward(knights);
 
         generatePseudoPresetMoves(board, moves, SQ64SQ120(i64), KNIGHTBB(i64),
-                                  &index);
+                                  bbKnight, &index);
     }
 
     ULL kings = board->bitboard[board->turn] & board->bitboard[bbKing];
     BITLOOP(kings) {
         int i64 = bitScanForward(kings);
         generatePseudoPresetMoves(board, moves, SQ64SQ120(i64), KINGBB(i64),
-                                  &index);
+                                  bbKing, &index);
     }
 
     ULL queens = board->bitboard[board->turn] & board->bitboard[bbQueen];
     BITLOOP(queens) {
         int i64 = bitScanForward(queens);
-
-        generatePseudoRookMoves(board, moves, SQ64SQ120(i64), &index);
-        generatePseudoBishopMoves(board, moves, SQ64SQ120(i64), &index);
+        generatePseudoQueenMoves(board, moves, SQ64SQ120(i64), &index);
     }
 
     generateOnePawnMoves(board, moves, &index);
 
     ULL pawns = board->bitboard[board->turn] & board->bitboard[bbPawn];
-
     BITLOOP(pawns) {
         int i64 = bitScanForward(pawns);
         generatePseudoPawnMoves(board, moves, SQ64SQ120(i64), &index);

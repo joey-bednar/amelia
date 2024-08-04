@@ -34,6 +34,22 @@ int kingSqTable[2][64];
 
 ULL slidingRay[8][64];
 
+int MVVLVA[8][8];
+
+static void initMVVLVA() {
+    for (int i = 0; i < 8; i++) {
+        for (int j = 0; j < 8; j++) {
+            MVVLVA[i][j] = 0;
+        }
+    }
+
+    for (int piece = bbPawn; piece <= bbKing; piece++) {
+        for (int cap = bbPawn; cap <= bbQueen; cap++) {
+            MVVLVA[piece][cap] = 10 * cap + (bbKing - piece);
+        }
+    }
+}
+
 static ULL initSingleSlidingRay(int sq64, int dir) {
     ULL bb = 0ull;
     int sq120 = SQ64SQ120(sq64);
@@ -314,6 +330,7 @@ void init(BOARD_STATE *board) {
     initPieceSqMaps();
     initZobrist();
     initSlidingRays();
+    initMVVLVA();
 
     clearBoard(board);
     initBoard(board);
