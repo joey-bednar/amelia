@@ -19,12 +19,14 @@ static void sortMoves(BOARD_STATE *board, MOVE *moves, int n_moves) {
         return;
     }
 
-    if (hashtable[board->hash % PVSIZE].pos == board->hash) {
+    MOVE best;
+    if (probeTT(board->hash, &best, INF, -INF, 0) != TT_EMPTY) {
         for (int i = 0; i < n_moves; i++) {
-            if (moves[i] == hashtable[board->hash % PVSIZE].move) {
+            if (moves[i] == best) {
                 MOVE temp = moves[i];
                 moves[i] = moves[0];
                 moves[0] = temp;
+                break;
             }
         }
         qsort(moves + 1, n_moves - 1, sizeof(MOVE), compareMoves);
@@ -142,7 +144,7 @@ static int quiesce(BOARD_STATE *board, int depth, int alpha, int beta) {
                         board->turn)) {
             ++legal;
 
-            if (CAPTURED(moves[i]) != EMPTY) {
+            if (CAPTURED(moves[i]) != EMPTY || PROMOTED(moves[i]) != EMPTY) {
                 score = -quiesce(board, depth - 1, -beta, -alpha);
             }
         }
@@ -291,9 +293,6 @@ static int alphabeta(BOARD_STATE *board, int depth, int alpha, int beta,
 
     for (int i = 0; i < n_moves; ++i) {
 
-        // printMoveText(moves[i]);
-        // printf(":%d ", MVVLVA(PIECE(moves[i]), CAPTURED(moves[i])));
-
         makeMove(board, moves[i]);
         ++board->ply;
 
@@ -307,10 +306,18 @@ static int alphabeta(BOARD_STATE *board, int depth, int alpha, int beta,
         --board->ply;
 
         if (score >= beta) {
+            // storeTT(board->hash, moves[i], beta, TT_BETA_FLAG, depth);
             return beta;
         }
         if (score > alpha) {
             alpha = score;
+
+            // if(depth >= hashtable[board->hash % PVSIZE].depth) {
+            //     hashtable[board->hash % PVSIZE].pos = board->hash;
+            //     hashtable[board->hash % PVSIZE].move = moves[i];
+            // }
+
+            storeTT(board->hash, moves[i], score, TT_EXACT_FLAG, depth);
 
             // add moves to pvarray
             board->pvarray[board->ply][board->ply] = moves[i];
@@ -491,9 +498,6 @@ void search(BOARD_STATE *board) {
 
         // get bestmove/ponder from pv
         bestmove = board->pvarray[0][0];
-
-        // load PV into TT
-        copyPVtoTable(board, board->pvlength[0]);
 
         // end searches in timed games if mate is found
         if (isMateEval(score) && inputTime[board->turn] != DEFAULT_TIME) {

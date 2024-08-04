@@ -78,6 +78,18 @@ int isInsufficientMaterial(BOARD_STATE *board) {
     return TRUE;
 }
 
+static int bonusPassedPawn(BOARD_STATE *board, int sq64, int color) {
+
+    ULL bb = (PASSEDPAWN(sq64, color) & board->bitboard[bbPawn] &
+              board->bitboard[!color]);
+
+    if (bb != 0ull) {
+        return 0;
+    }
+
+    return 50;
+}
+
 // returns eval for material count
 static int computeMaterialTotals(ULL bb, BOARD_STATE *board) {
     int total = 0;
@@ -104,6 +116,8 @@ static int computePieceSqTotals(ULL bb, int color, int endgame,
 
     BITLOOP(bb) {
         int index64 = bitScanForward(bb);
+        int unflipped64 = index64;
+
         int sq = SQ64SQ120(index64);
 
         int piece = getGenericPieceSq120(sq, board);
@@ -115,6 +129,7 @@ static int computePieceSqTotals(ULL bb, int color, int endgame,
         switch (piece) {
         case bbPawn:
             total += pawnSqTable[endgame][index64];
+            total += bonusPassedPawn(board, unflipped64, color);
             break;
         case bbRook:
             total += rookSqTable[endgame][index64];

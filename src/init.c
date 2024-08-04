@@ -36,6 +36,55 @@ ULL slidingRay[8][64];
 
 int MVVLVA[8][8];
 
+ULL passedPawnTable[64][2];
+
+static ULL generatePassedPawnBB(int sq64, int color) {
+
+    int startingSq120 = SQ64SQ120(sq64);
+
+    // no blocking pawns possible on these ranks
+    if (color == WHITE &&
+        (SQ120R(startingSq120) == RANK_1 || SQ120R(startingSq120) >= RANK_7)) {
+        return 0ull;
+    }
+    if (color == BLACK &&
+        (SQ120R(startingSq120) == RANK_8 || SQ120R(startingSq120) <= RANK_2)) {
+        return 0ull;
+    }
+
+    // forward direction
+    const int dirs[2] = {N, S};
+
+    // adjacent file directions
+    const int shift[3] = {0, W, E};
+
+    ULL bb = 0ull;
+
+    for (int i = 0; i < 3; i++) {
+
+        // shift to new file
+        int sq120 = startingSq120 + shift[i];
+
+        // add all forward squares on file
+        sq120 += dirs[color];
+        while (ONBOARD(sq120)) {
+            int sq64now = SQ120SQ64(sq120);
+            SETBIT(bb, sq64now);
+            sq120 += dirs[color];
+        }
+    }
+
+    return bb;
+}
+
+static void initPassedPawns() {
+    for (int i = 0; i < 64; i++) {
+        for (int c = 0; c < 2; c++) {
+            passedPawnTable[i][c] = generatePassedPawnBB(i, c);
+        }
+    }
+}
+
 static void initMVVLVA() {
     for (int i = 0; i < 8; i++) {
         for (int j = 0; j < 8; j++) {
@@ -166,16 +215,6 @@ static void initPieceSqMaps() {
     -30,-30,  0,  0,  0,  0,-30,-30,
     -50,-30,-30,-30,-30,-30,-30,-50
     };
-    // static const int kingEndgame[] = {
-    //  0,  0,  0,  0,  0,  0,  0,  0,
-    //  0,  0,  0,  0,  0,  0,  0,  0,
-    //  0,  0,  0,  0,  0,  0,  0,  0,
-    //  0,  0,  0,  0,  0,  0,  0,  0,
-    //  0,  0,  0,  0,  0,  0,  0,  0,
-    //  0,  0,  0,  0,  0,  0,  0,  0,
-    //  0,  0,  0,  0,  0,  0,  0,  0,
-    //  0,  0,  0,  0,  0,  0,  0,  0,
-    // };
     // clang-format on
 
     // rotate piece maps to match bitboard indices
@@ -194,13 +233,6 @@ static void initPieceSqMaps() {
         queenSqTable[1][BBROTATE(i)] = queen[i];
         kingSqTable[1][BBROTATE(i)] = kingEndgame[i];
     }
-
-    // for(int i=0;i<64;i++) {
-    //     if(i % 8 == 0) {
-    //         printf("\n");
-    //     }
-    //     printf("%d ",king[i]);
-    // }
 }
 
 // array map for possible en passant squares
@@ -331,6 +363,7 @@ void init(BOARD_STATE *board) {
     initZobrist();
     initSlidingRays();
     initMVVLVA();
+    initPassedPawns();
 
     clearBoard(board);
     initBoard(board);

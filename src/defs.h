@@ -61,6 +61,7 @@
 #define BISHOPOFFSETS bishopOffset
 #define PROMOTES promoteTo
 #define MVVLVA(p, c) (MVVLVA[(p)][(c)])
+#define PASSEDPAWN(sq64, c) (passedPawnTable[(sq64)][(c)])
 
 // move bitmasks
 #define START(move) (int)((move) & 0x3Ful)
@@ -77,9 +78,10 @@
 // hash table
 #define TT_SIZE 0x400000
 #define TT_EMPTY 1234
-#define TT_EXACT_FLAG 0
-#define TT_ALPHA_FLAG 1
-#define TT_BETA_FLAG 2
+#define TT_EMPTY_FLAG 0
+#define TT_EXACT_FLAG 1
+#define TT_ALPHA_FLAG 2
+#define TT_BETA_FLAG 3
 
 #define BITLOOP(bb) for (; (bb); (bb) &= ((bb) - 1))
 
@@ -109,9 +111,10 @@ typedef unsigned long MOVE;
 
 typedef struct tt {
     ULL hash;
+    MOVE best;
     int depth;
     int flag;
-    int score;
+    int val;
 } TT;
 
 typedef struct {
@@ -184,6 +187,7 @@ extern int rookSqTable[2][64];
 extern int queenSqTable[2][64];
 extern int kingSqTable[2][64];
 
+extern ULL passedPawnTable[64][2];
 extern int MVVLVA[8][8];
 
 extern ULL zobrist_vals[12][64];
@@ -262,5 +266,10 @@ extern void search(BOARD_STATE *board);
 // uci.c
 extern int loadFEN(char *fen, BOARD_STATE *board, int startIndex);
 extern void startUCI();
+
+// tt.c
+extern void initTT();
+extern int probeTT(ULL hash, MOVE *best, int alpha, int beta, int depth);
+extern void storeTT(ULL hash, MOVE best, int val, int flag, int depth);
 
 #endif
