@@ -1,6 +1,6 @@
 #!/bin/bash
 
-NEWENGINE="/tmp/annie"
+NEWENGINE="/tmp/amelia"
 CURRENTENGINE="$HOME/v10"
 
 BOOK="/usr/local/share/scid/books/Elo2400.bin"
@@ -13,7 +13,7 @@ CONCURRENT=2
 
 cd ..
 make
-cp build/annie /tmp/annie
+cp build/amelia /tmp/amelia
 
 rm -f ${PGN}
 cutechess-cli -engine name=New cmd=${NEWENGINE} -engine name=Current cmd=${CURRENTENGINE} -each book=${BOOK} proto=uci tc=${TC} -repeat -rounds $((GAMES/2)) -games 2 -pgnout ${PGN} -concurrency ${CONCURRENT}

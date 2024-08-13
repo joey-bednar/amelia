@@ -255,7 +255,7 @@ void startUCI() {
             printf("readyok\n");
             initBoard(&board);
         } else if (strncmp("uci", input, 3) == 0) {
-            printf("id name Annie\n");
+            printf("id name Amelia\n");
             printf("id author Joey Bednar\n");
             printf("uciok\n");
         } else if (strcmp("isready\n", input) == 0) {

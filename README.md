@@ -1,15 +1,15 @@
-# Annie Chess Engine
+# Amelia Chess Engine
 
 ## About
 
-Annie is a [UCI](https://www.chessprogramming.org/UCI) compatible chess engine written
-from scratch in C. You can play Annie on [Lichess.org](https://lichess.org/@/AnnieEdison) or
+Amelia is a [UCI](https://www.chessprogramming.org/UCI) compatible chess engine written
+from scratch in C. You can play Amelia on [Lichess.org](https://lichess.org/@/AnnieEdison) or
 install a chess interface to play locally.
 
 ## Lichess
 
-Challenge Annie on Lichess under the username [AnnieEdison](https://lichess.org/@/AnnieEdison).
-You can also [spectate active games](https://lichess.org/@/AnnieEdison/tv).
+Challenge Amelia on Lichess under the username [AmeliaLatest](https://lichess.org/@/AmeliaLatest).
+You can also [spectate active games](https://lichess.org/@/AmeliaLatest/tv).
 
 ## Technical Features
 
@@ -36,8 +36,8 @@ You can also [spectate active games](https://lichess.org/@/AnnieEdison/tv).
 ## Build
 
 ```bash
-git clone https://github.com/joey-bednar/annie && \
-cd annie && \
+git clone https://github.com/joey-bednar/amelia && \
+cd amelia && \
 make && \
-./build/annie
+./build/amelia
 ```
