@@ -1,17 +1,30 @@
-# Amelia Chess Engine
+<div align="center">
 
-## About
+# Amelia
+#### Chess engine accepting challenges on [Lichess.org](https://lichess.org/@/AmeliaLatest).
+
+[![lichess-rapid](https://lichess-shield.vercel.app/api?username=AmeliaLatest&format=bullet)](https://lichess.org/@/AmeliaLatest/perf/bullet)
+[![lichess-rapid](https://lichess-shield.vercel.app/api?username=AmeliaLatest&format=blitz)](https://lichess.org/@/AmeliaLatest/perf/blitz)
+
+<img src="logo.png" alt="logo" width="200px" height="200px"/>
+
+![C](https://img.shields.io/badge/c-%2300599C.svg?style=for-the-badge&logo=c&logoColor=white)
+![Linux](https://img.shields.io/badge/Linux-FCC624?style=for-the-badge&logo=linux&logoColor=black)
+
+</div>
+
+## :hibiscus: About
 
 Amelia is a [UCI](https://www.chessprogramming.org/UCI) compatible chess engine written
-from scratch in C. You can play Amelia on [Lichess.org](https://lichess.org/@/AnnieEdison) or
+from scratch in C. You can play Amelia on [Lichess.org](https://lichess.org/@/AmeliaLatest) or
 install a chess interface to play locally.
 
-## Lichess
+## :hibiscus: Lichess
 
 Challenge Amelia on Lichess under the username [AmeliaLatest](https://lichess.org/@/AmeliaLatest).
 You can also [spectate active games](https://lichess.org/@/AmeliaLatest/tv).
 
-## Technical Features
+## :hibiscus: Technical Features
 
 - Board
     - [Bitboards](https://www.chessprogramming.org/Bitboards)
@@ -33,7 +46,7 @@ You can also [spectate active games](https://lichess.org/@/AmeliaLatest/tv).
     - [UCI](https://en.wikipedia.org/wiki/Universal_Chess_Interface) compatible
     - Bulk [perft](https://www.chessprogramming.org/Perft) testing
 
-## Build
+## :hibiscus: Build
 
 ```bash
 git clone https://github.com/joey-bednar/amelia && \
