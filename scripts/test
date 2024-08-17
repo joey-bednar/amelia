@@ -1,7 +1,7 @@
 #!/bin/bash
 
 NEWENGINE="/tmp/amelia"
-CURRENTENGINE="$HOME/v10"
+CURRENTENGINE="$HOME/amelia"
 
 BOOK="/usr/local/share/scid/books/Elo2400.bin"
 TC="0:05+1"

@@ -1,0 +1,5 @@
+#!/bin/bash
+
+PGN="${HOME}/pgn.txt"
+
+ordo -Q -D -W -a 0 -A "Current" -s1000 ${PGN}
