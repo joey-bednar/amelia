@@ -1,19 +1,24 @@
 #!/bin/bash
 
-NEWENGINE="/tmp/amelia"
-CURRENTENGINE="$HOME/amelia"
+NEWENGINE="$HOME/dev"
+CURRENTENGINE="$HOME/v11"
 
 BOOK="/usr/local/share/scid/books/Elo2400.bin"
-TC="0:05+1"
+TC="10+0.5"
 
-GAMES=500
+GAMES=10000
 
 PGN="${HOME}/pgn.txt"
-CONCURRENT=2
+CONCURRENT=8
 
 cd ..
+rm -rf build
 make
-cp build/amelia /tmp/amelia
+rm ${NEWENGINE}
+cp build/amelia ${NEWENGINE}
 
 rm -f ${PGN}
-cutechess-cli -engine name=New cmd=${NEWENGINE} -engine name=Current cmd=${CURRENTENGINE} -each book=${BOOK} proto=uci tc=${TC} -repeat -rounds $((GAMES/2)) -games 2 -pgnout ${PGN} -concurrency ${CONCURRENT}
+# cutechess-cli -engine name=New cmd=${NEWENGINE} -engine name=Current cmd=${CURRENTENGINE} -each book=${BOOK} restart=on proto=uci tc=${TC} -repeat -rounds $((GAMES/2)) -games 2 -pgnout ${PGN} -concurrency ${CONCURRENT} -recover -debug
+
+
+cutechess-cli -engine name=New cmd=${NEWENGINE} -engine name=Current cmd=${CURRENTENGINE} -each book=${BOOK} restart=on proto=uci tc=${TC} -repeat -rounds $((GAMES/2)) -games 2 -pgnout ${PGN} -concurrency ${CONCURRENT} -ratinginterval 2 -sprt elo0=0 elo1=10 alpha=0.05 beta=0.05 -recover

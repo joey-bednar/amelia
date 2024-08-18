@@ -174,75 +174,6 @@ static int quiesce(BOARD_STATE *board, int depth, int alpha, int beta) {
     return alpha;
 }
 
-static int nullmovesearch(BOARD_STATE *board, int depth, int alpha, int beta) {
-
-    checkTime(board);
-    if (board->stopped) {
-        return 0;
-    }
-    ++board->nodes;
-
-    int score = -INF;
-
-    int legal = 0;
-
-    if (board->halfmove >= 100 || isThreeFold(board) ||
-        isInsufficientMaterial(board)) {
-        return 0;
-    }
-
-    // check extension
-    int incheck = isAttacked(board, SQ64SQ120(getKingSq(board, board->turn)),
-                             !board->turn);
-    if (incheck) {
-        ++depth;
-    }
-
-    if (depth == 0) {
-        return quiesce(board, QMAXDEPTH, alpha, beta);
-    }
-
-    MOVE moves[MAX_LEGAL_MOVES];
-    int n_moves = generateMoves(board, moves);
-
-    qsort(moves, n_moves, sizeof(MOVE), compareMoves);
-    // sortMoves(board, moves, n_moves);
-
-    for (int i = 0; i < n_moves; ++i) {
-
-        makeMove(board, moves[i]);
-        ++board->ply;
-
-        if (!isAttacked(board, SQ64SQ120(getKingSq(board, !board->turn)),
-                        board->turn)) {
-            ++legal;
-            score = -nullmovesearch(board, depth - 1, -beta, -alpha);
-        }
-
-        unmakeMove(board, moves[i]);
-        --board->ply;
-
-        if (score >= beta) {
-            return beta;
-        }
-        if (score > alpha) {
-            alpha = score;
-        }
-    }
-
-    if (legal == 0) {
-        if (incheck) {
-            // checkmate
-            return -MATE + board->ply;
-        } else {
-            // stalemate
-            return 0;
-        }
-    }
-
-    return alpha;
-}
-
 static int alphabeta(BOARD_STATE *board, int depth, int alpha, int beta,
                      int doNull) {
 
@@ -277,7 +208,7 @@ static int alphabeta(BOARD_STATE *board, int depth, int alpha, int beta,
     if (depth >= 4 && !incheck) {
 
         makeNullMove(board);
-        int nullScore = -nullmovesearch(board, depth - 2, -beta, -beta + 1);
+        int nullScore = -alphabeta(board, depth - 2, -beta, -beta + 1, FALSE);
         unmakeNullMove(board);
 
         if (nullScore >= beta) {
@@ -319,14 +250,16 @@ static int alphabeta(BOARD_STATE *board, int depth, int alpha, int beta,
 
             storeTT(board->hash, moves[i], score, TT_EXACT_FLAG, depth);
 
-            // add moves to pvarray
-            board->pvarray[board->ply][board->ply] = moves[i];
-            for (int j = board->ply + 1; j < board->pvlength[board->ply + 1];
-                 ++j) {
-                board->pvarray[board->ply][j] =
-                    board->pvarray[board->ply + 1][j];
+            if (doNull) {
+                // add moves to pvarray
+                board->pvarray[board->ply][board->ply] = moves[i];
+                for (int j = board->ply + 1;
+                     j < board->pvlength[board->ply + 1]; ++j) {
+                    board->pvarray[board->ply][j] =
+                        board->pvarray[board->ply + 1][j];
+                }
+                board->pvlength[board->ply] = board->pvlength[board->ply + 1];
             }
-            board->pvlength[board->ply] = board->pvlength[board->ply + 1];
         }
     }
 
