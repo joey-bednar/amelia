@@ -364,6 +364,7 @@ void init(BOARD_STATE *board) {
     initSlidingRays();
     initMVVLVA();
     initPassedPawns();
+    initTT();
 
     clearBoard(board);
     initBoard(board);

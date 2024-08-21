@@ -159,7 +159,6 @@ typedef struct {
 
 } BOARD_STATE;
 
-extern PVENTRY hashtable[PVSIZE];
 extern TT tt[TT_SIZE];
 
 extern int inputDepth;

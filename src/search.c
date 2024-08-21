@@ -301,20 +301,6 @@ void printMoveText(MOVE move) {
     }
 }
 
-static void copyPVtoTable(BOARD_STATE *board, int depth) {
-    for (int i = 0; i < depth; i++) {
-        ULL hash = board->hash;
-        hashtable[hash % PVSIZE].pos = hash;
-        hashtable[hash % PVSIZE].move = board->pvarray[0][i];
-        makeMove(board, hashtable[hash % PVSIZE].move);
-    }
-
-    for (int i = depth - 1; i >= 0; i--) {
-        MOVE move = board->pvarray[0][i];
-        unmakeMove(board, move);
-    }
-}
-
 // returns true when next iteration of search should be
 // prevented due to time restrictions
 static int searchCutoff(BOARD_STATE *board, float time_ms) {
