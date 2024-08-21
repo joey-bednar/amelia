@@ -49,10 +49,6 @@ void storeTT(ULL hash, MOVE best, int val, int flag, int depth) {
         return;
     }
 
-    if (tt[index].hash == TT_EXACT_FLAG && hash != TT_EXACT_FLAG) {
-        return;
-    }
-
     tt[index].hash = hash;
     tt[index].depth = depth;
     tt[index].flag = flag;
