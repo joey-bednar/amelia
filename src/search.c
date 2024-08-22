@@ -174,6 +174,75 @@ static int quiesce(BOARD_STATE *board, int depth, int alpha, int beta) {
     return alpha;
 }
 
+static int nullmovesearch(BOARD_STATE *board, int depth, int alpha, int beta) {
+
+    checkTime(board);
+    if (board->stopped) {
+        return 0;
+    }
+    ++board->nodes;
+
+    int score = -INF;
+
+    int legal = 0;
+
+    if (board->halfmove >= 100 || isThreeFold(board) ||
+        isInsufficientMaterial(board)) {
+        return 0;
+    }
+
+    // check extension
+    int incheck = isAttacked(board, SQ64SQ120(getKingSq(board, board->turn)),
+                             !board->turn);
+    if (incheck) {
+        ++depth;
+    }
+
+    if (depth == 0) {
+        return quiesce(board, QMAXDEPTH, alpha, beta);
+    }
+
+    MOVE moves[MAX_LEGAL_MOVES];
+    int n_moves = generateMoves(board, moves);
+
+    qsort(moves, n_moves, sizeof(MOVE), compareMoves);
+    // sortMoves(board, moves, n_moves);
+
+    for (int i = 0; i < n_moves; ++i) {
+
+        makeMove(board, moves[i]);
+        ++board->ply;
+
+        if (!isAttacked(board, SQ64SQ120(getKingSq(board, !board->turn)),
+                        board->turn)) {
+            ++legal;
+            score = -nullmovesearch(board, depth - 1, -beta, -alpha);
+        }
+
+        unmakeMove(board, moves[i]);
+        --board->ply;
+
+        if (score >= beta) {
+            return beta;
+        }
+        if (score > alpha) {
+            alpha = score;
+        }
+    }
+
+    if (legal == 0) {
+        if (incheck) {
+            // checkmate
+            return -MATE + board->ply;
+        } else {
+            // stalemate
+            return 0;
+        }
+    }
+
+    return alpha;
+}
+
 static int alphabeta(BOARD_STATE *board, int depth, int alpha, int beta,
                      int doNull) {
 
@@ -208,7 +277,9 @@ static int alphabeta(BOARD_STATE *board, int depth, int alpha, int beta,
     if (depth >= 4 && !incheck) {
 
         makeNullMove(board);
-        int nullScore = -alphabeta(board, depth - 2, -beta, -beta + 1, FALSE);
+        // int nullScore = -alphabeta(board, depth - 2, -beta, -beta + 1,
+        // FALSE);
+        int nullScore = -nullmovesearch(board, depth - 2, -beta, -beta + 1);
         unmakeNullMove(board);
 
         if (nullScore >= beta) {
@@ -370,7 +441,41 @@ static float setCutoff(BOARD_STATE *board) {
     return 20000 + inc;
 }
 
+// returns TRUE if only one move is legal
+// adds only move to "move"
+static int onlyMove(BOARD_STATE *board, MOVE *move) {
+    MOVE moves[MAX_LEGAL_MOVES];
+    int n_moves = generateMoves(board, moves);
+
+    int legal = 0;
+    int legalindex = 0;
+
+    int i = 0;
+    while (i < n_moves && legal < 2) {
+        // for (int i = 0; i < n_moves; ++i) {
+
+        makeMove(board, moves[i]);
+
+        if (!isAttacked(board, SQ64SQ120(getKingSq(board, !board->turn)),
+                        board->turn)) {
+            ++legal;
+            legalindex = i;
+        }
+
+        unmakeMove(board, moves[i]);
+        i++;
+    }
+
+    if (legal == 1) {
+        *move = moves[legalindex];
+        return TRUE;
+    }
+    return FALSE;
+}
+
 void search(BOARD_STATE *board) {
+
+    MOVE bestmove;
 
     // reset nodes searched
     board->nodes = 0;
@@ -382,8 +487,16 @@ void search(BOARD_STATE *board) {
     // begin timer
     board->start = clock();
 
+    // if only one legal move, play instantly
+    if (onlyMove(board, &bestmove)) {
+        // print best move
+        printf("bestmove ");
+        printMoveText(bestmove);
+        printf("\n");
+        return;
+    }
+
     // iterative deepening
-    MOVE bestmove;
     int alpha = -INF;
     int beta = INF;
     for (int searchDepth = 1; searchDepth <= inputDepth; searchDepth++) {
