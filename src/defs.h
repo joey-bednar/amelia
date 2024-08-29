@@ -191,6 +191,7 @@ extern int MVVLVA[8][8];
 
 extern ULL zobrist_vals[12][64];
 extern ULL zobristB2M;
+extern ULL zobristEP[120];
 
 extern int pawnOffset[2][4];
 extern const int rookOffset[4];
@@ -202,6 +203,7 @@ extern void initZobrist();
 extern void loadZobrist(BOARD_STATE *board);
 extern void updateZobrist(int sq64, int piece, BOARD_STATE *board);
 extern void turnZobrist(BOARD_STATE *board);
+extern void updateZobristEp(int start, int end, BOARD_STATE *board);
 
 // init.c
 extern void initBoard(BOARD_STATE *board);

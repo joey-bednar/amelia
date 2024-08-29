@@ -14,6 +14,7 @@ ULL kingJumps[64];
 
 ULL zobrist_vals[12][64];
 ULL zobristB2M;
+ULL zobristEP[120];
 
 int pawnOffset[2][4] = {{N, 2 * N, NW, NE}, {S, 2 * S, SW, SE}};
 

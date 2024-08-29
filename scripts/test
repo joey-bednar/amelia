@@ -1,7 +1,8 @@
 #!/bin/bash
 
 NEWENGINE="$HOME/dev"
-CURRENTENGINE="$HOME/prev"
+# CURRENTENGINE="$HOME/prev"
+CURRENTENGINE="$HOME/v11"
 
 BOOK="/usr/local/share/scid/books/Elo2400.bin"
 TC="10+1"

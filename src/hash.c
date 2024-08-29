@@ -13,17 +13,31 @@ static ULL get64rand() {
 // init random zobrist values
 void initZobrist() {
     srand(1);
+
+    // compute hash for all piece/square combinations
     for (int piece = wP; piece <= bK; ++piece) {
         for (int sq = 0; sq < 64; ++sq) {
             zobrist_vals[piece - 1][sq] = get64rand();
         }
     }
+
+    // compute turn hash
     zobristB2M = get64rand();
+
+    // compute en passant hashes
+    ULL offboardHash = get64rand();
+    for (int sq120 = 0; sq120 < 120; ++sq120) {
+        if (ONBOARD(sq120)) {
+            zobristEP[sq120] = get64rand();
+        } else {
+            zobristEP[sq120] = offboardHash;
+        }
+    }
 }
 
 // constructs hash of position
 void loadZobrist(BOARD_STATE *board) {
-    board->hash = 0ULL;
+    board->hash = 0ull;
     if (board->turn == BLACK) {
         board->hash ^= zobristB2M;
     }
@@ -34,9 +48,16 @@ void loadZobrist(BOARD_STATE *board) {
         board->hash ^= zobrist_vals[piece - 1][sq64];
     }
 
+    board->hash ^= zobristEP[board->enpassant];
+
     for (int i = 0; i < 2 * MAX_GAME_LENGTH; ++i) {
         board->playedmoves[i].hash = 0ull;
     }
+}
+
+void updateZobristEp(int start, int end, BOARD_STATE *board) {
+    board->hash = board->hash ^ zobristEP[start] ^ zobristEP[end];
+    board->enpassant = end;
 }
 
 // updates zobrist hash after placing/removing a piece from square

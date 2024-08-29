@@ -205,8 +205,8 @@ static int nullmovesearch(BOARD_STATE *board, int depth, int alpha, int beta) {
     MOVE moves[MAX_LEGAL_MOVES];
     int n_moves = generateMoves(board, moves);
 
-    qsort(moves, n_moves, sizeof(MOVE), compareMoves);
-    // sortMoves(board, moves, n_moves);
+    // qsort(moves, n_moves, sizeof(MOVE), compareMoves);
+    sortMoves(board, moves, n_moves);
 
     for (int i = 0; i < n_moves; ++i) {
 
@@ -223,9 +223,11 @@ static int nullmovesearch(BOARD_STATE *board, int depth, int alpha, int beta) {
         --board->ply;
 
         if (score >= beta) {
+            storeTT(board->hash, moves[i], beta, TT_BETA_FLAG, depth);
             return beta;
         }
         if (score > alpha) {
+            storeTT(board->hash, moves[i], score, TT_EXACT_FLAG, depth);
             alpha = score;
         }
     }
@@ -313,11 +315,6 @@ static int alphabeta(BOARD_STATE *board, int depth, int alpha, int beta,
         }
         if (score > alpha) {
             alpha = score;
-
-            // if(depth >= hashtable[board->hash % PVSIZE].depth) {
-            //     hashtable[board->hash % PVSIZE].pos = board->hash;
-            //     hashtable[board->hash % PVSIZE].move = moves[i];
-            // }
 
             storeTT(board->hash, moves[i], score, TT_EXACT_FLAG, depth);
 

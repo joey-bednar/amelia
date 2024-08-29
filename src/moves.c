@@ -2,6 +2,7 @@
 #include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 static void uncastleRooks(BOARD_STATE *board, int end) {
 
@@ -64,7 +65,8 @@ void makeNullMove(BOARD_STATE *board) {
     board->playedmoves[index].enpassant = board->enpassant;
     board->playedmoves[index].hash = board->hash;
 
-    board->enpassant = OFFBOARD;
+    // board->enpassant = OFFBOARD;
+    updateZobristEp(board->enpassant, OFFBOARD, board);
 
     // add hash to played moves
     ++board->pmindex;
@@ -82,7 +84,9 @@ void unmakeNullMove(BOARD_STATE *board) {
     // reset castling abilities
     board->castle = board->playedmoves[index].castle;
     board->halfmove = board->playedmoves[index].halfmove;
-    board->enpassant = board->playedmoves[index].enpassant;
+    updateZobristEp(board->enpassant, board->playedmoves[index].enpassant,
+                    board);
+    // board->enpassant = board->playedmoves[index].enpassant;
 
     turnZobrist(board);
     board->turn = !(board->turn);
@@ -90,6 +94,12 @@ void unmakeNullMove(BOARD_STATE *board) {
 
 // play a move on the board
 void makeMove(BOARD_STATE *board, MOVE move) {
+
+    // BOARD_STATE bcopy;
+    // memcpy(&bcopy, board, sizeof(BOARD_STATE));
+    // bcopy.hash = 0ull;
+    // loadZobrist(&bcopy);
+    // assert(bcopy.hash == board->hash);
 
     // add info to played moves
     int index = board->pmindex;
@@ -108,7 +118,7 @@ void makeMove(BOARD_STATE *board, MOVE move) {
     if (EPFLAG(move)) {
 
         const int offset = PAWNOFFSET(!board->turn, 0);
-        board->enpassant = OFFBOARD;
+        updateZobristEp(board->enpassant, OFFBOARD, board);
 
         clearPiece(board, TOCOLOR(!board->turn, CAPTURED(move)),
                    END120(move) + offset);
@@ -134,9 +144,9 @@ void makeMove(BOARD_STATE *board, MOVE move) {
     // update en passant square
     if (TWOPAWNFLAG(move)) {
         const int offset = PAWNOFFSET(!board->turn, 0);
-        board->enpassant = END120(move) + offset;
+        updateZobristEp(board->enpassant, END120(move) + offset, board);
     } else {
-        board->enpassant = OFFBOARD;
+        updateZobristEp(board->enpassant, OFFBOARD, board);
     }
 
     // update half move
@@ -187,7 +197,8 @@ void unmakeMove(BOARD_STATE *board, MOVE move) {
 
     // perform en passant
     if (EPFLAG(move)) {
-        board->enpassant = END120(move);
+
+        updateZobristEp(board->enpassant, END120(move), board);
 
         const int offset = PAWNOFFSET(board->turn, 0);
 
@@ -222,7 +233,8 @@ void unmakeMove(BOARD_STATE *board, MOVE move) {
         placePiece(board, pawn, START120(move));
     }
 
-    board->enpassant = board->playedmoves[index].enpassant;
+    updateZobristEp(board->enpassant, board->playedmoves[index].enpassant,
+                    board);
 
     if (board->turn == WHITE) {
         --board->fullmove;
