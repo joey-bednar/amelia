@@ -82,11 +82,11 @@ void unmakeNullMove(BOARD_STATE *board) {
     board->playedmoves[index].hash = 0ull;
 
     // reset castling abilities
+    updateZobristCastle(board->castle, board->playedmoves[index].castle, board);
     board->castle = board->playedmoves[index].castle;
     board->halfmove = board->playedmoves[index].halfmove;
     updateZobristEp(board->enpassant, board->playedmoves[index].enpassant,
                     board);
-    // board->enpassant = board->playedmoves[index].enpassant;
 
     turnZobrist(board);
     board->turn = !(board->turn);
@@ -166,6 +166,7 @@ void makeMove(BOARD_STATE *board, MOVE move) {
         ++board->fullmove;
     }
 
+    updateZobristCastle(board->playedmoves[index].castle, board->castle, board);
     turnZobrist(board);
     board->turn = !(board->turn);
 
@@ -185,6 +186,7 @@ void unmakeMove(BOARD_STATE *board, MOVE move) {
     }
 
     // reset castling abilities
+    updateZobristCastle(board->castle, board->playedmoves[index].castle, board);
     board->castle = board->playedmoves[index].castle;
     board->halfmove = board->playedmoves[index].halfmove;
 

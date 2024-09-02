@@ -33,6 +33,10 @@ void initZobrist() {
             zobristEP[sq120] = offboardHash;
         }
     }
+
+    for (int i = 0; i < CASTLE_LENGTH; ++i) {
+        zobristC[i] = get64rand();
+    }
 }
 
 // constructs hash of position
@@ -48,7 +52,7 @@ void loadZobrist(BOARD_STATE *board) {
         board->hash ^= zobrist_vals[piece - 1][sq64];
     }
 
-    board->hash ^= zobristEP[board->enpassant];
+    board->hash ^= zobristEP[board->enpassant] ^ zobristC[board->castle];
 
     for (int i = 0; i < 2 * MAX_GAME_LENGTH; ++i) {
         board->playedmoves[i].hash = 0ull;
@@ -58,6 +62,10 @@ void loadZobrist(BOARD_STATE *board) {
 void updateZobristEp(int start, int end, BOARD_STATE *board) {
     board->hash = board->hash ^ zobristEP[start] ^ zobristEP[end];
     board->enpassant = end;
+}
+
+void updateZobristCastle(int start, int end, BOARD_STATE *board) {
+    board->hash = board->hash ^ zobristC[start] ^ zobristC[end];
 }
 
 // updates zobrist hash after placing/removing a piece from square

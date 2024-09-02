@@ -104,7 +104,7 @@ enum {
 enum {NW=-9, N=1, NE=11, E=10, SE=9, S=-1, SW=-11, W=-10};
 // clang-format on
 
-enum { NO_CASTLE, WK_CASTLE, WQ_CASTLE, BK_CASTLE, BQ_CASTLE };
+enum { NO_CASTLE, WK_CASTLE, WQ_CASTLE, BK_CASTLE, BQ_CASTLE, CASTLE_LENGTH };
 
 typedef unsigned long long ULL;
 typedef unsigned long MOVE;
@@ -192,6 +192,7 @@ extern int MVVLVA[8][8];
 extern ULL zobrist_vals[12][64];
 extern ULL zobristB2M;
 extern ULL zobristEP[120];
+extern ULL zobristC[CASTLE_LENGTH];
 
 extern int pawnOffset[2][4];
 extern const int rookOffset[4];
@@ -204,6 +205,7 @@ extern void loadZobrist(BOARD_STATE *board);
 extern void updateZobrist(int sq64, int piece, BOARD_STATE *board);
 extern void turnZobrist(BOARD_STATE *board);
 extern void updateZobristEp(int start, int end, BOARD_STATE *board);
+extern void updateZobristCastle(int start, int end, BOARD_STATE *board);
 
 // init.c
 extern void initBoard(BOARD_STATE *board);
