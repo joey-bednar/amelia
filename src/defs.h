@@ -1,5 +1,10 @@
 #ifndef DEFS_H
 
+// name
+#define NAME "Amelia"
+#define VERSION "v0.12"
+#define AUTHOR "Joey Bednar"
+
 // settings
 #define DEFAULTDEPTH 6
 #define MAX_DEPTH 20
