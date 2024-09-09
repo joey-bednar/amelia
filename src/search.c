@@ -303,7 +303,20 @@ static int alphabeta(BOARD_STATE *board, int depth, int alpha, int beta,
         if (!isAttacked(board, SQ64SQ120(getKingSq(board, !board->turn)),
                         board->turn)) {
             ++legal;
-            score = -alphabeta(board, depth - 1, -beta, -alpha, doNull);
+
+            if (i == 0) {
+                // full window search on pv node
+                score = -alphabeta(board, depth - 1, -beta, -alpha, doNull);
+            } else {
+                // check if other moves score better than PV
+                score =
+                    -alphabeta(board, depth - 1, -alpha - 1, -alpha, doNull);
+
+                // prevent re-search of non-PV nodes
+                if (score > alpha && beta - alpha > 1) {
+                    score = -alphabeta(board, depth - 1, -beta, -alpha, doNull);
+                }
+            }
         }
 
         unmakeMove(board, moves[i]);
@@ -506,8 +519,8 @@ void search(BOARD_STATE *board) {
             break;
         }
 
-        // // redo search with INF window if score is outside aspiration window
-        // if (score <= alpha || score >= beta) {
+        // // redo search with INF window if score is outside aspiration
+        // window if (score <= alpha || score >= beta) {
         //     alpha = -INF;
         //     beta = INF;
         //     searchDepth--;
