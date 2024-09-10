@@ -30,8 +30,7 @@ You can also [spectate active games](https://lichess.org/@/AmeliaLatest/tv).
     - [Bitboards](https://www.chessprogramming.org/Bitboards)
     - [Zobrist hashing](https://en.wikipedia.org/wiki/Zobrist_hashing)
 - Search
-    - [Negamax](https://en.wikipedia.org/wiki/Negamax) search
-    - [Alpha-beta pruning](https://en.wikipedia.org/wiki/Alpha%E2%80%93beta_pruning)
+    - [Principal Variation Search](https://en.wikipedia.org/wiki/Principal_variation_search)
     - [Quiescence search](https://en.wikipedia.org/wiki/Quiescence_search)
     - [Iterative deepening](https://www.chessprogramming.org/Iterative_Deepening)
     - [Triangular PV-table](https://www.chessprogramming.org/Triangular_PV-Table)
@@ -40,7 +39,7 @@ You can also [spectate active games](https://lichess.org/@/AmeliaLatest/tv).
     - [Null move pruning](https://en.wikipedia.org/wiki/Null-move_heuristic)
 - Evaluation
     - Opening/endgame [piece square tables](https://www.chessprogramming.org/Piece-Square_Tables)
-    - Passed pawn evaluation
+    - Passed pawn bonus
     - [Mop-up evaluation](https://www.chessprogramming.org/Mop-up_Evaluation)
 - Interface
     - [UCI](https://en.wikipedia.org/wiki/Universal_Chess_Interface) compatible
