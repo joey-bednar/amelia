@@ -2,6 +2,7 @@
 TARGET_EXEC := amelia
 
 CC := gcc
+# CC := x86_64-w64-mingw32-gcc
 BUILD_DIR := ./build
 SRC_DIRS := ./src
 
@@ -28,14 +29,17 @@ INC_FLAGS := $(addprefix -I,$(INC_DIRS))
 # These files will have .d instead of .o as the output.
 CFLAGS := $(INC_FLAGS) -MMD -MP -Wall -Wextra -O3 -march=native
 
+# Set stack size to 8MB
+STACK_SIZE := -Wl,--stack,8388608
+
 # The final build step.
 $(BUILD_DIR)/$(TARGET_EXEC): $(OBJS)
-	$(CC) $(OBJS) -o $@ $(LDFLAGS) -lm
+	$(CC) $(OBJS) -o $@ $(LDFLAGS) -lm $(STACK_SIZE)
 
 # Build step for C source
 $(BUILD_DIR)/%.c.o: %.c
 	mkdir -p $(dir $@)
-	$(CC) $(CFLAGS) -c $< -o $@ -lm
+	$(CC) $(CFLAGS) -c $< -o $@ -lm $(STACK_SIZE)
 
 .PHONY: format
 format:
