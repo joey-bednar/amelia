@@ -295,7 +295,7 @@ static int alphabeta(BOARD_STATE *board, int depth, int alpha, int beta,
 
     MOVE m;
     int val = probeTT(board->hash, &m, alpha, beta, depth);
-    if (val != TT_EMPTY) {
+    if (beta - alpha > 1 && val != TT_EMPTY) {
         return val;
     }
 
@@ -564,7 +564,7 @@ void search(BOARD_STATE *board) {
 
         // get bestmove/ponder from pv
         // bestmove = board->pvarray[0][0];
-        probeTT(board->hash, &bestmove, -INF, INF, 0);
+        probeTT(board->hash, &bestmove, INF, -INF, 0);
 
         // end searches in timed games if mate is found
         if (isMateEval(score) && inputTime[board->turn] != DEFAULT_TIME) {
