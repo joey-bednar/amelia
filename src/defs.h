@@ -81,7 +81,7 @@
 #define PIECE(move) (int)(((move) & 0x00E00000ul) >> 21)
 
 // hash table
-#define TT_SIZE 0x400000
+#define TT_SIZE 10000000
 #define TT_EMPTY 1234
 #define TT_EMPTY_FLAG 0
 #define TT_EXACT_FLAG 1
@@ -112,7 +112,7 @@ enum {NW=-9, N=1, NE=11, E=10, SE=9, S=-1, SW=-11, W=-10};
 enum { NO_CASTLE, WK_CASTLE, WQ_CASTLE, BK_CASTLE, BQ_CASTLE, CASTLE_LENGTH };
 
 typedef unsigned long long ULL;
-typedef unsigned long MOVE;
+typedef unsigned long long MOVE;
 
 typedef struct tt {
     ULL hash;
@@ -197,7 +197,7 @@ extern int MVVLVA[8][8];
 extern ULL zobrist_vals[12][64];
 extern ULL zobristB2M;
 extern ULL zobristEP[120];
-extern ULL zobristC[CASTLE_LENGTH];
+extern ULL zobristC[64];
 
 extern int pawnOffset[2][4];
 extern const int rookOffset[4];

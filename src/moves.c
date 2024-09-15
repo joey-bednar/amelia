@@ -186,7 +186,7 @@ void unmakeMove(BOARD_STATE *board, MOVE move) {
     }
 
     // reset castling abilities
-    updateZobristCastle(board->castle, board->playedmoves[index].castle, board);
+    int castlingPerms = board->castle;
     board->castle = board->playedmoves[index].castle;
     board->halfmove = board->playedmoves[index].halfmove;
 
@@ -216,6 +216,7 @@ void unmakeMove(BOARD_STATE *board, MOVE move) {
             --board->fullmove;
         }
 
+        updateZobristCastle(castlingPerms, board->castle, board);
         turnZobrist(board);
         board->turn = !(board->turn);
         return;
@@ -237,6 +238,8 @@ void unmakeMove(BOARD_STATE *board, MOVE move) {
 
     updateZobristEp(board->enpassant, board->playedmoves[index].enpassant,
                     board);
+
+    updateZobristCastle(castlingPerms, board->castle, board);
 
     if (board->turn == WHITE) {
         --board->fullmove;

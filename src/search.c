@@ -3,6 +3,7 @@
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <time.h>
 
 int compareMoves(const void *moveA, const void *moveB) {
@@ -55,6 +56,21 @@ static void printEval(int score, int depth) {
     }
 }
 
+static void printPV(BOARD_STATE *board, int depth) {
+    BOARD_STATE bcopy;
+    memcpy(&bcopy, board, sizeof(BOARD_STATE));
+
+    for (int i = 0; i < depth; ++i) {
+        MOVE m;
+        if (probeTT(bcopy.hash, &m, INF, -INF, 0) == TT_EMPTY) {
+            return;
+        }
+        printMoveText(m);
+        printf(" ");
+        makeMove(&bcopy, m);
+    }
+}
+
 // prints uci search info
 static void printInfo(BOARD_STATE *board, float time, int score, int depth) {
 
@@ -68,18 +84,19 @@ static void printInfo(BOARD_STATE *board, float time, int score, int depth) {
     printf("nps %ld ", nps);
     printf("time %ld ", (long)time);
 
-    // skip pv output for search depth 0
-    if (board->pvlength[0] == 0) {
-        printf("\n");
-        return;
-    }
+    // // skip pv output for search depth 0
+    // if (board->pvlength[0] == 0) {
+    //     printf("\n");
+    //     return;
+    // }
 
     printf("pv ");
-
-    for (int i = 0; i < board->pvlength[0]; ++i) {
-        printMoveText(board->pvarray[0][i]);
-        printf(" ");
-    }
+    printPV(board, depth);
+    //
+    // for (int i = 0; i < board->pvlength[0]; ++i) {
+    //     printMoveText(board->pvarray[0][i]);
+    //     printf(" ");
+    // }
     printf("\n");
 }
 
@@ -276,18 +293,18 @@ static int alphabeta(BOARD_STATE *board, int depth, int alpha, int beta,
         return quiesce(board, QMAXDEPTH, alpha, beta);
     }
 
-    if (depth >= 4 && !incheck) {
-
-        makeNullMove(board);
-        // int nullScore = -alphabeta(board, depth - 2, -beta, -beta + 1,
-        // FALSE);
-        int nullScore = -nullmovesearch(board, depth - 2, -beta, -beta + 1);
-        unmakeNullMove(board);
-
-        if (nullScore >= beta) {
-            return beta;
-        }
-    }
+    // if (depth >= 4 && !incheck) {
+    //
+    //     makeNullMove(board);
+    //     // int nullScore = -alphabeta(board, depth - 2, -beta, -beta + 1,
+    //     // FALSE);
+    //     int nullScore = -nullmovesearch(board, depth - 2, -beta, -beta + 1);
+    //     unmakeNullMove(board);
+    //
+    //     if (nullScore >= beta) {
+    //         return beta;
+    //     }
+    // }
 
     MOVE moves[MAX_LEGAL_MOVES];
     int n_moves = generateMoves(board, moves);
@@ -331,16 +348,17 @@ static int alphabeta(BOARD_STATE *board, int depth, int alpha, int beta,
 
             storeTT(board->hash, moves[i], score, TT_EXACT_FLAG, depth);
 
-            if (doNull) {
-                // add moves to pvarray
-                board->pvarray[board->ply][board->ply] = moves[i];
-                for (int j = board->ply + 1;
-                     j < board->pvlength[board->ply + 1]; ++j) {
-                    board->pvarray[board->ply][j] =
-                        board->pvarray[board->ply + 1][j];
-                }
-                board->pvlength[board->ply] = board->pvlength[board->ply + 1];
-            }
+            // if (doNull) {
+            //     // add moves to pvarray
+            //     board->pvarray[board->ply][board->ply] = moves[i];
+            //     for (int j = board->ply + 1;
+            //          j < board->pvlength[board->ply + 1]; ++j) {
+            //         board->pvarray[board->ply][j] =
+            //             board->pvarray[board->ply + 1][j];
+            //     }
+            //     board->pvlength[board->ply] = board->pvlength[board->ply +
+            //     1];
+            // }
         }
     }
 
@@ -539,7 +557,9 @@ void search(BOARD_STATE *board) {
         printInfo(board, time_taken_ms, score, searchDepth);
 
         // get bestmove/ponder from pv
-        bestmove = board->pvarray[0][0];
+        // bestmove = board->pvarray[0][0];
+
+        probeTT(board->hash, &bestmove, -INF, INF, 0);
 
         // end searches in timed games if mate is found
         if (isMateEval(score) && inputTime[board->turn] != DEFAULT_TIME) {
@@ -556,4 +576,6 @@ void search(BOARD_STATE *board) {
     printf("bestmove ");
     printMoveText(bestmove);
     printf("\n");
+
+    initTT();
 }

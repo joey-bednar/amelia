@@ -14,10 +14,10 @@ void clearBoard(BOARD_STATE *board) {
     board->halfmove = 0;
     board->fullmove = 1;
     board->pmindex = 0;
-    SETBIT(board->castle, WK_CASTLE);
-    SETBIT(board->castle, WQ_CASTLE);
-    SETBIT(board->castle, BK_CASTLE);
-    SETBIT(board->castle, BQ_CASTLE);
+    CLEARBIT(board->castle, WK_CASTLE);
+    CLEARBIT(board->castle, WQ_CASTLE);
+    CLEARBIT(board->castle, BK_CASTLE);
+    CLEARBIT(board->castle, BQ_CASTLE);
 }
 
 // sets up the pieces for a new game
@@ -50,6 +50,17 @@ void initBoard(BOARD_STATE *board) {
         setPiece(wP, file, RANK_2, board);
         setPiece(bP, file, RANK_7, board);
     }
+
+    board->turn = WHITE;
+    board->enpassant = OFFBOARD;
+    board->halfmove = 0;
+    board->fullmove = 1;
+    board->pmindex = 0;
+
+    SETBIT(board->castle, WK_CASTLE);
+    SETBIT(board->castle, WK_CASTLE);
+    SETBIT(board->castle, BK_CASTLE);
+    SETBIT(board->castle, BQ_CASTLE);
 }
 
 void clearPiece(BOARD_STATE *board, int piece, int sq) {

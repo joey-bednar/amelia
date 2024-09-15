@@ -30,7 +30,7 @@ INC_FLAGS := $(addprefix -I,$(INC_DIRS))
 CFLAGS := $(INC_FLAGS) -MMD -MP -Wall -Wextra -O3 -march=native
 
 # Set stack size to 8MB
-STACK_SIZE := -Wl,--stack,8388608
+# STACK_SIZE := -Wl,--stack,8388608
 
 # The final build step.
 $(BUILD_DIR)/$(TARGET_EXEC): $(OBJS)

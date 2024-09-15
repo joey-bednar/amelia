@@ -29,7 +29,25 @@ void printBoard(BOARD_STATE *board) {
         printf("Black to move.\n");
     }
     printf("En passant: %d\n", board->enpassant);
-    printf("Castling: %d\n", board->castle);
+    printf("Castling: ");
+
+    if (CHECKBIT(board->castle, WK_CASTLE)) {
+        printf("K");
+    }
+    if (CHECKBIT(board->castle, WQ_CASTLE)) {
+        printf("Q");
+    }
+    if (CHECKBIT(board->castle, BK_CASTLE)) {
+        printf("k");
+    }
+    if (CHECKBIT(board->castle, BQ_CASTLE)) {
+        printf("q");
+    }
+    if (board->castle == 0) {
+        printf("-");
+    }
+    printf("\n");
+
     printf("Half: %d, Full: %d\n", board->halfmove, board->fullmove);
     printf("Hash: %llu\n", board->hash);
 }

@@ -12,7 +12,7 @@ static ULL get64rand() {
 
 // init random zobrist values
 void initZobrist() {
-    srand(1);
+    srand(2);
 
     // compute hash for all piece/square combinations
     for (int piece = wP; piece <= bK; ++piece) {
@@ -25,7 +25,7 @@ void initZobrist() {
     zobristB2M = get64rand();
 
     // compute en passant hashes
-    ULL offboardHash = get64rand();
+    ULL offboardHash = 0ull;
     for (int sq120 = 0; sq120 < 120; ++sq120) {
         if (ONBOARD(sq120)) {
             zobristEP[sq120] = get64rand();
@@ -34,7 +34,8 @@ void initZobrist() {
         }
     }
 
-    for (int i = 0; i < CASTLE_LENGTH; ++i) {
+    zobristC[0] = 0ull;
+    for (int i = 1; i < 64; ++i) {
         zobristC[i] = get64rand();
     }
 }
@@ -52,7 +53,8 @@ void loadZobrist(BOARD_STATE *board) {
         board->hash ^= zobrist_vals[piece - 1][sq64];
     }
 
-    board->hash ^= zobristEP[board->enpassant] ^ zobristC[board->castle];
+    board->hash =
+        board->hash ^ zobristEP[board->enpassant] ^ zobristC[board->castle];
 
     for (int i = 0; i < 2 * MAX_GAME_LENGTH; ++i) {
         board->playedmoves[i].hash = 0ull;
