@@ -58,9 +58,11 @@ void initBoard(BOARD_STATE *board) {
     board->pmindex = 0;
 
     SETBIT(board->castle, WK_CASTLE);
-    SETBIT(board->castle, WK_CASTLE);
+    SETBIT(board->castle, WQ_CASTLE);
     SETBIT(board->castle, BK_CASTLE);
     SETBIT(board->castle, BQ_CASTLE);
+
+    loadZobrist(board);
 }
 
 void clearPiece(BOARD_STATE *board, int piece, int sq) {

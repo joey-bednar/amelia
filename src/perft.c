@@ -18,8 +18,8 @@ static ULL perftrec(int depth, BOARD_STATE *board) {
     // }
 
     ULL val;
-    if (probeTT(board->hash, &val, INF, -INF, depth) == TT_EMPTY) {
-        val = -1;
+    if (probeTT(board->hash, &val, INF, -INF, depth) != TT_EMPTY) {
+        return val;
     }
 
     n_moves = generateMoves(board, move_list);
@@ -33,15 +33,15 @@ static ULL perftrec(int depth, BOARD_STATE *board) {
             }
         }
 
-        if (val != -1 && val != legal) {
-            printBoard(board);
-            printf("\nval vs legal: %llu %llu\n", val, (ULL)legal);
-            BOARD_STATE bcopy;
-            memcpy(&bcopy, board, sizeof(BOARD_STATE));
-            bcopy.hash = 0ull;
-            loadZobrist(&bcopy);
-            printf("copy: %llu\norig: %llu\n", bcopy.hash, board->hash);
-        }
+        // if (val != -1 && val != legal) {
+        //     printBoard(board);
+        //     printf("\nval vs legal: %llu %llu\n", val, (ULL)legal);
+        //     BOARD_STATE bcopy;
+        //     memcpy(&bcopy, board, sizeof(BOARD_STATE));
+        //     bcopy.hash = 0ull;
+        //     loadZobrist(&bcopy);
+        //     printf("copy: %llu\norig: %llu\n", bcopy.hash, board->hash);
+        // }
 
         storeTT(board->hash, (ULL)legal, 0, TT_EXACT_FLAG, depth);
 

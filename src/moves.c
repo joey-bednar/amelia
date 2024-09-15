@@ -4,6 +4,24 @@
 #include <stdlib.h>
 #include <string.h>
 
+static void castlingRookCaptured(BOARD_STATE *board, MOVE move) {
+    if (CAPTURED(move) == bbRook) {
+        if (board->turn == WHITE) {
+            if (END120(move) == A8) {
+                CLEARBIT(board->castle, BQ_CASTLE);
+            } else if (END120(move) == H8) {
+                CLEARBIT(board->castle, BK_CASTLE);
+            }
+        } else {
+            if (END120(move) == H1) {
+                CLEARBIT(board->castle, BK_CASTLE);
+            } else if (END120(move) == A1) {
+                CLEARBIT(board->castle, BQ_CASTLE);
+            }
+        }
+    }
+}
+
 static void uncastleRooks(BOARD_STATE *board, int end) {
 
     switch (end) {
@@ -131,6 +149,9 @@ void makeMove(BOARD_STATE *board, MOVE move) {
 
     // update castling permissions
     updateCastling(board, move);
+
+    // update castling permissions
+    castlingRookCaptured(board, move);
 
     // move piece to target square
     clearPiece(board, piece, START120(move));

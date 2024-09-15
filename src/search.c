@@ -84,7 +84,7 @@ static void printInfo(BOARD_STATE *board, float time, int score, int depth) {
     printf("nps %ld ", nps);
     printf("time %ld ", (long)time);
 
-    // // skip pv output for search depth 0
+    // skip pv output for search depth 0
     // if (board->pvlength[0] == 0) {
     //     printf("\n");
     //     return;
@@ -92,7 +92,7 @@ static void printInfo(BOARD_STATE *board, float time, int score, int depth) {
 
     printf("pv ");
     printPV(board, depth);
-    //
+
     // for (int i = 0; i < board->pvlength[0]; ++i) {
     //     printMoveText(board->pvarray[0][i]);
     //     printf(" ");
@@ -293,18 +293,24 @@ static int alphabeta(BOARD_STATE *board, int depth, int alpha, int beta,
         return quiesce(board, QMAXDEPTH, alpha, beta);
     }
 
-    // if (depth >= 4 && !incheck) {
-    //
-    //     makeNullMove(board);
-    //     // int nullScore = -alphabeta(board, depth - 2, -beta, -beta + 1,
-    //     // FALSE);
-    //     int nullScore = -nullmovesearch(board, depth - 2, -beta, -beta + 1);
-    //     unmakeNullMove(board);
-    //
-    //     if (nullScore >= beta) {
-    //         return beta;
-    //     }
-    // }
+    MOVE m;
+    int val = probeTT(board->hash, &m, alpha, beta, depth);
+    if (val != TT_EMPTY) {
+        return val;
+    }
+
+    if (depth >= 4 && !incheck) {
+
+        makeNullMove(board);
+        // int nullScore = -alphabeta(board, depth - 2, -beta, -beta + 1,
+        // FALSE);
+        int nullScore = -nullmovesearch(board, depth - 2, -beta, -beta + 1);
+        unmakeNullMove(board);
+
+        if (nullScore >= beta) {
+            return beta;
+        }
+    }
 
     MOVE moves[MAX_LEGAL_MOVES];
     int n_moves = generateMoves(board, moves);
@@ -558,7 +564,6 @@ void search(BOARD_STATE *board) {
 
         // get bestmove/ponder from pv
         // bestmove = board->pvarray[0][0];
-
         probeTT(board->hash, &bestmove, -INF, INF, 0);
 
         // end searches in timed games if mate is found
@@ -577,5 +582,5 @@ void search(BOARD_STATE *board) {
     printMoveText(bestmove);
     printf("\n");
 
-    initTT();
+    // initTT();
 }
