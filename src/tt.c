@@ -45,9 +45,9 @@ void storeTT(ULL hash, MOVE best, int val, int flag, int depth) {
 
     int index = hash % TT_SIZE;
 
-    if (hash == tt[index].hash && depth < tt[index].depth) {
-        return;
-    }
+    // if (hash == tt[index].hash && depth < tt[index].depth) {
+    //     return;
+    // }
 
     tt[index].hash = hash;
     tt[index].depth = depth;

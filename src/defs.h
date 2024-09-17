@@ -151,9 +151,6 @@ typedef struct {
 
     PVENTRY pvtable[PVSIZE];
 
-    MOVE pvarray[MAX_DEPTH][MAX_DEPTH];
-    int pvlength[MAX_DEPTH];
-
     POSRECORD playedmoves[MAX_GAME_LENGTH * 2];
     int pmindex;
 
@@ -265,6 +262,7 @@ extern void perft(int depth, BOARD_STATE *board);
 extern int isThreeFold(BOARD_STATE *board);
 extern int isInsufficientMaterial(BOARD_STATE *board);
 extern int eval(BOARD_STATE *board);
+extern int isRepeatPosition(BOARD_STATE *board);
 
 // search.c
 extern void printMoveText(MOVE move);

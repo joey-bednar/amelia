@@ -79,7 +79,9 @@ static void printInfo(BOARD_STATE *board, float time, int score, int depth) {
 
     printf("info ");
     printf("depth %d ", depth);
-    printEval(score, board->pvlength[0]);
+    MOVE m;
+    int val = probeTT(board->hash, &m, INF, -INF, 0);
+    printEval(score, val);
     printf("nodes %ld ", (long)board->nodes);
     printf("nps %ld ", nps);
     printf("time %ld ", (long)time);
@@ -271,14 +273,17 @@ static int alphabeta(BOARD_STATE *board, int depth, int alpha, int beta,
     }
     ++board->nodes;
 
-    board->pvlength[board->ply] = board->ply;
+    MOVE bestmove = 0ull;
+    int bestscore = -INF;
+    int oldalpha = alpha;
 
-    int score = -INF;
+    int flag = TT_ALPHA_FLAG;
 
     int legal = 0;
 
     if (board->halfmove >= 100 || isThreeFold(board) ||
         isInsufficientMaterial(board)) {
+        // storeTT(board->hash, 0ull, 0, TT_EXACT_FLAG, depth);
         return 0;
     }
 
@@ -293,8 +298,7 @@ static int alphabeta(BOARD_STATE *board, int depth, int alpha, int beta,
         return quiesce(board, QMAXDEPTH, alpha, beta);
     }
 
-    MOVE m;
-    int val = probeTT(board->hash, &m, alpha, beta, depth);
+    int val = probeTT(board->hash, &bestmove, alpha, beta, depth);
     if (beta - alpha > 1 && val != TT_EMPTY) {
         return val;
     }
@@ -318,6 +322,7 @@ static int alphabeta(BOARD_STATE *board, int depth, int alpha, int beta,
     // qsort(moves, n_moves, sizeof(MOVE), compareMoves);
     sortMoves(board, moves, n_moves);
 
+    int score = -INF;
     for (int i = 0; i < n_moves; ++i) {
 
         makeMove(board, moves[i]);
@@ -345,26 +350,18 @@ static int alphabeta(BOARD_STATE *board, int depth, int alpha, int beta,
         unmakeMove(board, moves[i]);
         --board->ply;
 
-        if (score >= beta) {
-            storeTT(board->hash, moves[i], beta, TT_BETA_FLAG, depth);
-            return beta;
-        }
-        if (score > alpha) {
+        if (score > bestscore) {
+            bestscore = score;
+            bestmove = moves[i];
+            if (score > alpha) {
+                if (score >= beta) {
+                    bestmove = moves[i];
+                    storeTT(board->hash, moves[i], beta, TT_BETA_FLAG, depth);
+                    return beta;
+                }
+            }
+            flag = TT_EXACT_FLAG;
             alpha = score;
-
-            storeTT(board->hash, moves[i], score, TT_EXACT_FLAG, depth);
-
-            // if (doNull) {
-            //     // add moves to pvarray
-            //     board->pvarray[board->ply][board->ply] = moves[i];
-            //     for (int j = board->ply + 1;
-            //          j < board->pvlength[board->ply + 1]; ++j) {
-            //         board->pvarray[board->ply][j] =
-            //             board->pvarray[board->ply + 1][j];
-            //     }
-            //     board->pvlength[board->ply] = board->pvlength[board->ply +
-            //     1];
-            // }
         }
     }
 
@@ -376,6 +373,12 @@ static int alphabeta(BOARD_STATE *board, int depth, int alpha, int beta,
             // stalemate
             return 0;
         }
+    }
+
+    if (alpha != oldalpha) {
+        storeTT(board->hash, bestmove, bestscore, TT_EXACT_FLAG, depth);
+    } else {
+        storeTT(board->hash, bestmove, alpha, TT_ALPHA_FLAG, depth);
     }
 
     return alpha;
