@@ -44,13 +44,10 @@ static int isMateEval(int score) {
 // prints uci centipawn/mate search info
 static void printEval(int score, int depth) {
 
-    if (score + MATETHRESHOLD >= MATE && score - MATETHRESHOLD <= MATE) {
-        int mate = (depth + 1) / 2;
-        printf("score mate %d ", mate);
-    } else if (score + MATETHRESHOLD >= -MATE &&
-               score - MATETHRESHOLD <= -MATE) {
-        int mate = (depth) / 2;
-        printf("score mate -%d ", mate);
+    if (score + MATETHRESHOLD >= MATE) {
+        printf("score mate %d ", (MATE - score + 1) / 2);
+    } else if (score - MATETHRESHOLD <= -MATE) {
+        printf("score mate %d ", -(MATE + score) / 2);
     } else {
         printf("score cp %d ", score);
     }
@@ -242,11 +239,11 @@ static int nullmovesearch(BOARD_STATE *board, int depth, int alpha, int beta) {
         --board->ply;
 
         if (score >= beta) {
-            storeTT(board->hash, moves[i], beta, TT_BETA_FLAG, depth);
+            storeTT(board, moves[i], beta, TT_BETA_FLAG, depth);
             return beta;
         }
         if (score > alpha) {
-            storeTT(board->hash, moves[i], score, TT_EXACT_FLAG, depth);
+            storeTT(board, moves[i], score, TT_EXACT_FLAG, depth);
             alpha = score;
         }
     }
@@ -356,7 +353,7 @@ static int alphabeta(BOARD_STATE *board, int depth, int alpha, int beta,
             if (score > alpha) {
                 if (score >= beta) {
                     bestmove = moves[i];
-                    storeTT(board->hash, moves[i], beta, TT_BETA_FLAG, depth);
+                    storeTT(board, moves[i], beta, TT_BETA_FLAG, depth);
                     return beta;
                 }
             }
@@ -376,9 +373,9 @@ static int alphabeta(BOARD_STATE *board, int depth, int alpha, int beta,
     }
 
     if (alpha != oldalpha) {
-        storeTT(board->hash, bestmove, bestscore, TT_EXACT_FLAG, depth);
+        storeTT(board, bestmove, bestscore, TT_EXACT_FLAG, depth);
     } else {
-        storeTT(board->hash, bestmove, alpha, TT_ALPHA_FLAG, depth);
+        storeTT(board, bestmove, alpha, TT_ALPHA_FLAG, depth);
     }
 
     return alpha;

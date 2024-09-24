@@ -41,15 +41,17 @@ int probeTT(ULL hash, MOVE *best, int alpha, int beta, int depth) {
     return TT_EMPTY;
 }
 
-void storeTT(ULL hash, MOVE best, int val, int flag, int depth) {
+void storeTT(BOARD_STATE *board, MOVE best, int val, int flag, int depth) {
 
-    int index = hash % TT_SIZE;
+    int index = board->hash % TT_SIZE;
 
-    // if (hash == tt[index].hash && depth < tt[index].depth) {
-    //     return;
-    // }
+    if (val + MATETHRESHOLD >= MATE) {
+        val = MATE - board->ply;
+    } else if (val - MATETHRESHOLD <= -MATE) {
+        val = -MATE + board->ply;
+    }
 
-    tt[index].hash = hash;
+    tt[index].hash = board->hash;
     tt[index].depth = depth;
     tt[index].flag = flag;
     tt[index].best = best;

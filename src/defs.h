@@ -276,6 +276,7 @@ extern void startUCI();
 // tt.c
 extern void initTT();
 extern int probeTT(ULL hash, MOVE *best, int alpha, int beta, int depth);
-extern void storeTT(ULL hash, MOVE best, int val, int flag, int depth);
+extern void storeTT(BOARD_STATE *board, MOVE best, int val, int flag,
+                    int depth);
 
 #endif
