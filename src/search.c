@@ -404,32 +404,9 @@ static int searchCutoff(BOARD_STATE *board, float time_ms) {
         return FALSE;
     }
 
-    // emergency
-    if (time <= 1000 * 5 && time_ms > 100) {
-        return TRUE;
-    }
-
-    // bullet time control
-    if (time <= 1000 * 60 * 1 && time_ms > 300) {
-        return TRUE;
-    }
-
-    // blitz
-    if (time <= 1000 * 60 * 3 && time_ms > 900) {
-        return TRUE;
-    }
-    if (time <= 1000 * 60 * 5 && time_ms > 1100) {
-        return TRUE;
-    }
-    if (time <= 1000 * 60 * 7 && time_ms > 1500) {
-        return TRUE;
-    }
-
-    // rapid
-    if (time_ms >= 5000 * 1) {
-        return TRUE;
-    }
-    return FALSE;
+    // if used more than half of allocated time,
+    // don't start a new search
+    return (time_ms * 2 >= board->cutoffTime);
 }
 
 static float setCutoff(BOARD_STATE *board) {
@@ -440,28 +417,9 @@ static float setCutoff(BOARD_STATE *board) {
         return 1000 * 60 * 36;
     }
 
-    // emergency
-    if (time <= 1000 * 5) {
-        return 150 + inc;
-    }
+    int time2move = (time / 20) + (4 * inc / 5);
 
-    // bullet
-    if (time <= 1000 * 60) {
-        return 5000 + inc;
-    }
-
-    // blitz
-    if (time <= 1000 * 60 * 3) {
-        return 8000 + inc;
-    }
-
-    // blitz
-    if (time <= 1000 * 60 * 5) {
-        return 10000 + inc;
-    }
-
-    // rapid
-    return 20000 + inc;
+    return time2move;
 }
 
 // returns TRUE if only one move is legal
@@ -475,7 +433,6 @@ static int onlyMove(BOARD_STATE *board, MOVE *move) {
 
     int i = 0;
     while (i < n_moves && legal < 2) {
-        // for (int i = 0; i < n_moves; ++i) {
 
         makeMove(board, moves[i]);
 
