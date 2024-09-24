@@ -5,8 +5,8 @@ NEWENGINE="$HOME/dev"
 CURRENTENGINE="$HOME/v12"
 
 BOOK="/usr/local/share/scid/books/Elo2400.bin"
-# TC="60+1"
-TC="10+1"
+# TC="10+1"
+TC="60+1"
 
 GAMES=10000
 
@@ -15,7 +15,7 @@ CONCURRENT=8
 # CONCURRENT=1
 
 cd ..
-rm -rf build
+make clean
 make ARCH=native
 rm ${NEWENGINE}
 cp build/amelia ${NEWENGINE}
