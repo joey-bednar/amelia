@@ -43,7 +43,7 @@ static ULL perftrec(int depth, BOARD_STATE *board) {
         //     printf("copy: %llu\norig: %llu\n", bcopy.hash, board->hash);
         // }
 
-        storeTT(board->hash, (ULL)legal, 0, TT_EXACT_FLAG, depth);
+        storeTT(board, (ULL)legal, 0, TT_EXACT_FLAG, depth);
 
         // if (board->hash == 14740458848981706522) {
         //     printf("here\n");
@@ -83,8 +83,6 @@ static ULL perftrec(int depth, BOARD_STATE *board) {
 
 void perft(int depth, BOARD_STATE *board) {
 
-    // printBoard(board);
-
     ULL total = 0;
 
     if (depth <= 0) {
@@ -113,8 +111,6 @@ void perft(int depth, BOARD_STATE *board) {
 
         unmakeMove(board, move_list[i]);
     }
-
-    // printBoard(board);
 
     t = clock() - t;
     double time_taken = ((double)t) / CLOCKS_PER_SEC; // in seconds

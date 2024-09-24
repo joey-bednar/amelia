@@ -2,13 +2,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-// returns number of pseudolegal king moves. used to evaluate king safety
-static int pawnShield(BOARD_STATE *board, int color) {
-    ULL moves = KINGBB(getKingSq(board, color)) & board->bitboard[color] &
-                board->bitboard[bbPawn];
-    return countBits(moves);
-}
-
 // returns true if position has been repeated three times
 int isThreeFold(BOARD_STATE *board) {
     if (board->halfmove >= 4) {

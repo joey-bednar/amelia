@@ -1,11 +1,11 @@
 #!/bin/bash
 
 NEWENGINE="$HOME/dev"
-CURRENTENGINE="$HOME/prev"
-# CURRENTENGINE="$HOME/v11"
+# CURRENTENGINE="$HOME/prev"
+CURRENTENGINE="$HOME/v12"
 
 BOOK="/usr/local/share/scid/books/Elo2400.bin"
-TC="10+1"
+TC="60+1"
 
 GAMES=10000
 

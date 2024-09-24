@@ -42,7 +42,7 @@ static int isMateEval(int score) {
 }
 
 // prints uci centipawn/mate search info
-static void printEval(int score, int depth) {
+static void printEval(int score) {
 
     if (score + MATETHRESHOLD >= MATE) {
         printf("score mate %d ", (MATE - score + 1) / 2);
@@ -78,24 +78,13 @@ static void printInfo(BOARD_STATE *board, float time, int score, int depth) {
     printf("depth %d ", depth);
     MOVE m;
     int val = probeTT(board->hash, &m, INF, -INF, 0);
-    printEval(score, val);
+    printEval(score);
     printf("nodes %ld ", (long)board->nodes);
     printf("nps %ld ", nps);
     printf("time %ld ", (long)time);
 
-    // skip pv output for search depth 0
-    // if (board->pvlength[0] == 0) {
-    //     printf("\n");
-    //     return;
-    // }
-
     printf("pv ");
     printPV(board, depth);
-
-    // for (int i = 0; i < board->pvlength[0]; ++i) {
-    //     printMoveText(board->pvarray[0][i]);
-    //     printf(" ");
-    // }
     printf("\n");
 }
 
