@@ -227,11 +227,11 @@ static int nullmovesearch(BOARD_STATE *board, int depth, int alpha, int beta) {
         unmakeMove(board, moves[i]);
         --board->ply;
 
-        if (score >= beta) {
+        if (score >= beta && !board->stopped) {
             storeTT(board, moves[i], beta, TT_BETA_FLAG, depth);
             return beta;
         }
-        if (score > alpha) {
+        if (score > alpha && !board->stopped) {
             storeTT(board, moves[i], score, TT_EXACT_FLAG, depth);
             alpha = score;
         }
@@ -340,7 +340,7 @@ static int alphabeta(BOARD_STATE *board, int depth, int alpha, int beta,
             bestscore = score;
             bestmove = moves[i];
             if (score > alpha) {
-                if (score >= beta) {
+                if (score >= beta && !board->stopped) {
                     bestmove = moves[i];
                     storeTT(board, moves[i], beta, TT_BETA_FLAG, depth);
                     return beta;
@@ -361,9 +361,9 @@ static int alphabeta(BOARD_STATE *board, int depth, int alpha, int beta,
         }
     }
 
-    if (alpha != oldalpha) {
+    if (alpha != oldalpha && !board->stopped) {
         storeTT(board, bestmove, bestscore, TT_EXACT_FLAG, depth);
-    } else {
+    } else if (!board->stopped) {
         storeTT(board, bestmove, alpha, TT_ALPHA_FLAG, depth);
     }
 
