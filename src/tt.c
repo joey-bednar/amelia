@@ -55,3 +55,8 @@ void storeTT(BOARD_STATE *board, MOVE best, int val, int flag, int depth) {
     tt[index].best = best;
     tt[index].val = val;
 }
+
+MOVE getMoveTT(BOARD_STATE *board) {
+    int index = board->hash % TT_SIZE;
+    return tt[index].best;
+}

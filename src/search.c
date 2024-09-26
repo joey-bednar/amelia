@@ -13,26 +13,45 @@ int compareMoves(const void *moveA, const void *moveB) {
     return MVVLVA(PIECE(B), CAPTURED(B)) - MVVLVA(PIECE(A), CAPTURED(A));
 }
 
-static void sortMoves(BOARD_STATE *board, MOVE *moves, int n_moves) {
+static void scoreMoves(BOARD_STATE *board, MOVE *moves, int *scores,
+                       int n_moves) {
+    MOVE m;
+    probeTT(board->hash, &m, INF, -INF, 0);
 
-    if (n_moves <= 1) {
-        return;
-    }
-
-    MOVE best;
-    if (probeTT(board->hash, &best, INF, -INF, 0) != TT_EMPTY) {
-        for (int i = 0; i < n_moves; i++) {
-            if (moves[i] == best) {
-                MOVE temp = moves[i];
-                moves[i] = moves[0];
-                moves[0] = temp;
-                break;
-            }
+    for (int i = 0; i < n_moves; ++i) {
+        if (moves[i] == m) {
+            scores[i] = 9999;
+        } else if (moves[i] == board->killers[board->ply][0]) {
+            scores[i] = 50;
+        } else if (moves[i] == board->killers[board->ply][1]) {
+            scores[i] = 49;
+        } else {
+            scores[i] = MVVLVA(PIECE(moves[i]), CAPTURED(moves[i]));
         }
-        qsort(moves + 1, n_moves - 1, sizeof(MOVE), compareMoves);
-        return;
     }
-    qsort(moves, n_moves, sizeof(MOVE), compareMoves);
+}
+
+static void pickSingleMoves(MOVE *moves, int *scores, int index, int n_moves) {
+    int max = scores[index];
+    int maxi = index;
+
+    // find max score index
+    for (int i = index; i < n_moves; ++i) {
+        if (scores[i] > max) {
+            max = scores[i];
+            maxi = i;
+        }
+    }
+
+    // move best move to front
+    MOVE temp = moves[index];
+    moves[index] = moves[maxi];
+    moves[maxi] = temp;
+
+    // move score to front
+    int scoretemp = scores[index];
+    scores[index] = scores[maxi];
+    scores[maxi] = scoretemp;
 }
 
 static int isMateEval(int score) {
@@ -132,7 +151,6 @@ static int quiesce(BOARD_STATE *board, int depth, int alpha, int beta) {
     MOVE moves[MAX_LEGAL_MOVES];
     int n_moves = generateMoves(board, moves);
 
-    // sortMoves(board, moves, n_moves);
     qsort(moves, n_moves, sizeof(MOVE), compareMoves);
 
     for (int i = 0; i < n_moves; ++i) {
@@ -205,6 +223,7 @@ static int alphabeta(BOARD_STATE *board, int depth, int alpha, int beta,
         return quiesce(board, QMAXDEPTH, alpha, beta);
     }
 
+    // null move pruning
     if (doNull && depth >= 4 && !incheck) {
 
         makeNullMove(board);
@@ -220,10 +239,17 @@ static int alphabeta(BOARD_STATE *board, int depth, int alpha, int beta,
     MOVE moves[MAX_LEGAL_MOVES];
     int n_moves = generateMoves(board, moves);
 
-    // qsort(moves, n_moves, sizeof(MOVE), compareMoves);
-    sortMoves(board, moves, n_moves);
+    int scores[n_moves];
+    scoreMoves(board, moves, scores, n_moves);
+
+    // for(int i=0;i<n_moves;i++) {
+    //     printMoveText(moves[i]);
+    //     printf(" %d\n",scores[i]);
+    // }
 
     for (int i = 0; i < n_moves; ++i) {
+
+        pickSingleMoves(moves, scores, i, n_moves);
 
         makeMove(board, moves[i]);
         ++board->ply;
@@ -252,6 +278,10 @@ static int alphabeta(BOARD_STATE *board, int depth, int alpha, int beta,
 
         if (score >= beta) {
             storeTT(board, moves[i], beta, TT_BETA_FLAG, depth);
+            if (CAPTURED(moves[i]) == EMPTY) {
+                board->killers[board->ply][1] = board->killers[board->ply][0];
+                board->killers[board->ply][0] = moves[i];
+            }
             return beta;
         }
         if (score > alpha) {

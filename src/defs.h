@@ -137,6 +137,11 @@ typedef struct {
 } PVENTRY;
 
 typedef struct {
+    int score;
+    int index;
+} MSCORE;
+
+typedef struct {
     ULL bitboard[bbLength];
 
     int turn;
@@ -146,6 +151,8 @@ typedef struct {
     int enpassant;
 
     ULL hash;
+
+    MOVE killers[MAX_DEPTH][2];
 
     int ply;
 

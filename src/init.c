@@ -88,6 +88,8 @@ static void initPassedPawns() {
 }
 
 static void initMVVLVA() {
+    const int offset = 200;
+
     for (int i = 0; i < 8; i++) {
         for (int j = 0; j < 8; j++) {
             MVVLVA[i][j] = 0;
@@ -96,7 +98,7 @@ static void initMVVLVA() {
 
     for (int piece = bbPawn; piece <= bbKing; piece++) {
         for (int cap = bbPawn; cap <= bbQueen; cap++) {
-            MVVLVA[piece][cap] = 10 * cap + (bbKing - piece);
+            MVVLVA[piece][cap] = 10 * cap + (bbKing - piece) + offset;
         }
     }
 }
