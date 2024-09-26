@@ -3,7 +3,6 @@
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
 #include <time.h>
 
 int compareMoves(const void *moveA, const void *moveB) {
@@ -42,29 +41,17 @@ static int isMateEval(int score) {
 }
 
 // prints uci centipawn/mate search info
-static void printEval(int score) {
+static void printEval(int score, int depth) {
 
-    if (score + MATETHRESHOLD >= MATE) {
-        printf("score mate %d ", (MATE - score + 1) / 2);
-    } else if (score - MATETHRESHOLD <= -MATE) {
-        printf("score mate %d ", -(MATE + score) / 2);
+    if (score + MATETHRESHOLD >= MATE && score - MATETHRESHOLD <= MATE) {
+        int mate = (depth + 1) / 2;
+        printf("score mate %d ", mate);
+    } else if (score + MATETHRESHOLD >= -MATE &&
+               score - MATETHRESHOLD <= -MATE) {
+        int mate = (depth) / 2;
+        printf("score mate -%d ", mate);
     } else {
         printf("score cp %d ", score);
-    }
-}
-
-static void printPV(BOARD_STATE *board, int depth) {
-    BOARD_STATE bcopy;
-    memcpy(&bcopy, board, sizeof(BOARD_STATE));
-
-    for (int i = 0; i < depth; ++i) {
-        MOVE m;
-        if (probeTT(bcopy.hash, &m, INF, -INF, 0) == TT_EMPTY) {
-            return;
-        }
-        printMoveText(m);
-        printf(" ");
-        makeMove(&bcopy, m);
     }
 }
 
@@ -76,15 +63,23 @@ static void printInfo(BOARD_STATE *board, float time, int score, int depth) {
 
     printf("info ");
     printf("depth %d ", depth);
-    MOVE m;
-    int val = probeTT(board->hash, &m, INF, -INF, 0);
-    printEval(score);
+    printEval(score, board->pvlength[0]);
     printf("nodes %ld ", (long)board->nodes);
     printf("nps %ld ", nps);
     printf("time %ld ", (long)time);
 
+    // skip pv output for search depth 0
+    if (board->pvlength[0] == 0) {
+        printf("\n");
+        return;
+    }
+
     printf("pv ");
-    printPV(board, depth);
+
+    for (int i = 0; i < board->pvlength[0]; ++i) {
+        printMoveText(board->pvarray[0][i]);
+        printf(" ");
+    }
     printf("\n");
 }
 
@@ -227,11 +222,11 @@ static int nullmovesearch(BOARD_STATE *board, int depth, int alpha, int beta) {
         unmakeMove(board, moves[i]);
         --board->ply;
 
-        if (score >= beta && !board->stopped) {
+        if (score >= beta) {
             storeTT(board, moves[i], beta, TT_BETA_FLAG, depth);
             return beta;
         }
-        if (score > alpha && !board->stopped) {
+        if (score > alpha) {
             storeTT(board, moves[i], score, TT_EXACT_FLAG, depth);
             alpha = score;
         }
@@ -259,17 +254,14 @@ static int alphabeta(BOARD_STATE *board, int depth, int alpha, int beta,
     }
     ++board->nodes;
 
-    MOVE bestmove = 0ull;
-    int bestscore = -INF;
-    int oldalpha = alpha;
+    board->pvlength[board->ply] = board->ply;
 
-    int flag = TT_ALPHA_FLAG;
+    int score = -INF;
 
     int legal = 0;
 
     if (board->halfmove >= 100 || isThreeFold(board) ||
         isInsufficientMaterial(board)) {
-        // storeTT(board->hash, 0ull, 0, TT_EXACT_FLAG, depth);
         return 0;
     }
 
@@ -282,11 +274,6 @@ static int alphabeta(BOARD_STATE *board, int depth, int alpha, int beta,
 
     if (depth == 0) {
         return quiesce(board, QMAXDEPTH, alpha, beta);
-    }
-
-    int val = probeTT(board->hash, &bestmove, alpha, beta, depth);
-    if (beta - alpha > 1 && val != TT_EMPTY) {
-        return val;
     }
 
     if (depth >= 4 && !incheck) {
@@ -308,7 +295,6 @@ static int alphabeta(BOARD_STATE *board, int depth, int alpha, int beta,
     // qsort(moves, n_moves, sizeof(MOVE), compareMoves);
     sortMoves(board, moves, n_moves);
 
-    int score = -INF;
     for (int i = 0; i < n_moves; ++i) {
 
         makeMove(board, moves[i]);
@@ -336,18 +322,25 @@ static int alphabeta(BOARD_STATE *board, int depth, int alpha, int beta,
         unmakeMove(board, moves[i]);
         --board->ply;
 
-        if (score > bestscore) {
-            bestscore = score;
-            bestmove = moves[i];
-            if (score > alpha) {
-                if (score >= beta && !board->stopped) {
-                    bestmove = moves[i];
-                    storeTT(board, moves[i], beta, TT_BETA_FLAG, depth);
-                    return beta;
-                }
-            }
-            flag = TT_EXACT_FLAG;
+        if (score >= beta) {
+            storeTT(board, moves[i], beta, TT_BETA_FLAG, depth);
+            return beta;
+        }
+        if (score > alpha) {
             alpha = score;
+
+            storeTT(board, moves[i], score, TT_EXACT_FLAG, depth);
+
+            if (doNull) {
+                // add moves to pvarray
+                board->pvarray[board->ply][board->ply] = moves[i];
+                for (int j = board->ply + 1;
+                     j < board->pvlength[board->ply + 1]; ++j) {
+                    board->pvarray[board->ply][j] =
+                        board->pvarray[board->ply + 1][j];
+                }
+                board->pvlength[board->ply] = board->pvlength[board->ply + 1];
+            }
         }
     }
 
@@ -359,12 +352,6 @@ static int alphabeta(BOARD_STATE *board, int depth, int alpha, int beta,
             // stalemate
             return 0;
         }
-    }
-
-    if (alpha != oldalpha && !board->stopped) {
-        storeTT(board, bestmove, bestscore, TT_EXACT_FLAG, depth);
-    } else if (!board->stopped) {
-        storeTT(board, bestmove, alpha, TT_ALPHA_FLAG, depth);
     }
 
     return alpha;
@@ -404,9 +391,32 @@ static int searchCutoff(BOARD_STATE *board, float time_ms) {
         return FALSE;
     }
 
-    // if used more than half of allocated time,
-    // don't start a new search
-    return (time_ms * 2 >= board->cutoffTime);
+    // emergency
+    if (time <= 1000 * 5 && time_ms > 100) {
+        return TRUE;
+    }
+
+    // bullet time control
+    if (time <= 1000 * 60 * 1 && time_ms > 300) {
+        return TRUE;
+    }
+
+    // blitz
+    if (time <= 1000 * 60 * 3 && time_ms > 900) {
+        return TRUE;
+    }
+    if (time <= 1000 * 60 * 5 && time_ms > 1100) {
+        return TRUE;
+    }
+    if (time <= 1000 * 60 * 7 && time_ms > 1500) {
+        return TRUE;
+    }
+
+    // rapid
+    if (time_ms >= 5000 * 1) {
+        return TRUE;
+    }
+    return FALSE;
 }
 
 static float setCutoff(BOARD_STATE *board) {
@@ -417,9 +427,28 @@ static float setCutoff(BOARD_STATE *board) {
         return 1000 * 60 * 36;
     }
 
-    int time2move = (time / 20) + (4 * inc / 5);
+    // emergency
+    if (time <= 1000 * 5) {
+        return 150 + inc;
+    }
 
-    return time2move;
+    // bullet
+    if (time <= 1000 * 60) {
+        return 5000 + inc;
+    }
+
+    // blitz
+    if (time <= 1000 * 60 * 3) {
+        return 8000 + inc;
+    }
+
+    // blitz
+    if (time <= 1000 * 60 * 5) {
+        return 10000 + inc;
+    }
+
+    // rapid
+    return 20000 + inc;
 }
 
 // returns TRUE if only one move is legal
@@ -433,6 +462,7 @@ static int onlyMove(BOARD_STATE *board, MOVE *move) {
 
     int i = 0;
     while (i < n_moves && legal < 2) {
+        // for (int i = 0; i < n_moves; ++i) {
 
         makeMove(board, moves[i]);
 
@@ -509,8 +539,8 @@ void search(BOARD_STATE *board) {
         printInfo(board, time_taken_ms, score, searchDepth);
 
         // get bestmove/ponder from pv
-        // bestmove = board->pvarray[0][0];
-        probeTT(board->hash, &bestmove, INF, -INF, 0);
+        bestmove = board->pvarray[0][0];
+        // probeTT(board->hash, &bestmove, INF, -INF, 0);
 
         // end searches in timed games if mate is found
         if (isMateEval(score) && inputTime[board->turn] != DEFAULT_TIME) {
@@ -527,6 +557,4 @@ void search(BOARD_STATE *board) {
     printf("bestmove ");
     printMoveText(bestmove);
     printf("\n");
-
-    // initTT();
 }

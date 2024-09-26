@@ -149,6 +149,9 @@ typedef struct {
 
     int ply;
 
+    MOVE pvarray[MAX_DEPTH][MAX_DEPTH];
+    int pvlength[MAX_DEPTH];
+
     PVENTRY pvtable[PVSIZE];
 
     POSRECORD playedmoves[MAX_GAME_LENGTH * 2];

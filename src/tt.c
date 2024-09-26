@@ -45,6 +45,10 @@ void storeTT(BOARD_STATE *board, MOVE best, int val, int flag, int depth) {
 
     int index = board->hash % TT_SIZE;
 
+    if (board->hash == tt[index].hash && depth < tt[index].depth) {
+        return;
+    }
+
     tt[index].hash = board->hash;
     tt[index].depth = depth;
     tt[index].flag = flag;
