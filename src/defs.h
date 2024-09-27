@@ -2,12 +2,12 @@
 
 // name
 #define NAME "Amelia"
-#define VERSION "v0.12"
+#define VERSION "v0.13"
 #define AUTHOR "Joey Bednar"
 
 // settings
 #define DEFAULTDEPTH 6
-#define MAX_DEPTH 20
+#define MAX_DEPTH 100
 #define QMAXDEPTH 100
 #define DEFAULT_TIME 3600000
 #define DEFAULT_INC 0
@@ -155,11 +155,6 @@ typedef struct {
     MOVE killers[MAX_DEPTH][2];
 
     int ply;
-
-    MOVE pvarray[MAX_DEPTH][MAX_DEPTH];
-    int pvlength[MAX_DEPTH];
-
-    PVENTRY pvtable[PVSIZE];
 
     POSRECORD playedmoves[MAX_GAME_LENGTH * 2];
     int pmindex;

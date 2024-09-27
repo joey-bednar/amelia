@@ -203,12 +203,6 @@ int eval(BOARD_STATE *board) {
             total -= 10 * computeMopUp(!board->turn, board);
         }
     }
-    // else {
-    //     // compute king safety in opening/middlegame
-    //     int shield =
-    //         pawnShield(board, board->turn) - pawnShield(board, !board->turn);
-    //     total += 10 * shield;
-    // }
 
     // compute piece square eval
     total += computePieceSqTotals(mine, board->turn, endgame, board);

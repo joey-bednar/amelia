@@ -40,8 +40,6 @@ static void playUCIMove(BOARD_STATE *board, int start, int end, char promo) {
         piece = '\0';
     }
 
-    // printf("playUCIMove %d %d\n",start,end);
-
     MOVE moves[MAX_LEGAL_MOVES];
     int n_moves = generateMoves(board, moves);
 
@@ -50,13 +48,9 @@ static void playUCIMove(BOARD_STATE *board, int start, int end, char promo) {
             isLegalMove(board, moves[i])) {
             if (promo == ' ' || promo == '\n') {
                 makeMove(board, moves[i]);
-                // printMoveText(moves[i]);
-                // printf("move no promote\n");
                 return;
             } else if (PROMOTED(moves[i]) == piece) {
                 makeMove(board, moves[i]);
-                // printMoveText(moves[i]);
-                // printf("move promote type %d\n",moves[i].type);
                 return;
             }
         }
@@ -83,11 +77,7 @@ static void parseMoves(char *string, BOARD_STATE *board) {
 
             char promo = string[i + 4];
 
-            // printf("parseMoves: %d %d %c\n",startSq,endSq,promo);
-
-            // printBoard(board);
             playUCIMove(board, startSq, endSq, promo);
-            // printBoard(board);
 
             if (promo == ' ') {
                 i = i + 4;

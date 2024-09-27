@@ -3,8 +3,8 @@
 # Amelia
 #### Chess engine accepting challenges on [Lichess.org](https://lichess.org/@/AmeliaLatest).
 
-[![lichess-rapid](https://lichess-shield.vercel.app/api?username=AmeliaLatest&format=bullet)](https://lichess.org/@/AmeliaLatest/perf/bullet)
-[![lichess-rapid](https://lichess-shield.vercel.app/api?username=AmeliaLatest&format=blitz)](https://lichess.org/@/AmeliaLatest/perf/blitz)
+[![lichess-bullet](https://lichess-shield.vercel.app/api?username=AmeliaLatest&format=bullet)](https://lichess.org/@/AmeliaLatest/perf/bullet)
+[![lichess-blitz](https://lichess-shield.vercel.app/api?username=AmeliaLatest&format=blitz)](https://lichess.org/@/AmeliaLatest/perf/blitz)
 
 <img src="logo.png" alt="logo" width="200px" height="200px"/>
 
@@ -33,9 +33,10 @@ You can also [spectate active games](https://lichess.org/@/AmeliaLatest/tv).
     - [Principal Variation Search](https://en.wikipedia.org/wiki/Principal_variation_search)
     - [Quiescence search](https://en.wikipedia.org/wiki/Quiescence_search)
     - [Iterative deepening](https://www.chessprogramming.org/Iterative_Deepening)
-    - [Triangular PV-table](https://www.chessprogramming.org/Triangular_PV-Table)
-    - Move ordering ([principal variation](https://www.chessprogramming.org/Principal_Variation), [MVV-LVA](https://www.chessprogramming.org/MVV-LVA))
+    - [Transposition table](https://en.wikipedia.org/wiki/Transposition_table)
+    - Move ordering ([hash move](https://www.chessprogramming.org/Hash_Move), [MVV-LVA](https://www.chessprogramming.org/MVV-LVA), [killer moves](https://www.chessprogramming.org/Killer_Move))
     - [Check extensions](https://www.chessprogramming.org/Check_Extensions)
+    - [Killer moves](https://www.chessprogramming.org/Killer_Move)
     - [Null move pruning](https://en.wikipedia.org/wiki/Null-move_heuristic)
 - Evaluation
     - Opening/endgame [piece square tables](https://www.chessprogramming.org/Piece-Square_Tables)
@@ -50,6 +51,10 @@ You can also [spectate active games](https://lichess.org/@/AmeliaLatest/tv).
 ```bash
 git clone https://github.com/joey-bednar/amelia && \
 cd amelia && \
+git checkout <VERSION> && \
 make && \
 ./build/amelia
 ```
+
+Optionally, you may cross-compile for Windows using `make TARGET=Windows` or use any [GCC `-march` option](https://gcc.gnu.org/onlinedocs/gcc/x86-Options.html).
+For example, `make ARCH=native` optimizes for your system.

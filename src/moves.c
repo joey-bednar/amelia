@@ -283,9 +283,6 @@ static void addMove(MOVE *moves, int start, int end, int piece, int captured,
     // 0000 0000 0000 1000 0000 0000 0000 0000 : two pawn move
     // 0000 0000 0001 0000 0000 0000 0000 0000 : castle
     // 0000 0000 1110 0000 0000 0000 0000 0000 : piece
-    //
-    // 0000 0000 0000 0000 0000 0000 0000 0000 : check
-    // 0000 0000 0000 0000 0000 0000 0000 0000 : MVV LVA
 
     moves[*index] = (((unsigned long)SQ120SQ64(start) << 0) & 0x0000003Ful) |
                     (((unsigned long)SQ120SQ64(end) << 6) & 0x00000FC0ul) |
