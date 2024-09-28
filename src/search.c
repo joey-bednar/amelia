@@ -478,4 +478,6 @@ void search(BOARD_STATE *board) {
     printf("bestmove ");
     printMoveText(bestmove);
     printf("\n");
+
+    initTT();
 }
