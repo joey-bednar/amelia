@@ -268,6 +268,7 @@ extern int isThreeFold(BOARD_STATE *board);
 extern int isInsufficientMaterial(BOARD_STATE *board);
 extern int eval(BOARD_STATE *board);
 extern int isRepeatPosition(BOARD_STATE *board);
+extern int getPhase(BOARD_STATE *board);
 
 // search.c
 extern void printMoveText(MOVE move);

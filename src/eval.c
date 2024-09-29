@@ -2,6 +2,19 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#define PASSED_PAWN_BONUS 50
+#define PAWN_MATERIAL 100
+#define KNIGHT_MATERIAL 320
+#define BISHOP_MATERIAL 330
+#define ROOK_MATERIAL 500
+#define QUEEN_MATERIAL 900
+
+#define PAWN_PHASE 0
+#define KNIGHT_PHASE 1
+#define BISHOP_PHASE 1
+#define ROOK_PHASE 2
+#define QUEEN_PHASE 4
+
 // returns true if position has been repeated three times
 int isThreeFold(BOARD_STATE *board) {
     if (board->halfmove >= 4) {
@@ -105,6 +118,8 @@ static int computeMaterialTotals(ULL bb, BOARD_STATE *board) {
 // returns eval for piece square tables
 static int computePieceSqTotals(ULL bb, int color, int endgame,
                                 BOARD_STATE *board) {
+
+    const int val[] = {100, 320, 330, 500, 900, 0};
     int total = 0;
 
     BITLOOP(bb) {
@@ -180,33 +195,122 @@ static int computeMopUp(int winningcolor, BOARD_STATE *board) {
     return mopUp;
 }
 
-// returns centipawn evaluation of current position
-int eval(BOARD_STATE *board) {
+// returns phase of game as integer 0-256
+// 0 = opening, 256 = endgame
+int getPhase(BOARD_STATE *board) {
+    ULL white = board->bitboard[bbWhite];
+    ULL black = board->bitboard[bbBlack];
 
-    ULL mine = board->bitboard[board->turn];
-    ULL yours = board->bitboard[!board->turn];
+    const int TOTAL_PHASE = 16 * PAWN_PHASE + 4 * KNIGHT_PHASE +
+                            4 * BISHOP_PHASE + 4 * ROOK_PHASE + 2 * QUEEN_PHASE;
 
+    int phase = TOTAL_PHASE;
+
+    phase -= PAWN_PHASE * countBits(white & board->bitboard[bbPawn]) +
+             PAWN_PHASE * countBits(black & board->bitboard[bbPawn]) +
+
+             KNIGHT_PHASE * countBits(white & board->bitboard[bbKnight]) +
+             KNIGHT_PHASE * countBits(black & board->bitboard[bbKnight]) +
+
+             BISHOP_PHASE * countBits(white & board->bitboard[bbBishop]) +
+             BISHOP_PHASE * countBits(black & board->bitboard[bbBishop]) +
+
+             ROOK_PHASE * countBits(white & board->bitboard[bbRook]) +
+             ROOK_PHASE * countBits(black & board->bitboard[bbRook]) +
+
+             QUEEN_PHASE * countBits(white & board->bitboard[bbQueen]) +
+             QUEEN_PHASE * countBits(black & board->bitboard[bbQueen]);
+
+    return (phase * 256 + (TOTAL_PHASE / 2)) / TOTAL_PHASE;
+}
+
+static void computeSquares(BOARD_STATE *board, int color, int *pieces,
+                           int *open, int *end) {
+
+    const int val[] = {100, 320, 330, 500, 900, 0};
     int total = 0;
 
-    // compute material eval
-    int myMaterial = computeMaterialTotals(mine, board);
-    int yourMaterial = computeMaterialTotals(yours, board);
-    total += myMaterial - yourMaterial;
+    ULL bb = board->bitboard[color];
 
-    // compute mop up eval for endgames
-    int endgame =
-        (myMaterial + yourMaterial < 2500) || board->bitboard[bbQueen] == 0ull;
-    if (endgame) {
-        if (total > 400) {
-            total += 10 * computeMopUp(board->turn, board);
-        } else if (total < -400) {
-            total -= 10 * computeMopUp(!board->turn, board);
+    BITLOOP(bb) {
+        int index64 = bitScanForward(bb);
+        int unflipped64 = index64;
+
+        int sq = SQ64SQ120(index64);
+
+        int piece = getGenericPieceSq120(sq, board);
+
+        if (color == BLACK) {
+            index64 ^= 7;
+        }
+
+        *pieces += val[piece - bbPawn];
+
+        switch (piece) {
+        case bbPawn:
+            *open += pawnSqTable[FALSE][index64];
+            *end += pawnSqTable[TRUE][index64];
+            total += bonusPassedPawn(board, unflipped64, color);
+            break;
+        case bbRook:
+            *open += rookSqTable[FALSE][index64];
+            *end += rookSqTable[TRUE][index64];
+            break;
+        case bbBishop:
+            *open += bishopSqTable[FALSE][index64];
+            *end += bishopSqTable[TRUE][index64];
+            break;
+        case bbKnight:
+            *open += knightSqTable[FALSE][index64];
+            *end += knightSqTable[TRUE][index64];
+            break;
+        case bbQueen:
+            *open += queenSqTable[FALSE][index64];
+            *end += queenSqTable[TRUE][index64];
+            break;
+        case bbKing:
+            *open += kingSqTable[FALSE][index64];
+            *end += kingSqTable[TRUE][index64];
+            break;
         }
     }
 
-    // compute piece square eval
-    total += computePieceSqTotals(mine, board->turn, endgame, board);
-    total -= computePieceSqTotals(yours, !board->turn, endgame, board);
+    *open += total;
+    *end += total;
+}
 
-    return total;
+// returns centipawn evaluation of current position
+int eval(BOARD_STATE *board) {
+
+    int wmaterial = 0;
+    int wopen = 0;
+    int wend = 0;
+    computeSquares(board, board->turn, &wmaterial, &wopen, &wend);
+
+    int bmaterial = 0;
+    int bopen = 0;
+    int bend = 0;
+    computeSquares(board, !board->turn, &bmaterial, &bopen, &bend);
+
+    int totalMiddle = wopen - bopen;
+    int totalEnd = wend - bend;
+
+    int phase = getPhase(board);
+
+    int eval = ((totalMiddle * (256 - phase)) + (totalEnd * phase)) / 256;
+
+    eval += wmaterial - bmaterial;
+
+    // compute mop up eval for endgames
+    int endgame =
+        (wmaterial + bmaterial < 2500) || board->bitboard[bbQueen] == 0ull;
+    if (endgame) {
+        if (eval > 400) {
+            eval += 10 * computeMopUp(board->turn, board);
+        } else if (eval < -400) {
+            eval -= 10 * computeMopUp(!board->turn, board);
+        }
+    }
+
+    return eval;
 }
