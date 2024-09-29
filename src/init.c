@@ -20,6 +20,7 @@ ULL zobristC[64];
 int pawnOffset[2][4] = {{N, 2 * N, NW, NE}, {S, 2 * S, SW, SE}};
 
 int inputDepth;
+int inputMovetime;
 int inputTime[2];
 int inputInc[2];
 

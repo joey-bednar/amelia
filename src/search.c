@@ -54,11 +54,6 @@ static void pickSingleMoves(MOVE *moves, int *scores, int index, int n_moves) {
     scores[maxi] = scoretemp;
 }
 
-static int isMateEval(int score) {
-    return ((score + MATETHRESHOLD >= MATE && score - MATETHRESHOLD <= MATE) ||
-            (score + MATETHRESHOLD >= -MATE && score - MATETHRESHOLD <= -MATE));
-}
-
 // prints uci centipawn/mate search info
 static void printEval(int score) {
 
@@ -100,7 +95,7 @@ static void printInfo(BOARD_STATE *board, float time, int score, int depth) {
     printf("info ");
     printf("depth %d ", depth);
     MOVE m;
-    int val = probeTT(board->hash, &m, INF, -INF, 0);
+    probeTT(board->hash, &m, INF, -INF, 0);
     printEval(score);
     printf("nodes %ld ", (long)board->nodes);
     printf("nps %ld ", nps);
@@ -215,7 +210,7 @@ static int alphabeta(BOARD_STATE *board, int depth, int alpha, int beta,
     int oldalpha = alpha;
 
     MOVE bestmove;
-    int flag = TT_ALPHA_FLAG;
+    // int flag = TT_ALPHA_FLAG;
 
     int legal = 0;
 
@@ -304,7 +299,7 @@ static int alphabeta(BOARD_STATE *board, int depth, int alpha, int beta,
                     return beta;
                 }
             }
-            flag = TT_EXACT_FLAG;
+            // flag = TT_EXACT_FLAG;
             alpha = score;
         }
     }
@@ -357,11 +352,6 @@ void printMoveText(MOVE move) {
 // prevented due to time restrictions
 static int searchCutoff(BOARD_STATE *board, float time_ms) {
 
-    int time = inputTime[board->turn];
-    if (time == DEFAULT_TIME) {
-        return FALSE;
-    }
-
     // if used more than half of allocated time,
     // don't start a new search
     return (time_ms * 2 >= board->cutoffTime);
@@ -370,6 +360,10 @@ static int searchCutoff(BOARD_STATE *board, float time_ms) {
 static float setCutoff(BOARD_STATE *board) {
     int time = inputTime[board->turn];
     int inc = inputInc[board->turn];
+
+    if (inputMovetime != 0) {
+        return inputMovetime;
+    }
 
     if (time == DEFAULT_TIME) {
         return 1000 * 60 * 36;

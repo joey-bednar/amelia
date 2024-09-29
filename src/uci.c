@@ -272,12 +272,7 @@ void startUCI() {
             inputTime[BLACK] = parseUCINumber(input, " btime ", DEFAULT_TIME);
             inputInc[WHITE] = parseUCINumber(input, " winc ", DEFAULT_INC);
             inputInc[BLACK] = parseUCINumber(input, " binc ", DEFAULT_INC);
-
-            int movetime = parseUCINumber(input, " movetime ", 0);
-            if (movetime != 0) {
-                inputTime[WHITE] = movetime;
-                inputTime[BLACK] = movetime;
-            }
+            inputMovetime = parseUCINumber(input, " movetime ", 0);
 
             search(&board);
 

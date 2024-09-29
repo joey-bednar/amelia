@@ -169,6 +169,7 @@ typedef struct {
 extern TT tt[TT_SIZE];
 
 extern int inputDepth;
+extern int inputMovetime;
 extern int inputTime[2];
 extern int inputInc[2];
 
