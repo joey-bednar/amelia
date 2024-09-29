@@ -36,10 +36,11 @@ You can also [spectate active games](https://lichess.org/@/AmeliaLatest/tv).
     - [Transposition table](https://en.wikipedia.org/wiki/Transposition_table)
     - Move ordering ([hash move](https://www.chessprogramming.org/Hash_Move), [MVV-LVA](https://www.chessprogramming.org/MVV-LVA), [killer moves](https://www.chessprogramming.org/Killer_Move))
     - [Check extensions](https://www.chessprogramming.org/Check_Extensions)
-    - [Killer moves](https://www.chessprogramming.org/Killer_Move)
+    - [Killer heuristic](https://www.chessprogramming.org/Killer_Heuristic)
     - [Null move pruning](https://en.wikipedia.org/wiki/Null-move_heuristic)
 - Evaluation
-    - Opening/endgame [piece square tables](https://www.chessprogramming.org/Piece-Square_Tables)
+    - [Tapered](https://www.chessprogramming.org/Tapered_Eval) middle/endgame evaluation
+    - [Piece-square tables](https://www.chessprogramming.org/Piece-Square_Tables)
     - Passed pawn bonus
     - [Mop-up evaluation](https://www.chessprogramming.org/Mop-up_Evaluation)
 - Interface

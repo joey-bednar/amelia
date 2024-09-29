@@ -1,6 +1,7 @@
 #include "defs.h"
 #include <assert.h>
 #include <stdio.h>
+#include <stdlib.h>
 
 int bitScanForward(ULL bb) {
     return __builtin_ffsll(bb) - 1;
@@ -135,4 +136,16 @@ void printBitboardIndex120() {
 
 int countBits(ULL b) {
     return __builtin_popcountll(b);
+}
+
+int manhattanDistance(int sq1, int sq2) {
+    int file1, file2, rank1, rank2;
+    int rankDistance, fileDistance;
+    file1 = sq1 & 7;
+    file2 = sq2 & 7;
+    rank1 = sq1 >> 3;
+    rank2 = sq2 >> 3;
+    rankDistance = abs(rank2 - rank1);
+    fileDistance = abs(file2 - file1);
+    return rankDistance + fileDistance;
 }

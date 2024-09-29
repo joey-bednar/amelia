@@ -260,6 +260,7 @@ extern void printBoard(BOARD_STATE *board);
 extern void printBoardIndex();
 extern int bitScanForward(ULL bb);
 extern int bitScanReverse(ULL bb);
+extern int manhattanDistance(int sq1, int sq2);
 
 // perft.c
 extern void perft(int depth, BOARD_STATE *board);

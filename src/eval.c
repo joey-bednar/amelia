@@ -96,18 +96,6 @@ static int bonusPassedPawn(BOARD_STATE *board, int sq64, int color) {
     return 50;
 }
 
-static int manhattanDistance(int sq1, int sq2) {
-    int file1, file2, rank1, rank2;
-    int rankDistance, fileDistance;
-    file1 = sq1 & 7;
-    file2 = sq2 & 7;
-    rank1 = sq1 >> 3;
-    rank2 = sq2 >> 3;
-    rankDistance = abs(rank2 - rank1);
-    fileDistance = abs(file2 - file1);
-    return rankDistance + fileDistance;
-}
-
 static int computeMopUp(int winningcolor, BOARD_STATE *board) {
     // clang-format off
     const int centerManhattanDistance[64] = {
@@ -163,7 +151,8 @@ int getPhase(BOARD_STATE *board) {
 static void computeSquares(BOARD_STATE *board, int color, int *pieces,
                            int *open, int *end) {
 
-    const int val[] = {100, 320, 330, 500, 900, 0};
+    const int val[] = {PAWN_MATERIAL, KNIGHT_MATERIAL, BISHOP_MATERIAL,
+                       ROOK_MATERIAL, QUEEN_MATERIAL,  0};
     int total = 0;
 
     ULL bb = board->bitboard[color];
