@@ -1,5 +1,6 @@
 #include "defs.h"
 #include <assert.h>
+#include <limits.h>
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -22,11 +23,16 @@ static void scoreMoves(BOARD_STATE *board, MOVE *moves, int *scores,
         if (moves[i] == m) {
             scores[i] = 9999;
         } else if (moves[i] == board->killers[board->ply][0]) {
-            scores[i] = 50;
+            scores[i] = 502;
         } else if (moves[i] == board->killers[board->ply][1]) {
-            scores[i] = 49;
+            scores[i] = 501;
+        } else if (CAPTURED(moves[i]) != EMPTY) {
+            scores[i] = 1000 + MVVLVA(PIECE(moves[i]), CAPTURED(moves[i]));
         } else {
-            scores[i] = MVVLVA(PIECE(moves[i]), CAPTURED(moves[i]));
+            scores[i] = MIN(
+                board->history[board->turn][END(moves[i])][START(moves[i])] -
+                    INT_MAX,
+                500);
         }
     }
 }
@@ -294,6 +300,9 @@ static int alphabeta(BOARD_STATE *board, int depth, int alpha, int beta,
                         board->killers[board->ply][1] =
                             board->killers[board->ply][0];
                         board->killers[board->ply][0] = moves[i];
+
+                        board->history[board->turn][END(moves[i])]
+                                      [START(moves[i])] += depth * depth;
                     }
 
                     return beta;
@@ -473,5 +482,15 @@ void search(BOARD_STATE *board) {
     printMoveText(bestmove);
     printf("\n");
 
+    // clear TT
     initTT();
+
+    // scale history heuristic
+    for (int side = 0; side < 2; side++) {
+        for (int end = 0; end < 64; end++) {
+            for (int start = 0; start < 64; start++) {
+                board->history[side][end][start] = 0;
+            }
+        }
+    }
 }

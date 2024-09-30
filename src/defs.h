@@ -153,6 +153,7 @@ typedef struct {
     ULL hash;
 
     MOVE killers[MAX_DEPTH][2];
+    int history[2][64][64];
 
     int ply;
 
