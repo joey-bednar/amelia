@@ -3,6 +3,8 @@
 #include <stdlib.h>
 
 #define PASSED_PAWN_BONUS 50
+#define BISHOP_PAIR_BONUS 30
+
 #define PAWN_MATERIAL 100
 #define KNIGHT_MATERIAL 320
 #define BISHOP_MATERIAL 330
@@ -94,6 +96,13 @@ static int bonusPassedPawn(BOARD_STATE *board, int sq64, int color) {
     }
 
     return 50;
+}
+
+static int bonusBishopPair(BOARD_STATE *board, int color) {
+    if (countBits(board->bitboard[bbBishop] & board->bitboard[color]) >= 2) {
+        return BISHOP_PAIR_BONUS;
+    }
+    return 0;
 }
 
 static int computeMopUp(int winningcolor, BOARD_STATE *board) {
@@ -225,6 +234,9 @@ int eval(BOARD_STATE *board) {
     int eval = ((totalMiddle * (256 - phase)) + (totalEnd * phase)) / 256;
 
     eval += wmaterial - bmaterial;
+
+    eval += bonusBishopPair(board, board->turn) -
+            bonusBishopPair(board, !board->turn);
 
     // compute mop up eval for endgames
     int endgame =
