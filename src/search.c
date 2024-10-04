@@ -100,8 +100,6 @@ static void printInfo(BOARD_STATE *board, float time, int score, int depth) {
 
     printf("info ");
     printf("depth %d ", depth);
-    MOVE m;
-    probeTT(board->hash, &m, INF, -INF, 0);
     printEval(score);
     printf("nodes %ld ", (long)board->nodes);
     printf("nps %ld ", nps);
@@ -362,21 +360,21 @@ void printMoveText(MOVE move) {
     char endFile = SQ120F(END120(move)) + 'a';
     char endRank = SQ120R(END120(move)) + '1';
 
-    char promote = '\0';
-    if (PROMOTED(move) == bbQueen) {
-        promote = 'q';
-    } else if (PROMOTED(move) == bbRook) {
-        promote = 'r';
-    } else if (PROMOTED(move) == bbBishop) {
-        promote = 'b';
-    } else if (PROMOTED(move) == bbKnight) {
-        promote = 'n';
-    }
+    printf("%c%c%c%c", startFile, startRank, endFile, endRank);
 
-    if (promote != '\0') {
-        printf("%c%c%c%c%c", startFile, startRank, endFile, endRank, promote);
-    } else {
-        printf("%c%c%c%c", startFile, startRank, endFile, endRank);
+    switch (PROMOTED(move)) {
+    case bbQueen:
+        printf("q");
+        break;
+    case bbRook:
+        printf("r");
+        break;
+    case bbBishop:
+        printf("b");
+        break;
+    case bbKnight:
+        printf("n");
+        break;
     }
 }
 
@@ -505,15 +503,6 @@ void search(BOARD_STATE *board) {
     printMoveText(bestmove);
     printf("\n");
 
-    // clear TT
     initTT();
-
-    // scale history heuristic
-    for (int side = 0; side < 2; side++) {
-        for (int end = 0; end < 64; end++) {
-            for (int start = 0; start < 64; start++) {
-                board->history[side][end][start] = 0;
-            }
-        }
-    }
+    initHistoryHeuristic(board);
 }

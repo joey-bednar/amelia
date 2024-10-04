@@ -11,7 +11,6 @@
 #define QMAXDEPTH 100
 #define DEFAULT_TIME 3600000
 #define DEFAULT_INC 0
-#define PVSIZE 20000
 #define ASPIRATION_WINDOW 50
 
 // internal constants
@@ -70,9 +69,9 @@
 
 // move bitmasks
 #define START(move) (int)((move) & 0x3Ful)
-#define START120(move) SQ64SQ120((int)((move) & 0x3Ful))
+#define START120(move) SQ64SQ120(START(move))
 #define END(move) (int)(((move) & 0x0FC0) >> 6)
-#define END120(move) SQ64SQ120((int)(((move) & 0x0FC0) >> 6))
+#define END120(move) SQ64SQ120(END(move))
 #define CAPTURED(move) (int)(((move) & 0x07000ul) >> 12)
 #define PROMOTED(move) (int)(((move) & 0x38000ul) >> 15)
 #define EPFLAG(move) (int)(((move) & 0x40000ul) >> 18)
@@ -128,18 +127,6 @@ typedef struct {
     int enpassant;
     int halfmove;
 } POSRECORD;
-
-typedef struct {
-    ULL pos;
-    MOVE move;
-    int depth;
-    int score;
-} PVENTRY;
-
-typedef struct {
-    int score;
-    int index;
-} MSCORE;
 
 typedef struct {
     ULL bitboard[bbLength];
@@ -220,6 +207,7 @@ extern void updateZobristCastle(int start, int end, BOARD_STATE *board);
 extern void initBoard(BOARD_STATE *board);
 extern void clearBoard(BOARD_STATE *board);
 extern void init(BOARD_STATE *board);
+extern void initHistoryHeuristic(BOARD_STATE *board);
 
 // board.c
 

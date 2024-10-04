@@ -346,6 +346,17 @@ static void initJumps() {
     }
 }
 
+void initHistoryHeuristic(BOARD_STATE *board) {
+    // reset history heuristic
+    for (int side = 0; side < 2; side++) {
+        for (int end = 0; end < 64; end++) {
+            for (int start = 0; start < 64; start++) {
+                board->history[side][end][start] = 0;
+            }
+        }
+    }
+}
+
 void init(BOARD_STATE *board) {
     initEnpassantMap();
     initColorMap();
@@ -358,8 +369,7 @@ void init(BOARD_STATE *board) {
     initMVVLVA();
     initPassedPawns();
     initTT();
+    initHistoryHeuristic(board);
 
-    clearBoard(board);
     initBoard(board);
-    loadZobrist(board);
 }

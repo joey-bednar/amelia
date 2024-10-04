@@ -242,8 +242,8 @@ void startUCI() {
         fgets(input, INPUTLEN, stdin);
 
         if (strcmp("ucinewgame", input) == 0) {
-            printf("readyok\n");
             initBoard(&board);
+            printf("readyok\n");
         } else if (strncmp("uci", input, 3) == 0) {
             printf("id name %s %s\n", NAME, VERSION);
             printf("id author %s\n", AUTHOR);
