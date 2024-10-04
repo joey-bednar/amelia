@@ -96,12 +96,12 @@ static void printPV(BOARD_STATE *board, int depth) {
 static void printInfo(BOARD_STATE *board, float time, int score, int depth) {
 
     // print search info
-    long nps = floor((1000 * (double)board->nodes / time));
+    long nps = floor((1000 * board->nodes / time));
 
     printf("info ");
     printf("depth %d ", depth);
     printEval(score);
-    printf("nodes %ld ", (long)board->nodes);
+    printf("nodes %ld ", board->nodes);
     printf("nps %ld ", nps);
     printf("time %ld ", (long)time);
 

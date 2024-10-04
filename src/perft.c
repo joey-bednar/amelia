@@ -81,7 +81,7 @@ void perft(int depth, BOARD_STATE *board) {
     }
 
     t = clock() - t;
-    double time_taken = ((double)t) / CLOCKS_PER_SEC; // in seconds
+    float time_taken = ((float)t) / CLOCKS_PER_SEC; // in seconds
 
-    printf("\nNodes searched: %llu (%fs)\n", total, time_taken);
+    printf("\nNodes searched: %llu (%.2fs)\n", total, time_taken);
 }

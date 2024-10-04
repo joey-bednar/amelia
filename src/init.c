@@ -1,5 +1,7 @@
 #include "defs.h"
+#include <assert.h>
 #include <stdio.h>
+#include <string.h>
 
 int epMap[120];
 int sq120sq64Map[120];
@@ -36,6 +38,9 @@ int queenSqTable[2][64];
 int kingSqTable[2][64];
 
 ULL slidingRay[8][64];
+
+ULL fileBB[8];
+ULL isolatedPawns[8];
 
 int MVVLVA[8][8];
 
@@ -89,11 +94,7 @@ static void initPassedPawns() {
 }
 
 static void initMVVLVA() {
-    for (int i = 0; i < 8; i++) {
-        for (int j = 0; j < 8; j++) {
-            MVVLVA[i][j] = 0;
-        }
-    }
+    memset(MVVLVA, 0, 8 * 8 * sizeof(int));
 
     for (int piece = bbPawn; piece <= bbKing; piece++) {
         for (int cap = bbPawn; cap <= bbQueen; cap++) {
@@ -346,14 +347,25 @@ static void initJumps() {
     }
 }
 
+// reset history heuristic
 void initHistoryHeuristic(BOARD_STATE *board) {
-    // reset history heuristic
-    for (int side = 0; side < 2; side++) {
-        for (int end = 0; end < 64; end++) {
-            for (int start = 0; start < 64; start++) {
-                board->history[side][end][start] = 0;
-            }
-        }
+    memset(board->history, 0, 64 * 64 * 2 * sizeof(int));
+}
+
+// create bitboards of each file
+static void initFiles() {
+    for (int i = 0; i < 64; i++) {
+        SETBIT(fileBB[i >> 3], i);
+    }
+}
+
+// create bitboards for isolated pawns
+static void initIsolatedPawns() {
+    isolatedPawns[FILE_A] = fileBB[FILE_B];
+    isolatedPawns[FILE_H] = fileBB[FILE_G];
+
+    for (int i = FILE_B; i <= FILE_G; i++) {
+        isolatedPawns[i] = fileBB[i - 1] + fileBB[i + 1];
     }
 }
 
@@ -370,6 +382,8 @@ void init(BOARD_STATE *board) {
     initPassedPawns();
     initTT();
     initHistoryHeuristic(board);
+    initFiles();
+    initIsolatedPawns();
 
     initBoard(board);
 }

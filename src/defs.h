@@ -147,7 +147,7 @@ typedef struct {
     POSRECORD playedmoves[MAX_GAME_LENGTH * 2];
     int pmindex;
 
-    int nodes;
+    long nodes;
     int stopped;
     int cutoffTime;
     float start;
@@ -183,6 +183,7 @@ extern int queenSqTable[2][64];
 extern int kingSqTable[2][64];
 
 extern ULL passedPawnTable[64][2];
+extern ULL isolatedPawns[8];
 extern int MVVLVA[8][8];
 
 extern ULL zobrist_vals[12][64];

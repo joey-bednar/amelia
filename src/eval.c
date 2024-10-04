@@ -123,7 +123,7 @@ static int computeMopUp(int winningcolor, BOARD_STATE *board) {
     int MD =
         manhattanDistance(getKingSq(board, WHITE), getKingSq(board, BLACK));
 
-    int mopUp = (int)(4.7 * CMD + 1.6 * (14 - MD));
+    int mopUp = (47 * CMD + 16 * (14 - MD));
 
     return mopUp;
 }
@@ -243,9 +243,9 @@ int eval(BOARD_STATE *board) {
         (wmaterial + bmaterial < 2500) || board->bitboard[bbQueen] == 0ull;
     if (endgame) {
         if (eval > 400) {
-            eval += 10 * computeMopUp(board->turn, board);
+            eval += computeMopUp(board->turn, board);
         } else if (eval < -400) {
-            eval -= 10 * computeMopUp(!board->turn, board);
+            eval -= computeMopUp(!board->turn, board);
         }
     }
 
