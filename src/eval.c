@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#define PASSED_PAWN_BONUS 50
+#define PASSED_PAWN_BONUS 30
 #define BISHOP_PAIR_BONUS 30
 
 #define PAWN_MATERIAL 100
@@ -95,7 +95,7 @@ static int bonusPassedPawn(BOARD_STATE *board, int sq64, int color) {
         return 0;
     }
 
-    return 50;
+    return PASSED_PAWN_BONUS;
 }
 
 static int bonusBishopPair(BOARD_STATE *board, int color) {
