@@ -5,6 +5,7 @@
 
 [![lichess-bullet](https://lichess-shield.vercel.app/api?username=AmeliaLatest&format=bullet)](https://lichess.org/@/AmeliaLatest/perf/bullet)
 [![lichess-blitz](https://lichess-shield.vercel.app/api?username=AmeliaLatest&format=blitz)](https://lichess.org/@/AmeliaLatest/perf/blitz)
+[![lichess-rapid](https://lichess-shield.vercel.app/api?username=AmeliaLatest&format=rapid)](https://lichess.org/@/AmeliaLatest/perf/rapid)
 
 <img src="logo.png" alt="logo" width="200px" height="200px"/>
 
@@ -34,16 +35,18 @@ You can also [spectate active games](https://lichess.org/@/AmeliaLatest/tv).
     - [Quiescence search](https://en.wikipedia.org/wiki/Quiescence_search)
     - [Iterative deepening](https://www.chessprogramming.org/Iterative_Deepening)
     - [Transposition table](https://en.wikipedia.org/wiki/Transposition_table)
-    - Move ordering ([hash move](https://www.chessprogramming.org/Hash_Move), [MVV-LVA](https://www.chessprogramming.org/MVV-LVA), [killer moves](https://www.chessprogramming.org/Killer_Move))
+    - Move ordering ([hash move](https://www.chessprogramming.org/Hash_Move), [MVV-LVA](https://www.chessprogramming.org/MVV-LVA), [killer moves](https://www.chessprogramming.org/Killer_Move), [history heuristic](https://www.chessprogramming.org/History_Heuristic))
     - [Check extensions](https://www.chessprogramming.org/Check_Extensions)
     - [Killer heuristic](https://www.chessprogramming.org/Killer_Heuristic)
     - [History heuristic](https://www.chessprogramming.org/History_Heuristic)
     - [Null move pruning](https://en.wikipedia.org/wiki/Null-move_heuristic)
+    - [Late move reductions](https://en.wikipedia.org/wiki/Late_move_reductions)
 - Evaluation
     - [Tapered](https://www.chessprogramming.org/Tapered_Eval) middle/endgame evaluation
     - [Piece-square tables](https://www.chessprogramming.org/Piece-Square_Tables)
-    - Passed pawn bonus
     - [Mop-up evaluation](https://www.chessprogramming.org/Mop-up_Evaluation)
+    - Passed pawn bonus
+    - Bishop pair bonus
 - Interface
     - [UCI](https://en.wikipedia.org/wiki/Universal_Chess_Interface) compatible
     - Bulk [perft](https://www.chessprogramming.org/Perft) testing

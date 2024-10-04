@@ -270,17 +270,40 @@ static int alphabeta(BOARD_STATE *board, int depth, int alpha, int beta,
                         board->turn)) {
             ++legal;
 
+            // full depth search on first move
             if (i == 0) {
-                // full window search on pv node
-                score = -alphabeta(board, depth - 1, -beta, -alpha, doNull);
-            } else {
-                // check if other moves score better than PV
-                score =
-                    -alphabeta(board, depth - 1, -alpha - 1, -alpha, doNull);
 
-                // prevent re-search of non-PV nodes
-                if (score > alpha && beta - alpha > 1) {
-                    score = -alphabeta(board, depth - 1, -beta, -alpha, doNull);
+                score = -alphabeta(board, depth - 1, -beta, -alpha, doNull);
+
+            }
+
+            // late move reduction
+            else {
+
+                if (i >= 4 && board->ply >= 3 && depth >= 2 &&
+                    CAPTURED(moves[i]) == EMPTY &&
+                    PROMOTED(moves[i]) == EMPTY &&
+                    !isAttacked(board, SQ64SQ120(getKingSq(board, board->turn)),
+                                !board->turn)) {
+
+                    // shallow search, check if late move could beat alpha
+                    score = -alphabeta(board, depth - 2, -alpha - 1, -alpha,
+                                       doNull);
+                } else {
+                    score = alpha + 1;
+                }
+
+                // if LMR found better move
+                if (score > alpha) {
+
+                    // search again at normal depth, minimal window
+                    score = -alphabeta(board, depth - 1, -alpha - 1, -alpha,
+                                       doNull);
+
+                    if (score > alpha && score < beta) {
+                        score =
+                            -alphabeta(board, depth - 1, -beta, -alpha, doNull);
+                    }
                 }
             }
         }
