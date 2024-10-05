@@ -18,6 +18,26 @@
 #define QUEEN_PHASE 4
 
 // returns true if position has been repeated three times
+int isTwoFold(BOARD_STATE *board) {
+    if (board->halfmove >= 2) {
+        int end = board->pmindex;
+        int start = 0; // end - board->halfmove;
+        int count = 0;
+        for (int i = start; i <= end; ++i) {
+            if ((board->hash ^ zobristB2M) == board->playedmoves[i].hash) {
+                ++count;
+            }
+        }
+
+        if (count >= 2) {
+            return TRUE;
+        }
+    }
+
+    return FALSE;
+}
+
+// returns true if position has been repeated three times
 int isThreeFold(BOARD_STATE *board) {
     if (board->halfmove >= 4) {
         int end = board->pmindex;

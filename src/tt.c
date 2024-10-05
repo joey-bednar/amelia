@@ -1,5 +1,6 @@
 #include "defs.h"
 #include <assert.h>
+#include <string.h>
 
 // clear table
 void initTT() {

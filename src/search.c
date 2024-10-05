@@ -78,7 +78,8 @@ static void printPV(BOARD_STATE *board, int depth) {
     int i = 0;
     while (i < depth) {
         MOVE m;
-        if (probeTT(board->hash, &m, INF, -INF, 0) == TT_EMPTY) {
+        int val = probeTT(board->hash, &m, INF, -INF, 0);
+        if (val == TT_EMPTY) {
             break;
         }
         printMoveText(m);
@@ -236,6 +237,14 @@ static int alphabeta(BOARD_STATE *board, int depth, int alpha, int beta,
 
     int val = probeTT(board->hash, &bestmove, alpha, beta, depth);
     if (val != TT_EMPTY) {
+        // hotfix for repetition detection
+        makeMove(board, bestmove);
+        int rep = isTwoFold(board);
+        unmakeMove(board, bestmove);
+        if (rep) {
+            return 0;
+        }
+
         return val;
     }
 
@@ -387,7 +396,7 @@ static int searchCutoff(BOARD_STATE *board, float time_ms) {
     return (time_ms * 2 >= board->cutoffTime);
 }
 
-static float setCutoff(BOARD_STATE *board) {
+static int setCutoff(BOARD_STATE *board) {
     int time = inputTime[board->turn];
     int inc = inputInc[board->turn];
 
@@ -469,18 +478,6 @@ void search(BOARD_STATE *board) {
             break;
         }
 
-        // // redo search with INF window if score is outside aspiration
-        // window if (score <= alpha || score >= beta) {
-        //     alpha = -INF;
-        //     beta = INF;
-        //     searchDepth--;
-        //     continue;
-        // }
-        //
-        // // set aspiration window
-        // alpha = score - ASPIRATION_WINDOW;
-        // beta = score + ASPIRATION_WINDOW;
-
         // measure time spent
         float new_t = clock() - board->start;
         float time_taken_ms = (1000 * new_t) / CLOCKS_PER_SEC;
@@ -489,7 +486,6 @@ void search(BOARD_STATE *board) {
         printInfo(board, time_taken_ms, score, searchDepth);
 
         // get bestmove/ponder from pv
-        // bestmove = board->pvarray[0][0];
         probeTT(board->hash, &bestmove, INF, -INF, 0);
 
         // prevent new searches if not enough time

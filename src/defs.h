@@ -257,6 +257,7 @@ extern void perft(int depth, BOARD_STATE *board);
 
 // eval.c
 extern int isThreeFold(BOARD_STATE *board);
+extern int isTwoFold(BOARD_STATE *board);
 extern int isInsufficientMaterial(BOARD_STATE *board);
 extern int eval(BOARD_STATE *board);
 extern int isRepeatPosition(BOARD_STATE *board);
