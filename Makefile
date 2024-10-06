@@ -7,9 +7,9 @@ LINUX_CC := gcc
 LINUX_CFLAGS :=
 LINUX_LDFLAGS :=
 
-WINDOWS_CC := x86_64-w64-mingw32-gcc
-WINDOWS_CFLAGS :=
-WINDOWS_LDFLAGS := -Wl,--stack,8388608
+WINDOWS_CC := x86_64-w64-mingw32-gcc-posix
+WINDOWS_CFLAGS := --static -pthread
+WINDOWS_LDFLAGS := --static -pthread -Wl,--stack,8388608
 
 OUT := amelia
 

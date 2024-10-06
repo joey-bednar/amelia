@@ -1,5 +1,6 @@
 #include "defs.h"
 #include <assert.h>
+#include <pthread.h>
 #include <stdio.h>
 #include <string.h>
 
@@ -230,9 +231,18 @@ int loadFEN(char *fen, BOARD_STATE *board, int startIndex) {
     return i;
 }
 
+void *searchThread(void *args) {
+
+    BOARD_STATE *board = (BOARD_STATE *)args;
+    search(board);
+    fflush(stdout);
+    return NULL;
+}
+
 void startUCI() {
     BOARD_STATE board;
     init(&board);
+    pthread_t thread_id;
 
     while (TRUE) {
         char input[INPUTLEN];
@@ -274,11 +284,14 @@ void startUCI() {
             inputInc[BLACK] = parseUCINumber(input, " binc ", DEFAULT_INC);
             inputMovetime = parseUCINumber(input, " movetime ", 0);
 
-            search(&board);
+            board.stopped = FALSE;
+
+            pthread_create(&thread_id, NULL, searchThread, (void *)&board);
 
         } else if (strcmp("stop\n", input) == 0) {
-            // printf("stop\n");
+            board.stopped = TRUE;
         } else if (strcmp("quit\n", input) == 0) {
+            board.stopped = TRUE;
             break;
         }
         fflush(stdout);
