@@ -113,7 +113,7 @@ enum { NO_CASTLE, WK_CASTLE, WQ_CASTLE, BK_CASTLE, BQ_CASTLE, CASTLE_LENGTH };
 typedef unsigned long long ULL;
 typedef unsigned long long MOVE;
 
-typedef struct tt {
+typedef struct {
     ULL hash;
     MOVE best;
     int depth;
@@ -154,7 +154,7 @@ typedef struct {
 
 } BOARD_STATE;
 
-extern TT tt[TT_SIZE];
+extern TT *tt;
 
 extern int inputDepth;
 extern int inputMovetime;

@@ -1,14 +1,12 @@
 #include "defs.h"
-#include <assert.h>
-#include <stdio.h>
 #include <stdlib.h>
 
-TT tt[TT_SIZE];
+TT *tt;
 
 int main() {
     BOARD_STATE board;
 
-    TT *tt = (TT *)calloc(TT_SIZE, sizeof(TT));
+    tt = (TT *)calloc(TT_SIZE, sizeof(TT));
     init(&board);
 
     startUCI();
