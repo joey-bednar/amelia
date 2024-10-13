@@ -461,7 +461,9 @@ static void outputMoveUCI(BOARD_STATE *board, int ponder) {
         unmakeMove(board, bestmove);
 
         // output ponder move if legal
-        if (isLegalMove(board, pmove)) {
+        if (isLegalMove(board, pmove) &&
+            !(board->halfmove >= 100 || isThreeFold(board) ||
+              isInsufficientMaterial(board))) {
             printf(" ponder ");
             printMoveText(pmove);
         }
