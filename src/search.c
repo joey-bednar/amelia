@@ -443,10 +443,8 @@ static int onlyMove(BOARD_STATE *board, MOVE *move) {
     return FALSE;
 }
 
-static void outputMoveUCI(BOARD_STATE *board, int ponder) {
-    MOVE bestmove;
-    probeTT(board->hash, &bestmove, INF, -INF, 0);
-
+static void outputMoveUCI(BOARD_STATE *board, MOVE bestmove, MOVE pondermove,
+                          int ponder) {
     // play best move
     printf("bestmove ");
     printMoveText(bestmove);
@@ -454,27 +452,36 @@ static void outputMoveUCI(BOARD_STATE *board, int ponder) {
     // ponder best followup
     if (ponder) {
 
-        // get followup move
         makeMove(board, bestmove);
-        MOVE pmove;
-        probeTT(board->hash, &pmove, INF, -INF, 0);
-        unmakeMove(board, bestmove);
 
         // output ponder move if legal
-        if (isLegalMove(board, pmove) &&
+        if (isLegalMove(board, pondermove) &&
             !(board->halfmove >= 100 || isThreeFold(board) ||
               isInsufficientMaterial(board))) {
             printf(" ponder ");
-            printMoveText(pmove);
+            printMoveText(pondermove);
         }
+
+        unmakeMove(board, bestmove);
     }
 
     printf("\n");
 }
 
+static void saveMovesUCI(BOARD_STATE *board, MOVE *bestmove, MOVE *pondermove) {
+    // get best move
+    probeTT(board->hash, bestmove, INF, -INF, 0);
+
+    // get followup move
+    makeMove(board, *bestmove);
+    probeTT(board->hash, pondermove, INF, -INF, 0);
+    unmakeMove(board, *bestmove);
+}
+
 void search(BOARD_STATE *board) {
 
     MOVE bestmove;
+    MOVE pondermove;
 
     // reset nodes searched
     board->nodes = 0;
@@ -493,7 +500,7 @@ void search(BOARD_STATE *board) {
     // if only one legal move, play instantly
     if (!board->ponder && onlyMove(board, &bestmove)) {
 
-        outputMoveUCI(board, FALSE);
+        outputMoveUCI(board, bestmove, 0ull, FALSE);
         return;
     }
 
@@ -518,7 +525,7 @@ void search(BOARD_STATE *board) {
         printInfo(board, time_taken_ms, score, searchDepth);
 
         // get bestmove/ponder from pv
-        probeTT(board->hash, &bestmove, INF, -INF, 0);
+        saveMovesUCI(board, &bestmove, &pondermove);
 
         // prevent new searches if not enough time
         if (!board->ponder && searchCutoff(board, time_taken_ms)) {
@@ -526,7 +533,7 @@ void search(BOARD_STATE *board) {
         }
     }
 
-    outputMoveUCI(board, TRUE);
+    outputMoveUCI(board, bestmove, pondermove, TRUE);
 
     if (!board->ponder) {
         initTT();
