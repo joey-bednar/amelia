@@ -443,6 +443,33 @@ static int onlyMove(BOARD_STATE *board, MOVE *move) {
     return FALSE;
 }
 
+static void outputMoveUCI(BOARD_STATE *board, int ponder) {
+    MOVE bestmove;
+    probeTT(board->hash, &bestmove, INF, -INF, 0);
+
+    // play best move
+    printf("bestmove ");
+    printMoveText(bestmove);
+
+    // ponder best followup
+    if (ponder) {
+
+        // get followup move
+        makeMove(board, bestmove);
+        MOVE pmove;
+        probeTT(board->hash, &pmove, INF, -INF, 0);
+        unmakeMove(board, bestmove);
+
+        // output ponder move if legal
+        if (isLegalMove(board, pmove)) {
+            printf(" ponder ");
+            printMoveText(pmove);
+        }
+    }
+
+    printf("\n");
+}
+
 void search(BOARD_STATE *board) {
 
     MOVE bestmove;
@@ -463,10 +490,8 @@ void search(BOARD_STATE *board) {
 
     // if only one legal move, play instantly
     if (!board->ponder && onlyMove(board, &bestmove)) {
-        // print best move
-        printf("bestmove ");
-        printMoveText(bestmove);
-        printf("\n");
+
+        outputMoveUCI(board, FALSE);
         return;
     }
 
@@ -499,19 +524,7 @@ void search(BOARD_STATE *board) {
         }
     }
 
-    // print best move
-    printf("bestmove ");
-    printMoveText(bestmove);
-
-    makeMove(board, bestmove);
-
-    printf(" ponder ");
-    MOVE pmove;
-    probeTT(board->hash, &pmove, INF, -INF, 0);
-    printMoveText(pmove);
-    printf("\n");
-
-    unmakeMove(board, bestmove);
+    outputMoveUCI(board, TRUE);
 
     if (!board->ponder) {
         initTT();
