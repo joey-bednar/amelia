@@ -396,7 +396,7 @@ static int searchCutoff(BOARD_STATE *board, float time_ms) {
     return (time_ms * 2 >= board->cutoffTime);
 }
 
-static int setCutoff(BOARD_STATE *board) {
+int setCutoff(BOARD_STATE *board) {
     int time = inputTime[board->turn];
     int inc = inputInc[board->turn];
 
@@ -451,24 +451,29 @@ void search(BOARD_STATE *board) {
 
     // reset search time parameters
     board->stopped = FALSE;
-    board->cutoffTime = setCutoff(board);
+    if (!board->ponder) {
+        board->cutoffTime = setCutoff(board);
+    } else {
+        board->cutoffTime = 999999999;
+    }
 
     // begin timer
     board->start = clock();
 
-    // if only one legal move, play instantly
-    if (onlyMove(board, &bestmove)) {
-        // print best move
-        printf("bestmove ");
-        printMoveText(bestmove);
-        printf("\n");
-        return;
-    }
+    // // if only one legal move, play instantly
+    // if (!board->ponder && onlyMove(board, &bestmove)) {
+    //     // print best move
+    //     printf("bestmove ");
+    //     printMoveText(bestmove);
+    //     printf("\n");
+    //     return;
+    // }
 
     // iterative deepening
     int alpha = -INF;
     int beta = INF;
-    for (int searchDepth = 1; searchDepth <= inputDepth; searchDepth++) {
+    int searchDepth = 1;
+    while (TRUE) {
 
         board->ply = 0;
 
@@ -489,15 +494,23 @@ void search(BOARD_STATE *board) {
         probeTT(board->hash, &bestmove, INF, -INF, 0);
 
         // prevent new searches if not enough time
-        if (searchCutoff(board, time_taken_ms)) {
+        if (!board->ponder &&
+            (searchDepth > inputDepth || searchCutoff(board, time_taken_ms))) {
             break;
         }
+        searchDepth++;
     }
 
     // print best move
     printf("bestmove ");
     printMoveText(bestmove);
+    makeMove(board, bestmove);
+    printf(" ponder ");
+    MOVE pmove;
+    probeTT(board->hash, &pmove, INF, -INF, 0);
+    printMoveText(pmove);
     printf("\n");
+    unmakeMove(board, pmove);
 
     initTT();
     initHistoryHeuristic(board);
