@@ -139,6 +139,9 @@ typedef struct {
 
     ULL hash;
 
+    MOVE pv[MAX_DEPTH];
+    int pvlength;
+
     MOVE killers[MAX_DEPTH][2];
     int history[2][64][64];
 

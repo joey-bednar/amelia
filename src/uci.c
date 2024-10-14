@@ -293,7 +293,6 @@ void startUCI() {
             // stop searches, wait for thread to join
             board.stopped = TRUE;
             pthread_join(thread_id, NULL);
-            // pthread_exit(&thread_id);
 
             // parse inputs
             parseSearchParameters(input);
@@ -307,36 +306,27 @@ void startUCI() {
             // stop searches, wait for thread to join
             board.stopped = TRUE;
             pthread_join(thread_id, NULL);
-            // pthread_exit(&thread_id);
 
             // parse inputs
             parseSearchParameters(input);
 
             // create search thread
-            // board.stopped = FALSE;
             board.ponder = FALSE;
             pthread_create(&thread_id, NULL, searchThread, (void *)&board);
 
         } else if (strcmp("ponderhit\n", input) == 0) {
             // stop searches, wait for thread to join
-            // board.stopped = TRUE;
-            // pthread_join(thread_id, NULL);
-            // pthread_exit(&thread_id);
 
             // create search thread
-            // board.stopped = FALSE;
             board.ponder = FALSE;
             board.cutoffTime = setCutoff(&board);
             board.start = clock();
-            // pthread_create(&thread_id, NULL, searchThread, (void *)&board);
         } else if (strcmp("stop\n", input) == 0) {
             board.stopped = TRUE;
             pthread_join(thread_id, NULL);
-            // pthread_exit(&thread_id);
         } else if (strcmp("quit\n", input) == 0) {
             board.stopped = TRUE;
             pthread_join(thread_id, NULL);
-            // pthread_exit(&thread_id);
             break;
         } else if (strcmp("setoption\n", input) == 0) {
             // incomplete

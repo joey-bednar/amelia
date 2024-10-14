@@ -73,9 +73,8 @@ static void printEval(int score) {
 }
 
 static void printPV(BOARD_STATE *board, int depth) {
-    MOVE list[depth];
-
     int i = 0;
+    board->pvlength = 0;
     while (i < depth) {
         MOVE m;
         int val = probeTT(board->hash, &m, INF, -INF, 0);
@@ -85,11 +84,12 @@ static void printPV(BOARD_STATE *board, int depth) {
         printMoveText(m);
         printf(" ");
         makeMove(board, m);
-        list[i++] = m;
+        board->pv[i++] = m;
+        board->pvlength++;
     }
 
     while (i > 0) {
-        unmakeMove(board, list[--i]);
+        unmakeMove(board, board->pv[--i]);
     }
 }
 
@@ -455,7 +455,7 @@ static void outputMoveUCI(BOARD_STATE *board, MOVE bestmove, MOVE pondermove,
         makeMove(board, bestmove);
 
         // output ponder move if legal
-        if (isLegalMove(board, pondermove) &&
+        if (board->pvlength > 1 && isLegalMove(board, pondermove) &&
             !(board->halfmove >= 100 || isThreeFold(board) ||
               isInsufficientMaterial(board))) {
             printf(" ponder ");
@@ -466,16 +466,6 @@ static void outputMoveUCI(BOARD_STATE *board, MOVE bestmove, MOVE pondermove,
     }
 
     printf("\n");
-}
-
-static void saveMovesUCI(BOARD_STATE *board, MOVE *bestmove, MOVE *pondermove) {
-    // get best move
-    probeTT(board->hash, bestmove, INF, -INF, 0);
-
-    // get followup move
-    makeMove(board, *bestmove);
-    probeTT(board->hash, pondermove, INF, -INF, 0);
-    unmakeMove(board, *bestmove);
 }
 
 void search(BOARD_STATE *board) {
@@ -499,7 +489,6 @@ void search(BOARD_STATE *board) {
 
     // if only one legal move, play instantly
     if (!board->ponder && onlyMove(board, &bestmove)) {
-
         outputMoveUCI(board, bestmove, 0ull, FALSE);
         return;
     }
@@ -507,7 +496,8 @@ void search(BOARD_STATE *board) {
     // iterative deepening
     int alpha = -INF;
     int beta = INF;
-    for (int searchDepth = 1; searchDepth <= inputDepth; searchDepth++) {
+    int searchDepth = 1;
+    while (TRUE) {
 
         board->ply = 0;
 
@@ -524,16 +514,19 @@ void search(BOARD_STATE *board) {
         // print search info
         printInfo(board, time_taken_ms, score, searchDepth);
 
-        // get bestmove/ponder from pv
-        saveMovesUCI(board, &bestmove, &pondermove);
-
         // prevent new searches if not enough time
         if (!board->ponder && searchCutoff(board, time_taken_ms)) {
             break;
         }
+
+        // exit loop at max depth
+        if (!board->ponder && searchDepth >= inputDepth) {
+            break;
+        }
+        searchDepth++;
     }
 
-    outputMoveUCI(board, bestmove, pondermove, TRUE);
+    outputMoveUCI(board, board->pv[0], board->pv[1], TRUE);
 
     if (!board->ponder) {
         initTT();
