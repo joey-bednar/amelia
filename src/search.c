@@ -445,6 +445,7 @@ static int onlyMove(BOARD_STATE *board, MOVE *move) {
 void search(BOARD_STATE *board) {
 
     MOVE bestmove;
+    MOVE pondermove;
 
     // reset nodes searched
     board->nodes = 0;
@@ -459,15 +460,6 @@ void search(BOARD_STATE *board) {
 
     // begin timer
     board->start = clock();
-
-    // // if only one legal move, play instantly
-    // if (!board->ponder && onlyMove(board, &bestmove)) {
-    //     // print best move
-    //     printf("bestmove ");
-    //     printMoveText(bestmove);
-    //     printf("\n");
-    //     return;
-    // }
 
     // iterative deepening
     int alpha = -INF;
@@ -492,6 +484,9 @@ void search(BOARD_STATE *board) {
 
         // get bestmove/ponder from pv
         probeTT(board->hash, &bestmove, INF, -INF, 0);
+        makeMove(board, bestmove);
+        probeTT(board->hash, &pondermove, INF, -INF, 0);
+        unmakeMove(board, bestmove);
 
         // prevent new searches if not enough time
         if (!board->ponder &&
@@ -504,13 +499,9 @@ void search(BOARD_STATE *board) {
     // print best move
     printf("bestmove ");
     printMoveText(bestmove);
-    makeMove(board, bestmove);
     printf(" ponder ");
-    MOVE pmove;
-    probeTT(board->hash, &pmove, INF, -INF, 0);
-    printMoveText(pmove);
+    printMoveText(pondermove);
     printf("\n");
-    unmakeMove(board, pmove);
 
     initTT();
     initHistoryHeuristic(board);
