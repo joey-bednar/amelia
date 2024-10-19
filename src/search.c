@@ -75,6 +75,8 @@ static void printEval(int score) {
 static void printPV(BOARD_STATE *board, int depth) {
     MOVE list[depth];
 
+    board->pvlength = 0;
+
     int i = 0;
     while (i < depth) {
         MOVE m;
@@ -82,10 +84,12 @@ static void printPV(BOARD_STATE *board, int depth) {
         if (val == TT_EMPTY) {
             break;
         }
+        board->pv[i] = m;
         printMoveText(m);
         printf(" ");
         makeMove(board, m);
         list[i++] = m;
+        ++board->pvlength;
     }
 
     while (i > 0) {
@@ -411,41 +415,7 @@ int setCutoff(BOARD_STATE *board) {
     return (time / 20) + (4 * inc / 5);
 }
 
-// returns TRUE if only one move is legal
-// adds only move to "move"
-static int onlyMove(BOARD_STATE *board, MOVE *move) {
-    MOVE moves[MAX_LEGAL_MOVES];
-    int n_moves = generateMoves(board, moves);
-
-    int legal = 0;
-    int legalindex = 0;
-
-    int i = 0;
-    while (i < n_moves && legal < 2) {
-
-        makeMove(board, moves[i]);
-
-        if (!isAttacked(board, SQ64SQ120(getKingSq(board, !board->turn)),
-                        board->turn)) {
-            ++legal;
-            legalindex = i;
-        }
-
-        unmakeMove(board, moves[i]);
-        i++;
-    }
-
-    if (legal == 1) {
-        *move = moves[legalindex];
-        return TRUE;
-    }
-    return FALSE;
-}
-
 void search(BOARD_STATE *board) {
-
-    MOVE bestmove;
-    MOVE pondermove;
 
     // reset nodes searched
     board->nodes = 0;
@@ -482,12 +452,6 @@ void search(BOARD_STATE *board) {
         // print search info
         printInfo(board, time_taken_ms, score, searchDepth);
 
-        // get bestmove/ponder from pv
-        probeTT(board->hash, &bestmove, INF, -INF, 0);
-        makeMove(board, bestmove);
-        probeTT(board->hash, &pondermove, INF, -INF, 0);
-        unmakeMove(board, bestmove);
-
         // prevent new searches if not enough time
         if (!board->ponder &&
             (searchDepth > inputDepth || searchCutoff(board, time_taken_ms))) {
@@ -498,9 +462,11 @@ void search(BOARD_STATE *board) {
 
     // print best move
     printf("bestmove ");
-    printMoveText(bestmove);
-    printf(" ponder ");
-    printMoveText(pondermove);
+    printMoveText(board->pv[0]);
+    if (board->pvlength > 1) {
+        printf(" ponder ");
+        printMoveText(board->pv[1]);
+    }
     printf("\n");
 
     initTT();

@@ -22,5 +22,5 @@ cp build/amelia ${NEWENGINE}
 
 rm -f ${PGN}
 
-# cutechess-cli -engine name=New cmd=${NEWENGINE} -engine name=Current cmd=${CURRENTENGINE} -each book=${BOOK} restart=on proto=uci tc=${TC} -repeat -rounds $((GAMES/2)) -games 2 -pgnout ${PGN} -concurrency ${CONCURRENT} -ratinginterval 2 -sprt elo0=0 elo1=10 alpha=0.05 beta=0.05 -recover -debug
-cutechess-cli -engine name=New cmd=${NEWENGINE} -engine name=Current cmd=${CURRENTENGINE} -each book=${BOOK} ponder restart=on proto=uci tc=${TC} -repeat -rounds $((GAMES/2)) -games 2 -pgnout ${PGN} -concurrency ${CONCURRENT} -ratinginterval 2 -sprt elo0=0 elo1=10 alpha=0.05 beta=0.05 -recover
+cutechess-cli -engine name=New cmd=${NEWENGINE} -engine name=Current cmd=${CURRENTENGINE} -each book=${BOOK} restart=on proto=uci tc=${TC} -repeat -rounds $((GAMES/2)) -games 2 -pgnout ${PGN} -concurrency ${CONCURRENT} -ratinginterval 2 -sprt elo0=0 elo1=10 alpha=0.05 beta=0.05 -recover
+# cutechess-cli -engine name=New cmd=${NEWENGINE} -engine name=Current cmd=${CURRENTENGINE} -each book=${BOOK} ponder restart=on proto=uci tc=${TC} -repeat -rounds $((GAMES/2)) -games 2 -pgnout ${PGN} -concurrency ${CONCURRENT} -ratinginterval 2 -sprt elo0=0 elo1=10 alpha=0.05 beta=0.05 -recover
