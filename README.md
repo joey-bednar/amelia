@@ -49,6 +49,7 @@ You can also [spectate active games](https://lichess.org/@/AmeliaLatest/tv).
     - Bishop pair bonus
 - Interface
     - [UCI](https://en.wikipedia.org/wiki/Universal_Chess_Interface) compatible
+    - [Pondering](https://www.chessprogramming.org/Pondering)
     - Bulk [perft](https://www.chessprogramming.org/Perft) testing
 
 ## :hibiscus: Build
