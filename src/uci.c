@@ -259,7 +259,10 @@ void startUCI() {
         for (int i = 0; i < INPUTLEN; ++i) {
             input[i] = '\0';
         }
-        fgets(input, INPUTLEN, stdin);
+
+        if (fgets(input, INPUTLEN, stdin) == NULL) {
+            return;
+        }
 
         if (strncmp("ucinewgame", input, 10) == 0) {
             initBoard(&board);
@@ -312,8 +315,12 @@ void startUCI() {
         } else if (strcmp("ponderhit\n", input) == 0) {
             // switch to ponder search
             board.ponder = FALSE;
-            board.cutoffTime = setCutoff(&board);
-            board.start = clock();
+
+            // set cutoff time not counting time spent pondering
+            float new_t = clock() - board.start;
+            int time_taken_ms = (1000 * new_t) / CLOCKS_PER_SEC;
+            board.cutoffTime = time_taken_ms + setCutoff(&board);
+
         } else if (strcmp("stop\n", input) == 0) {
             board.stopped = TRUE;
             pthread_join(thread_id, NULL);

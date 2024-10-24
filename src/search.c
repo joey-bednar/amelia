@@ -412,7 +412,7 @@ int setCutoff(BOARD_STATE *board) {
         return 1000 * 60 * 36;
     }
 
-    return (time / 20) + (4 * inc / 5);
+    return (time / 25) + (3 * inc / 5);
 }
 
 void search(BOARD_STATE *board) {
