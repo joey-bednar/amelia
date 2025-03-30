@@ -4,6 +4,11 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "attack.h"
+#include "board.h"
+#include "hash.h"
+#include "utils.h"
+
 static void castlingRookCaptured(BOARD_STATE *board, MOVE move) {
     if (CAPTURED(move) == bbRook) {
         if (board->turn == WHITE) {

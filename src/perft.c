@@ -4,6 +4,9 @@
 #include <string.h>
 #include <time.h>
 
+#include "attack.h"
+#include "board.h"
+#include "moves.h"
 #include "search.h"
 #include "tt.h"
 

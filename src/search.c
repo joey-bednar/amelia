@@ -6,7 +6,11 @@
 #include <stdlib.h>
 #include <time.h>
 
+#include "attack.h"
+#include "board.h"
 #include "eval.h"
+#include "init.h"
+#include "moves.h"
 #include "search.h"
 #include "tt.h"
 

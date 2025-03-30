@@ -2,6 +2,9 @@
 #include <assert.h>
 #include <stdlib.h>
 
+#include "board.h"
+#include "utils.h"
+
 // generates random ULL
 static ULL get64rand() {
     return (((ULL)rand() << 0) & 0x000000000000FFFFull) |

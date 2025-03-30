@@ -4,8 +4,14 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "attack.h"
+#include "board.h"
+#include "hash.h"
+#include "init.h"
+#include "moves.h"
 #include "perft.h"
 #include "search.h"
+#include "utils.h"
 
 #define INPUTLEN 10000
 

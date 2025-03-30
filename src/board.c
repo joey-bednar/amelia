@@ -2,6 +2,10 @@
 #include <assert.h>
 #include <stdio.h>
 
+#include "board.h"
+#include "hash.h"
+#include "utils.h"
+
 // clears the chess board of any pieces
 void clearBoard(BOARD_STATE *board) {
 

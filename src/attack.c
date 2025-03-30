@@ -1,6 +1,10 @@
 #include "defs.h"
 #include <assert.h>
 
+#include "board.h"
+#include "moves.h"
+#include "utils.h"
+
 // return TRUE if sq(120) is attacked by an enemy piece. calculated
 // using preset attack bitboards
 static int isAttackedPreset(BOARD_STATE *board, int sq, int enemycolor,

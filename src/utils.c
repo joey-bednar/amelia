@@ -3,6 +3,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "board.h"
+
 int bitScanForward(ULL bb) {
     return __builtin_ffsll(bb) - 1;
 }

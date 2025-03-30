@@ -2,6 +2,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "board.h"
+#include "utils.h"
+
 #define PASSED_PAWN_BONUS 30
 #define BISHOP_PAIR_BONUS 30
 

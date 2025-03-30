@@ -3,6 +3,8 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "hash.h"
+#include "init.h"
 #include "tt.h"
 
 int epMap[120];
