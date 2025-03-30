@@ -6,6 +6,10 @@
 #include <stdlib.h>
 #include <time.h>
 
+#include "eval.h"
+#include "search.h"
+#include "tt.h"
+
 int compareMoves(const void *moveA, const void *moveB) {
 
     MOVE A = *(MOVE *)moveA;

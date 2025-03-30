@@ -4,6 +4,9 @@
 #include <string.h>
 #include <time.h>
 
+#include "search.h"
+#include "tt.h"
+
 static ULL perftrec(int depth, BOARD_STATE *board) {
     MOVE move_list[MAX_LEGAL_MOVES];
     int n_moves, i;
@@ -11,6 +14,10 @@ static ULL perftrec(int depth, BOARD_STATE *board) {
 
     if (depth == 0) {
         return 1;
+    }
+
+    if (board->stopped) {
+        return 0;
     }
 
     ULL val;
@@ -51,6 +58,8 @@ static ULL perftrec(int depth, BOARD_STATE *board) {
 
 void perft(int depth, BOARD_STATE *board) {
 
+    board->stopped = FALSE;
+
     ULL total = 0;
 
     if (depth <= 0) {
@@ -73,8 +82,10 @@ void perft(int depth, BOARD_STATE *board) {
             count = perftrec(depth - 1, board);
             total += count;
 
-            printMoveText(move_list[i]);
-            printf(": %llu\n", count);
+            if (!board->stopped) {
+                printMoveText(move_list[i]);
+                printf(": %llu\n", count);
+            }
         }
 
         unmakeMove(board, move_list[i]);
@@ -82,6 +93,10 @@ void perft(int depth, BOARD_STATE *board) {
 
     t = clock() - t;
     float time_taken = ((float)t) / CLOCKS_PER_SEC; // in seconds
+
+    // TT contains counts of positions after using perft and needs to
+    // needs to be cleared before searching again.
+    initTT();
 
     printf("\nNodes searched: %llu (%.2fs)\n", total, time_taken);
 }

@@ -4,6 +4,9 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "perft.h"
+#include "search.h"
+
 #define INPUTLEN 10000
 
 static int parseUCINumber(char *string, const char *leader,
@@ -239,6 +242,14 @@ void *searchThread(void *args) {
     return NULL;
 }
 
+void *perftThread(void *args) {
+
+    BOARD_STATE *board = (BOARD_STATE *)args;
+    perft(inputDepth, board);
+    fflush(stdout);
+    return NULL;
+}
+
 static void parseSearchParameters(char *input) {
     // parse inputs
     inputDepth = parseUCINumber(input, " depth ", MAX_DEPTH);
@@ -298,6 +309,19 @@ void startUCI() {
             // create ponder thread
             board.ponder = TRUE;
             pthread_create(&thread_id, NULL, searchThread, (void *)&board);
+
+        } else if (strncmp("go perft ", input, 8) == 0) {
+
+            // stop searches, wait for thread to join
+            board.stopped = TRUE;
+            pthread_join(thread_id, NULL);
+
+            // parse inputs
+            inputDepth = parseUCINumber(input, "go perft ", MAX_DEPTH);
+
+            // create perft thread
+            board.ponder = FALSE;
+            pthread_create(&thread_id, NULL, perftThread, (void *)&board);
 
         } else if (strncmp("go\n", input, 2) == 0) {
 

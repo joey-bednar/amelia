@@ -1,4 +1,5 @@
 #ifndef DEFS_H
+#define DEFS_H
 
 // name
 #define NAME "Amelia"
@@ -255,32 +256,5 @@ extern void printBoardIndex();
 extern int bitScanForward(ULL bb);
 extern int bitScanReverse(ULL bb);
 extern int manhattanDistance(int sq1, int sq2);
-
-// perft.c
-extern void perft(int depth, BOARD_STATE *board);
-
-// eval.c
-extern int isThreeFold(BOARD_STATE *board);
-extern int isTwoFold(BOARD_STATE *board);
-extern int isInsufficientMaterial(BOARD_STATE *board);
-extern int eval(BOARD_STATE *board);
-extern int isRepeatPosition(BOARD_STATE *board);
-extern int getPhase(BOARD_STATE *board);
-
-// search.c
-extern void printMoveText(MOVE move);
-extern int compareMoves(const void *a, const void *b);
-extern void search(BOARD_STATE *board);
-extern int setCutoff(BOARD_STATE *board);
-
-// uci.c
-extern int loadFEN(char *fen, BOARD_STATE *board, int startIndex);
-extern void startUCI();
-
-// tt.c
-extern void initTT();
-extern int probeTT(ULL hash, MOVE *best, int alpha, int beta, int depth);
-extern void storeTT(BOARD_STATE *board, MOVE best, int val, int flag,
-                    int depth);
 
 #endif

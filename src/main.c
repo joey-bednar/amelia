@@ -1,4 +1,5 @@
 #include "defs.h"
+#include "uci.h"
 #include <stdlib.h>
 
 TT *tt;

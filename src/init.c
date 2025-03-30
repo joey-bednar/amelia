@@ -3,6 +3,8 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "tt.h"
+
 int epMap[120];
 int sq120sq64Map[120];
 int sq64sq120Map[64];

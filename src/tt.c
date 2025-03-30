@@ -2,6 +2,8 @@
 #include <assert.h>
 #include <string.h>
 
+#include "tt.h"
+
 // clear table
 void initTT() {
     for (int i = 0; i < TT_SIZE; ++i) {
