@@ -3,6 +3,7 @@
 #include <stdlib.h>
 
 #include "board.h"
+#include "hash.h"
 #include "utils.h"
 
 // generates random ULL

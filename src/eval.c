@@ -3,6 +3,7 @@
 #include <stdlib.h>
 
 #include "board.h"
+#include "eval.h"
 #include "utils.h"
 
 #define PASSED_PAWN_BONUS 30

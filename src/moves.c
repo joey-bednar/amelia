@@ -7,6 +7,7 @@
 #include "attack.h"
 #include "board.h"
 #include "hash.h"
+#include "moves.h"
 #include "utils.h"
 
 static void castlingRookCaptured(BOARD_STATE *board, MOVE move) {

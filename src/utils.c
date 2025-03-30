@@ -4,6 +4,7 @@
 #include <stdlib.h>
 
 #include "board.h"
+#include "utils.h"
 
 int bitScanForward(ULL bb) {
     return __builtin_ffsll(bb) - 1;

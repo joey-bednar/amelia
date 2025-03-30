@@ -7,6 +7,7 @@
 #include "attack.h"
 #include "board.h"
 #include "moves.h"
+#include "perft.h"
 #include "search.h"
 #include "tt.h"
 

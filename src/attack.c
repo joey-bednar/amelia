@@ -1,6 +1,7 @@
 #include "defs.h"
 #include <assert.h>
 
+#include "attack.h"
 #include "board.h"
 #include "moves.h"
 #include "utils.h"

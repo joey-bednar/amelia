@@ -11,6 +11,7 @@
 #include "moves.h"
 #include "perft.h"
 #include "search.h"
+#include "uci.h"
 #include "utils.h"
 
 #define INPUTLEN 10000
