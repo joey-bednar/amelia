@@ -5,6 +5,7 @@
 #include "board.h"
 #include "eval.h"
 #include "utils.h"
+#include "hash.h"
 
 #define PASSED_PAWN_BONUS 30
 #define BISHOP_PAIR_BONUS 30

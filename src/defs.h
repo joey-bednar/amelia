@@ -41,7 +41,6 @@
 #define TOWHITE(p) (toColor[WHITE][(p)])
 #define TOBLACK(p) (toColor[BLACK][(p)])
 #define TOCOLOR(c, p) (toColor[c][(p)])
-#define ONBOARD(sq) (onboardMap[(sq)])
 
 // bit operations
 #define CHECKBIT(bb, sq64) (((bb)) >> ((sq64)) & 1ULL)
@@ -58,147 +57,12 @@
 #define KNIGHTBB(sq64) (knightJumps[(sq64)])
 #define KINGBB(sq64) (kingJumps[(sq64)])
 
-// piece offsets and promotions
-#define PAWNOFFSET(c, i) (pawnOffset[(c)][(i)])
-#define ROOKOFFSET(i) (rookOffset[(i)])
-#define ROOKOFFSETS rookOffset
-#define BISHOPOFFSET(i) (bishopOffset[(i)])
-#define BISHOPOFFSETS bishopOffset
-#define PROMOTES promoteTo
-#define MVVLVA(p, c) (MVVLVA[(p)][(c)])
-#define PASSEDPAWN(sq64, c) (passedPawnTable[(sq64)][(c)])
-
-// move bitmasks
-#define START(move) (int)((move) & 0x3Ful)
-#define START120(move) SQ64SQ120(START(move))
-#define END(move) (int)(((move) & 0x0FC0) >> 6)
-#define END120(move) SQ64SQ120(END(move))
-#define CAPTURED(move) (int)(((move) & 0x07000ul) >> 12)
-#define PROMOTED(move) (int)(((move) & 0x38000ul) >> 15)
-#define EPFLAG(move) (int)(((move) & 0x40000ul) >> 18)
-#define TWOPAWNFLAG(move) (int)(((move) & 0x80000ul) >> 19)
-#define CASTLEFLAG(move) (int)(((move) & 0x100000ul) >> 20)
-#define PIECE(move) (int)(((move) & 0x00E00000ul) >> 21)
-
-// hash table
-#define TT_SIZE 10000000
-#define TT_EMPTY 1234
-#define TT_EMPTY_FLAG 0
-#define TT_EXACT_FLAG 1
-#define TT_ALPHA_FLAG 2
-#define TT_BETA_FLAG 3
-
 #define BITLOOP(bb) for (; (bb); (bb) &= ((bb) - 1))
-
-// clang-format off
-enum { EMPTY, wP, wN, wB, wR, wQ, wK, bP, bN, bB, bR, bQ, bK, OFFBOARD };
-enum { bbWhite, bbBlack, bbPawn, bbKnight, bbBishop, bbRook, bbQueen, bbKing, bbLength };
-enum { FILE_A, FILE_B, FILE_C, FILE_D, FILE_E, FILE_F, FILE_G, FILE_H, FILE_NONE };
-enum { RANK_1, RANK_2, RANK_3, RANK_4, RANK_5, RANK_6, RANK_7, RANK_8, RANK_NONE };
-enum { WHITE, BLACK, BOTH, NONE };
-enum {
-  A1 = 21, A2, A3, A4, A5, A6, A7, A8,
-  B1 = 31, B2, B3, B4, B5, B6, B7, B8,
-  C1 = 41, C2, C3, C4, C5, C6, C7, C8,
-  D1 = 51, D2, D3, D4, D5, D6, D7, D8,
-  E1 = 61, E2, E3, E4, E5, E6, E7, E8,
-  F1 = 71, F2, F3, F4, F5, F6, F7, F8,
-  G1 = 81, G2, G3, G4, G5, G6, G7, G8,
-  H1 = 91, H2, H3, H4, H5, H6, H7, H8,
-};
-enum {NW=-9, N=1, NE=11, E=10, SE=9, S=-1, SW=-11, W=-10};
-// clang-format on
 
 enum { NO_CASTLE, WK_CASTLE, WQ_CASTLE, BK_CASTLE, BQ_CASTLE, CASTLE_LENGTH };
 
 typedef unsigned long long ULL;
 typedef unsigned long long MOVE;
 
-typedef struct {
-    ULL hash;
-    MOVE best;
-    int depth;
-    int flag;
-    int val;
-} TT;
-
-typedef struct {
-    ULL hash;
-    int castle;
-    int enpassant;
-    int halfmove;
-} POSRECORD;
-
-typedef struct {
-    ULL bitboard[bbLength];
-
-    int turn;
-    int halfmove;
-    int fullmove;
-    int castle;
-    int enpassant;
-
-    ULL hash;
-
-    MOVE killers[MAX_DEPTH][2];
-    int history[2][64][64];
-
-    int ply;
-
-    POSRECORD playedmoves[MAX_GAME_LENGTH * 2];
-    int pmindex;
-
-    int pvlength;
-    MOVE pv[MAX_DEPTH];
-
-    int ponder;
-    long nodes;
-    int stopped;
-    int cutoffTime;
-    float start;
-
-} BOARD_STATE;
-
-extern TT *tt;
-
-extern int inputDepth;
-extern int inputMovetime;
-extern int inputTime[2];
-extern int inputInc[2];
-
-extern int epMap[120];
-extern int sq120sq64Map[120];
-extern int sq64sq120Map[64];
-extern int colorMap[OFFBOARD + 1];
-extern int notcolorMap[OFFBOARD + 1];
-extern int genericMap[OFFBOARD + 1];
-
-extern int toColor[2][OFFBOARD + 1];
-
-extern int onboardMap[120];
-extern ULL knightJumps[64];
-extern ULL kingJumps[64];
-extern ULL slidingRay[8][64];
-
-extern int pawnSqTable[2][64];
-extern int knightSqTable[2][64];
-extern int bishopSqTable[2][64];
-extern int rookSqTable[2][64];
-extern int queenSqTable[2][64];
-extern int kingSqTable[2][64];
-
-extern ULL passedPawnTable[64][2];
-extern ULL isolatedPawns[8];
-extern int MVVLVA[8][8];
-
-extern ULL zobrist_vals[12][64];
-extern ULL zobristB2M;
-extern ULL zobristEP[120];
-extern ULL zobristC[64];
-
-extern int pawnOffset[2][4];
-extern const int rookOffset[4];
-extern const int bishopOffset[4];
-extern const int promoteTo[4];
 
 #endif

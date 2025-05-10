@@ -13,6 +13,7 @@
 #include "moves.h"
 #include "search.h"
 #include "tt.h"
+#include "uci.h"
 
 int compareMoves(const void *moveA, const void *moveB) {
 

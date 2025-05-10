@@ -5,6 +5,7 @@
 #include "board.h"
 #include "hash.h"
 #include "utils.h"
+#include "moves.h"
 
 // clears the chess board of any pieces
 void clearBoard(BOARD_STATE *board) {
