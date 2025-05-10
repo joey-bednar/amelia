@@ -95,13 +95,6 @@ extern int genericMap[OFFBOARD + 1];
 #define TOCOLOR(c, p) (toColor[c][(p)])
 extern int toColor[2][OFFBOARD + 1];
 
-
-
-
-
-
-
-
 int getKingSq(BOARD_STATE *board, int color);
 
 void setPiece(int piece, int file, int rank, BOARD_STATE *board);

@@ -1,5 +1,5 @@
-#ifndef DEFS_H
-#define DEFS_H
+#ifndef MISC_H
+#define MISC_H
 
 // internal constants
 #define FALSE 0
