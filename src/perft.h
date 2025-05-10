@@ -1,10 +1,9 @@
 #ifndef PERFT_H
 #define PERFT_H
 
-#ifndef DEFS_H
-#include "defs.h"
-#endif
+#include "misc.h"
+#include "board.h"
 
-extern void perft(int depth, BOARD_STATE *board);
+void perft(int depth, BOARD_STATE *board);
 
 #endif

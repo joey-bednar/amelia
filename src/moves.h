@@ -1,13 +1,12 @@
 #ifndef MOVES_H
 #define MOVES_H
 
-#ifndef DEFS_H
-#include "defs.h"
-#endif
-
-#ifndef BOARD_H
+#include "misc.h"
 #include "board.h"
-#endif
+
+// attack bitboards
+#define KNIGHTBB(sq64) (knightJumps[(sq64)])
+#define KINGBB(sq64) (kingJumps[(sq64)])
 
 // piece offsets and promotions
 #define PAWNOFFSET(c, i) (pawnOffset[(c)][(i)])
@@ -36,10 +35,10 @@ extern const int rookOffset[4];
 extern const int bishopOffset[4];
 extern const int promoteTo[4];
 
-extern int generateMoves(BOARD_STATE *board, MOVE *move);
-extern void makeMove(BOARD_STATE *board, MOVE move);
-extern void unmakeMove(BOARD_STATE *board, MOVE move);
-extern void makeNullMove(BOARD_STATE *board);
-extern void unmakeNullMove(BOARD_STATE *board);
+int generateMoves(BOARD_STATE *board, MOVE *move);
+void makeMove(BOARD_STATE *board, MOVE move);
+void unmakeMove(BOARD_STATE *board, MOVE move);
+void makeNullMove(BOARD_STATE *board);
+void unmakeNullMove(BOARD_STATE *board);
 
 #endif

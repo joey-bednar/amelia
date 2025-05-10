@@ -1,4 +1,4 @@
-#include "defs.h"
+#include "misc.h"
 #include <assert.h>
 #include <pthread.h>
 #include <stdio.h>
@@ -12,7 +12,6 @@
 #include "perft.h"
 #include "search.h"
 #include "uci.h"
-#include "utils.h"
 
 #define INPUTLEN 10000
 
@@ -292,10 +291,6 @@ void startUCI() {
             printf("uciok\n");
         } else if (strcmp("isready\n", input) == 0) {
             printf("readyok\n");
-        } else if (strcmp("debug\n", input) == 0) {
-            printf("\n");
-            printBoard(&board);
-            printf("\n");
         } else if (strncmp("position startpos", input, 17) == 0) {
             initBoard(&board);
             parseMoves(input, &board);

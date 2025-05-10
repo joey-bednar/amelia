@@ -1,7 +1,5 @@
-#include "defs.h"
+#include "misc.h"
 #include <assert.h>
-#include <stdio.h>
-
 #include "board.h"
 #include "hash.h"
 #include "utils.h"

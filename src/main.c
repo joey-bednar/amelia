@@ -1,4 +1,4 @@
-#include "defs.h"
+#include "misc.h"
 #include "init.h"
 #include "uci.h"
 #include "tt.h"

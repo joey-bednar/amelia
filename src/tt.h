@@ -1,15 +1,9 @@
 #ifndef TT_H
 #define TT_H
 
-#ifndef DEFS_H
-#include "defs.h"
-#endif
-
-#ifndef BOARD_H
+#include "misc.h"
 #include "board.h"
-#endif
 
-// hash table
 #define TT_SIZE 10000000
 #define TT_EMPTY 1234
 #define TT_EMPTY_FLAG 0
@@ -27,10 +21,9 @@ typedef struct {
 
 extern TT *tt;
 
-
-extern void initTT();
-extern int probeTT(ULL hash, MOVE *best, int alpha, int beta, int depth);
-extern void storeTT(BOARD_STATE *board, MOVE best, int val, int flag,
+void initTT();
+int probeTT(ULL hash, MOVE *best, int alpha, int beta, int depth);
+void storeTT(BOARD_STATE *board, MOVE best, int val, int flag,
                     int depth);
 
 #endif

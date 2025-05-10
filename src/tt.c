@@ -1,6 +1,5 @@
-#include "defs.h"
+#include "misc.h"
 #include <assert.h>
-#include <string.h>
 
 #include "tt.h"
 

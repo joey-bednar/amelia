@@ -1,9 +1,8 @@
 #ifndef EVAL_H
 #define EVAL_H
 
-#ifndef DEFS_H
-#include "defs.h"
-#endif
+#include "misc.h"
+#include "board.h"
 
 #define MVVLVA(p, c) (MVVLVA[(p)][(c)])
 #define PASSEDPAWN(sq64, c) (passedPawnTable[(sq64)][(c)])
@@ -19,11 +18,11 @@ extern int rookSqTable[2][64];
 extern int queenSqTable[2][64];
 extern int kingSqTable[2][64];
 
-extern int isThreeFold(BOARD_STATE *board);
-extern int isTwoFold(BOARD_STATE *board);
-extern int isInsufficientMaterial(BOARD_STATE *board);
-extern int eval(BOARD_STATE *board);
-extern int isRepeatPosition(BOARD_STATE *board);
-extern int getPhase(BOARD_STATE *board);
+int isThreeFold(BOARD_STATE *board);
+int isTwoFold(BOARD_STATE *board);
+int isInsufficientMaterial(BOARD_STATE *board);
+int eval(BOARD_STATE *board);
+int isRepeatPosition(BOARD_STATE *board);
+int getPhase(BOARD_STATE *board);
 
 #endif
