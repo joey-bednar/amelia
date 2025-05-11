@@ -1,10 +1,10 @@
-#include "misc.h"
 #include <assert.h>
 #include <stdlib.h>
 
 #include "board.h"
 #include "hash.h"
 #include "utils.h"
+#include "misc.h"
 
 // generates random ULL
 static ULL get64rand() {

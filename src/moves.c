@@ -1,14 +1,10 @@
-#include "misc.h"
 #include <assert.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-
 #include "attack.h"
 #include "board.h"
 #include "hash.h"
 #include "moves.h"
 #include "utils.h"
+#include "misc.h"
 
 static void castlingRookCaptured(BOARD_STATE *board, MOVE move) {
     if (CAPTURED(move) == bbRook) {

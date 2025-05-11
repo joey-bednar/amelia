@@ -1,7 +1,4 @@
 #include "misc.h"
-#include <stdio.h>
-#include <stdlib.h>
-
 #include "board.h"
 #include "eval.h"
 #include "utils.h"
